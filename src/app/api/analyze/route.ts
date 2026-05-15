@@ -1,0 +1,71 @@
+// POST /api/analyze
+//
+// Body: { resumeText, jobPostText }
+// Returns: AnalyzeResponse — the full AnalysisResult (requirements,
+// evidence, matches, buckets, follow-ups, score).
+
+import { NextResponse } from "next/server";
+import { z } from "zod";
+import { analyze } from "@/lib/analysis";
+import { elapsedMs, logDevTiming, nowMs } from "@/lib/utils/perf";
+import type { AnalyzeResponse } from "@/lib/types";
+
+export const runtime = "nodejs";
+export const maxDuration = 120;
+
+const Body = z.object({
+  resumeText: z.string().min(1, "resumeText is required"),
+  jobPostText: z.string().min(1, "jobPostText is required")
+});
+
+export async function POST(req: Request) {
+  const started = nowMs();
+  let parsed;
+  try {
+    const parseStarted = nowMs();
+    const raw = await req.json();
+    const safe = Body.safeParse(raw);
+    if (!safe.success) {
+      return NextResponse.json(
+        { error: "Invalid request body.", issues: safe.error.issues },
+        { status: 400 }
+      );
+    }
+    parsed = safe.data;
+    logDevTiming("route.analyze.parse", {
+      ms: elapsedMs(parseStarted),
+      resumeChars: parsed.resumeText.length,
+      jobChars: parsed.jobPostText.length
+    });
+  } catch (err) {
+    return NextResponse.json(
+      { error: "Could not read request body.", detail: errMsg(err) },
+      { status: 400 }
+    );
+  }
+
+  try {
+    const analysis = await analyze({
+      resumeText: parsed.resumeText,
+      jobPostText: parsed.jobPostText
+    });
+    const body: AnalyzeResponse = { analysis };
+    logDevTiming("route.analyze.total", {
+      ms: elapsedMs(started),
+      score: analysis.score,
+      reqs: analysis.requirements.length,
+      followUps: analysis.followUps.length
+    });
+    return NextResponse.json(body);
+  } catch (err) {
+    console.error("[analyze] request failed", err);
+    return NextResponse.json(
+      { error: "Analysis failed.", detail: errMsg(err) },
+      { status: 500 }
+    );
+  }
+}
+
+function errMsg(err: unknown): string {
+  return err instanceof Error ? err.message : String(err);
+}

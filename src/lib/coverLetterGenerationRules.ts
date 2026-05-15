@@ -1,0 +1,15 @@
+export const COVER_LETTER_GENERATION_RULES = `Cover letter generation rules:
+- Write a human, confident, professional cover letter, not a checklist.
+- Always write in first person using I, my, and me.
+- Never refer to the candidate by first name or in third person.
+- Do not prove requirements line by line.
+- Do not simply restate the resume in paragraph form.
+- Use a natural narrative: why this role makes sense, what I bring, one or two concrete proof points, and how I would contribute.
+- Paragraph 1 should connect the candidate's core value to the role/company in natural language.
+- Paragraph 2 should use one concrete example or repeated work pattern from the candidate's background.
+- Paragraph 3 should explain how the candidate would contribute in the role.
+- Optional final sentence should be simple and confident.
+- Avoid phrases like "I meet your requirement for", "my experience aligns with", "as requested in the posting", and "as required by the role".
+- If a hard-skill gap is unconfirmed, handle it honestly and lightly. Do not invent direct experience.
+- Use clarified answers when relevant, but do not hallucinate blank or negative answers.
+- Keep the letter warm but not casual, direct but not defensive.`;

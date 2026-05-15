@@ -1,0 +1,23 @@
+export const RESUME_GENERATION_RULES = `Resume generation rules:
+- Produce a clean, single-column, ATS-safe resume in plain text.
+- Do not use tables, columns, icons, graphics, sidebars, rating bars, headers, or footers.
+- Use standard section headings in this order: PROFESSIONAL SUMMARY, KEY SKILLS, PROFESSIONAL EXPERIENCE, EDUCATION, then TOOL STACK or TECHNICAL SKILLS only when relevant.
+- Header format: candidate name at the top, target role near the name or directly below it, contact details below, then the body sections. Do not fake columns with spacing.
+- Professional Summary must be no more than 4 lines, human, role-tailored, and recruiter-readable.
+- Do not let one hard skill dominate the summary unless it is central to the role and strongly supported by the candidate's evidence.
+- KEY SKILLS must contain 6 to 9 complete, concise, role-tailored skill phrases.
+- Format KEY SKILLS as a simple bullet list, one complete skill phrase per line.
+- Never split, truncate, or hyphen-break skill phrases such as Follow-Through, Cross-Functional, Data-Driven, Customer-Facing, or End-to-End.
+- PROFESSIONAL EXPERIENCE entries must show job title first, then company, location, and date range.
+- Each role must include one concise overview sentence before bullets.
+- Each role should include 4 to 5 strong bullets when enough evidence exists.
+- Write bullets with action, context, and result where possible.
+- Use measurable results only when provided. If no metric exists, use credible qualitative impact without inventing numbers.
+- Use clarified answers when relevant, but do not hallucinate blank or negative answers.
+- Never invent graduation years, education years, job dates, completion dates, months, or date ranges. If a date is missing from the resume and answers, omit it.
+- Do not infer dates from resume order, current roles, school names, candidate age, or unrelated experience.
+- If the same company appears in overlapping or duplicate roles, consolidate highly related work into one clear entry instead of creating confusing duplicate chronology.
+- If keeping same-company roles separate, their titles, responsibilities, and date ranges must be distinct and supported by the source material.
+- Put confirmed hard skills in the role, skills, or tool sections where natural. Do not force weak or unconfirmed hard-skill gaps into the summary.
+- Include TOOL STACK or TECHNICAL SKILLS only when relevant and supported. Do not invent tools.
+- Preserve readable date ranges like Jan 2023 - Present.`;
