@@ -87,7 +87,7 @@ export default function AccountCreditIndicator() {
             Dashboard
           </Link>
           <Link
-            href="/pricing?pack=5"
+            href="/pricing?pack=5&checkout=1"
             className="block rounded-[14px] px-3 py-2 font-bold text-[var(--color-text-primary)] hover:bg-[#f4f8fb]"
           >
             Buy credits
