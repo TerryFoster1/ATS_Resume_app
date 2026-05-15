@@ -32,6 +32,7 @@ const SAVED_RESULTS_KEY = "ats-resume-app:last-results";
 
 type Step = "intro" | "resume" | "job" | "analysis" | "generate" | "results";
 type RestoreStatus = "idle" | "restoring" | "failed";
+type RestoreFailureReason = "checkout" | "generic";
 type StoredResults = SessionState & {
   applicationTitle?: string;
   savedOutputId?: string | null;
@@ -55,19 +56,25 @@ export default function ResumeWizard({ initialStep }: { initialStep: Step }) {
       ? "restoring"
       : "idle"
   );
+  const [restoreFailureReason, setRestoreFailureReason] =
+    useState<RestoreFailureReason>("generic");
   const [contextAnswers, setContextAnswers] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (initialStep !== "results") return;
     let active = true;
     const params = new URLSearchParams(window.location.search);
+    const hasVerifiedCheckoutReturn =
+      params.get("checkout") === "success" && Boolean(params.get("session_id"));
     if (params.get("restore") === "failed") {
+      setRestoreFailureReason(hasVerifiedCheckoutReturn ? "checkout" : "generic");
       setRestoreStatus("failed");
       return;
     }
     const saved = readSavedResults();
     const savedOutputId = readSavedOutputId();
     if (!saved && !savedOutputId) {
+      setRestoreFailureReason(hasVerifiedCheckoutReturn ? "checkout" : "generic");
       setRestoreStatus("failed");
       return;
     }
@@ -86,6 +93,7 @@ export default function ResumeWizard({ initialStep }: { initialStep: Step }) {
           setRestoreStatus("idle");
           return;
         }
+        setRestoreFailureReason(hasVerifiedCheckoutReturn ? "checkout" : "generic");
         setRestoreStatus("failed");
       });
       return () => {
@@ -209,6 +217,7 @@ export default function ResumeWizard({ initialStep }: { initialStep: Step }) {
 
       {step === "results" && restoreStatus === "failed" && (
         <ResultsRestoreFailed
+          reason={restoreFailureReason}
           onRestart={() => {
             setState(INITIAL_STATE);
             setContextAnswers({});
@@ -325,13 +334,27 @@ function ResultsRestoreLoading() {
   );
 }
 
-function ResultsRestoreFailed({ onRestart }: { onRestart: () => void }) {
+function ResultsRestoreFailed({
+  reason,
+  onRestart
+}: {
+  reason: RestoreFailureReason;
+  onRestart: () => void;
+}) {
+  const checkoutFailed = reason === "checkout";
   return (
     <section className="app-screen-card space-y-5 text-center">
-      <p className="app-kicker">Payment successful</p>
+      <p className="app-kicker">{checkoutFailed ? "Checkout complete" : "Resume recovery"}</p>
       <h1 className="text-3xl app-heading">
-        Your payment was successful, but we couldn’t reload the generated materials automatically.
+        {checkoutFailed
+          ? "Your payment was successful, but we couldn’t reload the generated materials automatically."
+          : "We couldn’t reload the generated materials automatically."}
       </h1>
+      <p className="mx-auto max-w-2xl text-sm leading-6 text-[var(--color-text-muted)]">
+        {checkoutFailed
+          ? "Your credits should still be attached to your account. You can reopen saved materials from the dashboard or start a new application."
+          : "If you just signed in, your account is ready. Reopen saved materials from the dashboard or start a new application."}
+      </p>
       <div className="flex flex-wrap justify-center gap-3">
         <a href="/dashboard" className="app-button-primary">
           Go to dashboard

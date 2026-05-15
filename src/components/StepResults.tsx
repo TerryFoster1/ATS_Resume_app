@@ -175,12 +175,17 @@ export default function StepResults({ state, onRestart }: Props) {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (params.get("checkout") === "success") {
+    if (params.get("checkout") === "success" && params.get("session_id")) {
       setCheckoutReturned(true);
       params.delete("checkout");
+      params.delete("session_id");
       const next = `${window.location.pathname}${params.toString() ? `?${params}` : ""}`;
       window.history.replaceState(null, "", next);
       void completePendingUnlockAfterCheckout();
+    } else if (params.get("checkout") === "success") {
+      params.delete("checkout");
+      const next = `${window.location.pathname}${params.toString() ? `?${params}` : ""}`;
+      window.history.replaceState(null, "", next);
     }
 
     if (params.get("unlock") === "1") {
@@ -1959,6 +1964,7 @@ function ResumePanel({
           text={editedText}
           title={title}
           mode={lockMode}
+          headerSource={headerSource}
           onRequestUnlock={onRequestUnlock}
         />
       ) : (
@@ -2051,11 +2057,13 @@ function LockedDocumentPreview({
   text,
   title,
   mode,
+  headerSource,
   onRequestUnlock
 }: {
   text: string;
   title: string;
   mode: "resume" | "coverLetter";
+  headerSource?: string;
   onRequestUnlock?: () => void;
 }) {
   const clean = sanitizeGeneratedText(text);
@@ -2075,6 +2083,7 @@ function LockedDocumentPreview({
       <StyledDocumentPreview
         text={clean}
         kind={mode === "resume" ? "resume" : "coverLetter"}
+        headerSource={headerSource}
         locked
       />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-60 bg-gradient-to-t from-[#f5f7fa] via-[#f5f7fa]/92 to-[#f5f7fa]/10" />
@@ -2243,14 +2252,14 @@ function CoverLetterDocumentPreview({
   text: string;
   headerSource?: string;
 }) {
-  const header = extractCandidateHeader(headerSource ?? text);
+  const header = headerSource ? extractCandidateHeader(headerSource) : {};
   const body = ensureGreeting(normalizeCoverLetterParagraphs(sanitizeGeneratedText(text)));
   return (
-    <article className="mx-auto min-h-[560px] max-w-[760px] bg-white px-6 py-8 text-[13px] leading-[1.65] text-[#1f2937] shadow-[0_18px_48px_rgba(17,35,63,0.12)] sm:px-10 sm:py-11">
+    <article className="mx-auto min-h-[560px] max-w-[760px] bg-white px-6 py-8 font-sans text-[13px] font-normal leading-[1.65] text-[#1f2937] shadow-[0_18px_48px_rgba(17,35,63,0.12)] sm:px-10 sm:py-11">
       {(header.name || header.contact) && (
         <header className="mb-8 border-b border-[#2f3a4a]/20 pb-4">
           {header.name && (
-            <h4 className="text-2xl font-black leading-tight tracking-tight text-[#111827]">
+            <h4 className="text-[20px] font-bold leading-tight tracking-normal text-[#111827]">
               {header.name}
             </h4>
           )}
@@ -2264,7 +2273,7 @@ function CoverLetterDocumentPreview({
         {body.map((paragraph, index) => (
           <p
             key={`${index}-${paragraph.slice(0, 24)}`}
-            className={/^dear\b/i.test(paragraph) ? "font-bold text-[#111827]" : ""}
+            className={/^dear\b/i.test(paragraph) ? "text-[13px] font-bold leading-[1.65] text-[#111827]" : "text-[13px] font-normal leading-[1.65] text-[#1f2937]"}
           >
             {paragraph}
           </p>
@@ -2812,11 +2821,20 @@ function extractCandidateHeader(text: string): { name?: string; contact?: string
     .split("\n")
     .map((line) => line.trim())
     .filter(Boolean);
-  const name = lines[0] && !isCoverLetterLabel(lines[0]) ? lines[0] : undefined;
+  const name =
+    lines[0] && !isCoverLetterLabel(lines[0]) && !looksLikeLetterBodyStart(lines[0])
+      ? lines[0]
+      : undefined;
   const contact = lines
     .slice(1, 4)
     .find((line) => /@|\b(?:https?:\/\/|linkedin\.com)|\d{3}[-.)\s]\d{3}/i.test(line));
   return { name, contact };
+}
+
+function looksLikeLetterBodyStart(text: string): boolean {
+  return /^(dear\b|to whom it may concern|i am writing\b|i’m writing\b|thank you\b)/i.test(
+    text.trim()
+  );
 }
 
 function normalizeCoverLetterParagraphs(text: string): string[] {

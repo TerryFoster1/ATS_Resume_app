@@ -10,10 +10,18 @@ const CHECKOUT_RETURN_KEY = "ats-resume-app:checkout-returned";
 export default function CheckoutSuccessBridge() {
   const [hasSavedResults, setHasSavedResults] = useState(false);
   const [continueHref, setContinueHref] = useState("/?step=results&checkout=success&restore=failed");
+  const [missingSession, setMissingSession] = useState(false);
+  const [checkoutStatus, setCheckoutStatus] =
+    useState<"verifying" | "verified" | "invalid">("verifying");
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const checkoutSessionId = params.get("session_id");
+    if (!checkoutSessionId) {
+      setMissingSession(true);
+      setContinueHref("/pricing");
+      return;
+    }
     const saved =
       window.sessionStorage.getItem(CHECKOUT_SNAPSHOT_KEY) ??
       window.sessionStorage.getItem(SAVED_RESULTS_KEY);
@@ -24,31 +32,49 @@ export default function CheckoutSuccessBridge() {
     setHasSavedResults(Boolean(saved));
     window.sessionStorage.setItem(CHECKOUT_RETURN_KEY, "1");
     const target = saved
-      ? `/?step=results&checkout=success${savedOutputId ? `&outputId=${encodeURIComponent(savedOutputId)}` : ""}`
-      : "/?step=results&checkout=success&restore=failed";
+      ? `/?step=results&checkout=success&session_id=${encodeURIComponent(checkoutSessionId)}${savedOutputId ? `&outputId=${encodeURIComponent(savedOutputId)}` : ""}`
+      : `/?step=results&checkout=success&session_id=${encodeURIComponent(checkoutSessionId)}&restore=failed`;
     setContinueHref(target);
     const timer = window.setTimeout(() => {
-      void verifyCheckoutSession(checkoutSessionId).finally(() => {
+      void verifyCheckoutSession(checkoutSessionId).then((verified) => {
+        if (!verified) {
+          setCheckoutStatus("invalid");
+          setContinueHref("/pricing");
+          return;
+        }
+        setCheckoutStatus("verified");
         window.location.replace(target);
       });
     }, 700);
     return () => window.clearTimeout(timer);
   }, []);
 
+  const checkoutVerified = checkoutStatus === "verified";
+  const checkoutInvalid = missingSession || checkoutStatus === "invalid";
+
   return (
     <section className="app-screen-card space-y-5 text-center">
-      <p className="app-kicker">Checkout complete</p>
-      <h1 className="text-4xl app-heading">Payment successful</h1>
+      <p className="app-kicker">{checkoutInvalid ? "Checkout" : checkoutVerified ? "Checkout complete" : "Verifying checkout"}</p>
+      <h1 className="text-4xl app-heading">
+        {checkoutInvalid
+          ? "Choose a credit pack to continue."
+          : checkoutVerified
+            ? "Payment successful"
+            : "Confirming your Stripe payment."}
+      </h1>
       <p className="mx-auto max-w-2xl text-sm leading-6 text-[var(--color-text-muted)]">
-        Your credits are being added to your account. Sending you back to the
-        generated output flow.
+        {checkoutInvalid
+          ? "We did not receive a verified Stripe checkout session for this visit, so no payment has been confirmed."
+          : checkoutVerified
+            ? "Your credits are being added to your account. Sending you back to the generated output flow."
+            : "This only takes a moment. We will return you to your generated materials after Stripe confirms the session."}
       </p>
       <div className="flex flex-wrap justify-center gap-3">
         <Link
-          href={hasSavedResults ? continueHref : "/?step=results&checkout=success&restore=failed"}
+          href={checkoutInvalid ? "/pricing" : hasSavedResults ? continueHref : continueHref}
           className="app-button-primary"
         >
-          Continue
+          {checkoutInvalid ? "View pricing" : "Continue"}
         </Link>
       </div>
     </section>
@@ -56,7 +82,7 @@ export default function CheckoutSuccessBridge() {
 }
 
 async function verifyCheckoutSession(sessionId: string | null) {
-  if (!sessionId) return;
+  if (!sessionId) return false;
   try {
     const response = await fetch("/api/checkout/verify-session", {
       method: "POST",
@@ -68,9 +94,12 @@ async function verifyCheckoutSession(sessionId: string | null) {
         status: response.status,
         body: await response.text()
       });
+      return false;
     }
+    return true;
   } catch (error) {
     console.warn("[CheckoutSuccessBridge] Checkout verification request failed", error);
+    return false;
   }
 }
 

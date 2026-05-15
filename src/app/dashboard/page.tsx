@@ -50,7 +50,7 @@ export default async function DashboardPage() {
               <Link href="/?step=resume" className="app-button-primary dashboard-primary-cta">
                 Start a new application
               </Link>
-              <Link href="/pricing" className="dashboard-secondary-cta">
+              <Link href="/pricing?pack=5" className="dashboard-secondary-cta">
                 Buy credits
               </Link>
               <form action="/auth/signout" method="post" className="sm:ml-1">
