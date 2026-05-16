@@ -30,11 +30,23 @@ export async function POST(request: Request) {
 
   const secretKey = process.env.STRIPE_SECRET_KEY;
   const appUrl = process.env.NEXT_PUBLIC_APP_URL;
-  const priceId = process.env[PRICE_ENV_BY_PACK[pack]];
+  const priceEnvName = PRICE_ENV_BY_PACK[pack];
+  const priceId = process.env[priceEnvName];
 
   if (!secretKey || !appUrl || !priceId) {
+    console.error("[checkout-create] Missing Stripe checkout configuration", {
+      pack,
+      missing: [
+        !secretKey ? "STRIPE_SECRET_KEY" : null,
+        !appUrl ? "NEXT_PUBLIC_APP_URL" : null,
+        !priceId ? priceEnvName : null
+      ].filter(Boolean)
+    });
     return NextResponse.json(
-      { error: "Stripe checkout is not configured." },
+      {
+        error:
+          "Stripe checkout is not configured for this deployment. Please contact support."
+      },
       { status: 500 }
     );
   }

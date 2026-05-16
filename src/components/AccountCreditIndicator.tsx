@@ -79,7 +79,7 @@ export default function AccountCreditIndicator() {
       </button>
 
       {open && (
-        <div className="absolute right-0 z-30 mt-2 w-56 rounded-[18px] border border-[var(--color-border-light)] bg-white p-2 text-sm shadow-[0_18px_44px_rgba(17,35,63,0.12)]">
+        <div className="app-account-menu">
           <Link
             href="/dashboard"
             className="block rounded-[14px] px-3 py-2 font-bold text-[var(--color-text-primary)] hover:bg-[#f4f8fb]"
