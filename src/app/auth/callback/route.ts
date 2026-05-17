@@ -5,7 +5,7 @@ import { ensureUserProfile } from "@/lib/accountStorage";
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
-  const next = url.searchParams.get("next") ?? "/dashboard";
+  const next = normalizeNextPath(url.searchParams.get("next"), url.origin);
   const supabase = createServerSupabaseClient();
 
   if (code && supabase) {
@@ -26,4 +26,18 @@ export async function GET(request: Request) {
   }
 
   return NextResponse.redirect(new URL(next, url.origin));
+}
+
+function normalizeNextPath(next: string | null, currentOrigin: string) {
+  if (!next) return "/dashboard";
+  try {
+    const parsed = new URL(next, currentOrigin);
+    const currentHost = new URL(currentOrigin).host;
+    const isSameHost = parsed.host === currentHost;
+    const isVercelDeployment = parsed.hostname.endsWith(".vercel.app");
+    if (!isSameHost && !isVercelDeployment) return "/dashboard";
+    return `${parsed.pathname}${parsed.search}${parsed.hash}` || "/dashboard";
+  } catch {
+    return next.startsWith("/") ? next : "/dashboard";
+  }
 }

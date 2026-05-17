@@ -28,30 +28,6 @@ export async function POST(request: Request) {
     );
   }
 
-  const secretKey = process.env.STRIPE_SECRET_KEY;
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL;
-  const priceEnvName = PRICE_ENV_BY_PACK[pack];
-  const priceId = process.env[priceEnvName];
-
-  if (!secretKey || !appUrl || !priceId) {
-    console.error("[checkout-create] Missing Stripe checkout configuration", {
-      pack,
-      missing: [
-        !secretKey ? "STRIPE_SECRET_KEY" : null,
-        !appUrl ? "NEXT_PUBLIC_APP_URL" : null,
-        !priceId ? priceEnvName : null
-      ].filter(Boolean)
-    });
-    return NextResponse.json(
-      {
-        error:
-          "Stripe checkout is not configured for this deployment. Please contact support."
-      },
-      { status: 500 }
-    );
-  }
-
-  const stripe = new Stripe(secretKey);
   const supabase = createServerSupabaseClient();
   const {
     data: { user }
@@ -74,6 +50,30 @@ export async function POST(request: Request) {
       { status: 401 }
     );
   }
+
+  const secretKey = process.env.STRIPE_SECRET_KEY;
+  const priceEnvName = PRICE_ENV_BY_PACK[pack];
+  const priceId = process.env[priceEnvName];
+  const appUrl = getRequestOrigin(request);
+
+  if (!secretKey || !priceId) {
+    console.error("[checkout-create] Missing Stripe checkout configuration", {
+      pack,
+      missing: [
+        !secretKey ? "STRIPE_SECRET_KEY" : null,
+        !priceId ? priceEnvName : null
+      ].filter(Boolean)
+    });
+    return NextResponse.json(
+      {
+        error:
+          "Stripe checkout is not configured for this deployment. Please contact support."
+      },
+      { status: 500 }
+    );
+  }
+
+  const stripe = new Stripe(secretKey);
 
   let stripeCustomerId: string | undefined;
   await ensureUserProfile({
@@ -156,4 +156,13 @@ function parsePack(body: unknown): CheckoutPack | null {
 
 function isAnonymousSupabaseUser(user: { is_anonymous?: boolean; email?: string | null }) {
   return user.is_anonymous === true || !user.email;
+}
+
+function getRequestOrigin(request: Request) {
+  const forwardedProto = request.headers.get("x-forwarded-proto");
+  const forwardedHost = request.headers.get("x-forwarded-host");
+  if (forwardedProto && forwardedHost) {
+    return `${forwardedProto}://${forwardedHost}`;
+  }
+  return new URL(request.url).origin;
 }

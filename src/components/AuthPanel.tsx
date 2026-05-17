@@ -38,11 +38,25 @@ function getFriendlyGoogleAuthError(error: unknown) {
 }
 
 function getAuthRedirectUrl(next: string) {
-  const appUrl =
-    process.env.NEXT_PUBLIC_APP_URL ||
-    (typeof window !== "undefined" ? window.location.origin : "");
-  const normalizedAppUrl = appUrl.replace(/\/+$/, "");
-  return `${normalizedAppUrl}/auth/callback?next=${encodeURIComponent(next)}`;
+  const currentOrigin = typeof window !== "undefined" ? window.location.origin : "";
+  const configuredOrigin = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/+$/, "") ?? "";
+  const origin = currentOrigin || configuredOrigin;
+  const safeNext = normalizeNextPath(next, origin);
+  return `${origin}/auth/callback?next=${encodeURIComponent(safeNext)}`;
+}
+
+function normalizeNextPath(next: string, currentOrigin: string) {
+  if (!next) return "/dashboard";
+  try {
+    const parsed = new URL(next, currentOrigin || "https://ats-resume-app-sage.vercel.app");
+    const currentHost = currentOrigin ? new URL(currentOrigin).host : parsed.host;
+    const isSameHost = parsed.host === currentHost;
+    const isVercelDeployment = parsed.hostname.endsWith(".vercel.app");
+    if (!isSameHost && !isVercelDeployment) return "/dashboard";
+    return `${parsed.pathname}${parsed.search}${parsed.hash}` || "/dashboard";
+  } catch {
+    return next.startsWith("/") ? next : "/dashboard";
+  }
 }
 
 export default function AuthPanel({
@@ -83,7 +97,7 @@ export default function AuthPanel({
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        window.location.href = next;
+        window.location.href = normalizeNextPath(next, window.location.origin);
       }
     } catch (err) {
       console.error("Supabase auth error", err);
