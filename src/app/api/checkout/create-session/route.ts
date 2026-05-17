@@ -12,6 +12,8 @@ const PRICE_ENV_BY_PACK: Record<CheckoutPack, string> = {
   "10": "STRIPE_PRICE_10_CREDIT_PACK"
 };
 
+const CANONICAL_APP_ORIGIN = "https://ats-resume-app-sage.vercel.app";
+
 export async function POST(request: Request) {
   let body: unknown;
   try {
@@ -161,6 +163,10 @@ function isAnonymousSupabaseUser(user: { is_anonymous?: boolean; email?: string 
 function getRequestOrigin(request: Request) {
   const forwardedProto = request.headers.get("x-forwarded-proto");
   const forwardedHost = request.headers.get("x-forwarded-host");
+  const host = (forwardedHost ?? new URL(request.url).host).toLowerCase().split(":")[0];
+  if (host.endsWith(".vercel.app") && host !== "ats-resume-app-sage.vercel.app") {
+    return CANONICAL_APP_ORIGIN;
+  }
   if (forwardedProto && forwardedHost) {
     return `${forwardedProto}://${forwardedHost}`;
   }
