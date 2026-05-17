@@ -5,7 +5,8 @@ import { ensureUserProfile } from "@/lib/accountStorage";
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
-  const next = normalizeNextPath(url.searchParams.get("next"), url.origin);
+  const canonicalOrigin = getCanonicalOrigin(url);
+  const next = normalizeNextPath(url.searchParams.get("next"), canonicalOrigin);
   const supabase = createServerSupabaseClient();
 
   if (code && supabase) {
@@ -25,7 +26,14 @@ export async function GET(request: Request) {
     }
   }
 
-  return NextResponse.redirect(new URL(next, url.origin));
+  return NextResponse.redirect(new URL(next, canonicalOrigin));
+}
+
+function getCanonicalOrigin(url: URL) {
+  if (url.hostname.endsWith(".vercel.app") && url.hostname !== "ats-resume-app-sage.vercel.app") {
+    return "https://ats-resume-app-sage.vercel.app";
+  }
+  return url.origin;
 }
 
 function normalizeNextPath(next: string | null, currentOrigin: string) {

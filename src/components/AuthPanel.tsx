@@ -38,11 +38,21 @@ function getFriendlyGoogleAuthError(error: unknown) {
 }
 
 function getAuthRedirectUrl(next: string) {
-  const currentOrigin = typeof window !== "undefined" ? window.location.origin : "";
+  const currentOrigin = getCurrentCanonicalOrigin();
   const configuredOrigin = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/+$/, "") ?? "";
   const origin = currentOrigin || configuredOrigin;
   const safeNext = normalizeNextPath(next, origin);
   return `${origin}/auth/callback?next=${encodeURIComponent(safeNext)}`;
+}
+
+function getCurrentCanonicalOrigin() {
+  if (typeof window === "undefined") return "";
+  const origin = window.location.origin;
+  const host = window.location.host.toLowerCase();
+  if (host.endsWith(".vercel.app") && host !== "ats-resume-app-sage.vercel.app") {
+    return "https://ats-resume-app-sage.vercel.app";
+  }
+  return origin;
 }
 
 function normalizeNextPath(next: string, currentOrigin: string) {
