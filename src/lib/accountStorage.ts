@@ -125,47 +125,7 @@ export async function fulfillCreditPurchase(args: {
     throw ensureProfileError;
   }
 
-  const { data, error } = await supabase.rpc("fulfill_credit_purchase", {
-    p_user_id: args.userId,
-    p_pack: args.pack,
-    p_checkout_session_id: args.stripeCheckoutSessionId,
-    p_customer_id: args.stripeCustomerId ?? null,
-    p_payment_intent_id: args.stripePaymentIntentId ?? null
-  });
-
-  if (error) {
-    if (isMissingFulfillmentFunctionError(error)) {
-      console.warn("[credits] RPC fulfill_credit_purchase is unavailable. Falling back to direct fulfillment.", {
-        code: error.code,
-        message: error.message
-      });
-      return fulfillCreditPurchaseDirect(args);
-    }
-    console.error("[credits] RPC fulfill_credit_purchase failed", {
-      code: error.code,
-      message: error.message,
-      details: error.details
-    });
-    throw error;
-  }
-  const result = Array.isArray(data) ? data[0] : data;
-  if (result?.status === "duplicate") {
-    console.log("[credits] Duplicate credit purchase skipped", {
-      userId: args.userId,
-      stripeCheckoutSessionId: args.stripeCheckoutSessionId
-    });
-    return { status: "duplicate" as const };
-  }
-  const credits = typeof result?.credits === "number" ? result.credits : args.pack === "10" ? 10 : 5;
-  console.log("[credits] Credit purchase fulfilled through RPC", {
-    userId: args.userId,
-    stripeCheckoutSessionId: args.stripeCheckoutSessionId,
-    credits
-  });
-  return {
-    status: "fulfilled" as const,
-    credits
-  };
+  return fulfillCreditPurchaseDirect(args);
 }
 
 async function fulfillCreditPurchaseDirect(args: {
@@ -249,14 +209,6 @@ async function fulfillCreditPurchaseDirect(args: {
     credits
   });
   return { status: "fulfilled" as const, credits };
-}
-
-function isMissingFulfillmentFunctionError(error: { code?: string; message?: string }) {
-  return (
-    error.code === "42883" ||
-    error.code === "PGRST202" ||
-    /fulfill_credit_purchase/i.test(error.message ?? "")
-  );
 }
 
 export async function consumeCredits(userId: string, amount: number, reason: string) {
