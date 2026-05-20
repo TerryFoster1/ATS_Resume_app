@@ -5,6 +5,7 @@ import LoadingIndicator from "@/components/LoadingIndicator";
 import StepIndicator from "@/components/StepIndicator";
 import { DocumentStackGraphic } from "@/components/VisualDecor";
 import { enforceAnsweredEvidenceInResume } from "@/lib/analysis/answerTransform";
+import { trackEvent } from "@/lib/analytics";
 import { sanitizeGeneratedText } from "@/lib/sanitizeGeneratedText";
 import { limitSkillsSection } from "@/lib/skillsSection";
 import type {
@@ -149,6 +150,7 @@ async function runPipeline(
     return;
   }
   try {
+    trackEvent("generation_started");
     let tailoredResume = "";
     let tailoredCoverLetter = "";
     let atsReport: AtsRuleResult[] = [];
@@ -239,6 +241,7 @@ ${feedback}`
       revisionPass,
       finalAnalysis
     });
+    trackEvent("generation_completed", { revisionPass });
   } catch (err) {
     setRetryMessage(null);
     setError(friendlyGenerationError(err));

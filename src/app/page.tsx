@@ -239,12 +239,12 @@ function ProductHeader() {
       <div className="relative z-10 flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex items-center gap-4">
           <div className="app-brand-mark" aria-hidden>
-            ATS
+            CL
           </div>
           <div>
-            <p className="app-kicker">Resume translation engine</p>
+            <p className="app-kicker">Resume positioning engine</p>
             <h1 className="mt-1 text-2xl font-black tracking-tight text-[var(--color-text-primary)] sm:text-3xl">
-              ATS Resume App
+              Career Ladder
             </h1>
           </div>
         </div>

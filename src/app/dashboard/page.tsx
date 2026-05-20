@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import AnalyticsEvent from "@/components/AnalyticsEvent";
 import DashboardApplications, { type DashboardApplication } from "@/components/DashboardApplications";
 import { getCreditBalance } from "@/lib/accountStorage";
 import { createAdminSupabaseClient, createServerSupabaseClient } from "@/lib/supabase/server";
@@ -35,6 +36,7 @@ export default async function DashboardPage() {
 
   return (
     <main className="dashboard-workspace space-y-8">
+      <AnalyticsEvent name="dashboard_reopen" />
       <header className="dashboard-hero">
         <div className="relative z-10 grid gap-6 xl:grid-cols-[1fr_360px] xl:items-center">
           <div className="max-w-3xl">

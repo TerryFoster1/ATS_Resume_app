@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ACCOUNT_CREDITS_REFRESH_EVENT } from "@/components/AccountCreditIndicator";
+import { trackEvent } from "@/lib/analytics";
 import { inferJobMeta } from "@/lib/applicationMeta";
 import { sanitizeGeneratedText } from "@/lib/sanitizeGeneratedText";
 import { limitSkillsSection } from "@/lib/skillsSection";
@@ -360,6 +361,7 @@ export default function StepResults({ state, onRestart }: Props) {
       unlockedResume: nextResumeUnlocked,
       unlockedCoverLetter: nextCoverUnlocked
     });
+    trackEvent("unlock_completed", { target, outputId });
     window.dispatchEvent(new Event(ACCOUNT_CREDITS_REFRESH_EVENT));
     setInterviewPromptOpen(true);
   }
@@ -2024,6 +2026,7 @@ function VariationShell({
         <button
           type="button"
           onClick={onToggle}
+          onMouseDown={() => trackEvent("regenerate_clicked", { label })}
           className="app-button-ghost px-5 py-2.5 text-sm"
         >
           {label}

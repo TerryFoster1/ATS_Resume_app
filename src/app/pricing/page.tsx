@@ -1,5 +1,6 @@
 import Link from "next/link";
 import AccountCreditIndicator from "@/components/AccountCreditIndicator";
+import AnalyticsEvent from "@/components/AnalyticsEvent";
 import CheckoutButton from "@/components/CheckoutButton";
 
 const CREDIT_USES = [
@@ -38,6 +39,7 @@ export default function PricingPage({
 
   return (
     <main className="space-y-8">
+      <AnalyticsEvent name="pricing_viewed" />
       <header className="app-product-header px-5 py-5 sm:px-7">
         <div className="relative z-10 flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           <div>

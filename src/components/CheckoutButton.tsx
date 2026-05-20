@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { trackEvent } from "@/lib/analytics";
 
 type CheckoutButtonProps = {
   pack: "5" | "10";
@@ -22,6 +23,7 @@ export default function CheckoutButton({ pack, autoStart = false, children }: Ch
     } catch {
       // Let the auth redirect handle unclear session state.
     }
+    trackEvent("sign_in_started", { source: "checkout", pack });
     window.sessionStorage.setItem(PENDING_PACK_KEY, pack);
     window.location.href = `/auth?next=${encodeURIComponent(`/pricing?pack=${pack}&checkout=1`)}`;
     return false;
@@ -48,6 +50,7 @@ export default function CheckoutButton({ pack, autoStart = false, children }: Ch
       if (!response.ok || !data.url) {
         throw new Error(data.error ?? "Could not start checkout.");
       }
+      trackEvent("checkout_started", { pack });
       window.location.href = data.url;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not start checkout.");

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import AccountCreditIndicator from "@/components/AccountCreditIndicator";
+import SavedOutputDocuments from "@/components/SavedOutputDocuments";
 import { createAdminSupabaseClient, createServerSupabaseClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -59,35 +60,17 @@ export default async function SavedOutputPage({
         </div>
       </header>
 
-      <section className="grid gap-5 xl:grid-cols-2">
-        <SavedDocument title="Resume" text={data.resume_text} unlocked={Boolean(data.resume_unlocked)} />
-        <SavedDocument title="Cover Letter" text={data.cover_letter_text} unlocked={Boolean(data.cover_letter_unlocked)} />
-      </section>
-    </main>
-  );
-}
-
-function SavedDocument({
-  title,
-  text,
-  unlocked
-}: {
-  title: string;
-  text: string;
-  unlocked: boolean;
-}) {
-  return (
-    <div className="app-document-panel space-y-3">
-      <div className="flex items-center justify-between gap-3">
-        <h2 className="text-base font-semibold text-[var(--color-text-primary)]">{title}</h2>
-        <span className="app-header-pill">{unlocked ? "Unlocked" : "Preview"}</span>
-      </div>
-      <textarea
-        readOnly={!unlocked}
-        value={text}
-        className="app-textarea-mono min-h-[420px] resize-y read-only:bg-[#f9f4ee]"
+      <SavedOutputDocuments
+        outputId={data.id}
+        title={data.job_title ?? "Untitled application"}
+        companyName={data.company_name}
+        resumeText={data.resume_text ?? ""}
+        coverLetterText={data.cover_letter_text ?? ""}
+        sourceResumeText={data.resume_text ?? null}
+        resumeUnlocked={Boolean(data.resume_unlocked)}
+        coverLetterUnlocked={Boolean(data.cover_letter_unlocked)}
       />
-    </div>
+    </main>
   );
 }
 

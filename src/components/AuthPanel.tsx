@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { trackEvent } from "@/lib/analytics";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import { getSupabaseBrowserConfigIssue } from "@/lib/supabase/config";
 
@@ -92,6 +93,7 @@ export default function AuthPanel({
     }
     setBusy(true);
     setMessage(null);
+    trackEvent("sign_in_started", { mode });
     try {
       if (mode === "sign-up") {
         const { error } = await supabase.auth.signUp({
@@ -107,6 +109,7 @@ export default function AuthPanel({
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
+        trackEvent("sign_in_completed", { provider: "password" });
         window.location.href = normalizeNextPath(next, window.location.origin);
       }
     } catch (err) {
@@ -131,6 +134,8 @@ export default function AuthPanel({
     if (error) {
       console.error("Supabase OAuth error", error);
       setMessage(getFriendlyGoogleAuthError(error));
+    } else {
+      trackEvent("sign_in_started", { provider: "google" });
     }
   }
 

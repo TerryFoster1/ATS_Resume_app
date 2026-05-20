@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { trackEvent } from "@/lib/analytics";
 
 const SAVED_RESULTS_KEY = "ats-resume-app:last-results";
 const CHECKOUT_SNAPSHOT_KEY = "ats-resume-app:checkout-snapshot";
@@ -43,6 +44,7 @@ export default function CheckoutSuccessBridge() {
           return;
         }
         setCheckoutStatus("verified");
+        trackEvent("checkout_completed", { sessionId: checkoutSessionId });
         window.location.replace(target);
       });
     }, 700);
