@@ -7,6 +7,7 @@ import { trackEvent } from "@/lib/analytics";
 const SAVED_RESULTS_KEY = "ats-resume-app:last-results";
 const CHECKOUT_SNAPSHOT_KEY = "ats-resume-app:checkout-snapshot";
 const CHECKOUT_RETURN_KEY = "ats-resume-app:checkout-returned";
+const CHECKOUT_RETURN_PATH_KEY = "career-ladder:checkout-return-path";
 
 export default function CheckoutSuccessBridge() {
   const [hasSavedResults, setHasSavedResults] = useState(false);
@@ -30,11 +31,12 @@ export default function CheckoutSuccessBridge() {
       window.sessionStorage.setItem(SAVED_RESULTS_KEY, saved);
     }
     const savedOutputId = readSavedOutputId(saved);
+    const savedReturnPath = readCheckoutReturnPath();
     setHasSavedResults(Boolean(saved));
     window.sessionStorage.setItem(CHECKOUT_RETURN_KEY, "1");
     const target = saved
       ? `/?step=results&checkout=success&session_id=${encodeURIComponent(checkoutSessionId)}${savedOutputId ? `&outputId=${encodeURIComponent(savedOutputId)}` : ""}`
-      : `/dashboard?checkout=success`;
+      : savedReturnPath ?? `/dashboard?checkout=success`;
     setContinueHref(target);
     const timer = window.setTimeout(() => {
       void verifyCheckoutSession(checkoutSessionId).then((verified) => {
@@ -44,6 +46,7 @@ export default function CheckoutSuccessBridge() {
           return;
         }
         setCheckoutStatus("verified");
+        window.sessionStorage.removeItem(CHECKOUT_RETURN_PATH_KEY);
         trackEvent("checkout_completed", { sessionId: checkoutSessionId });
         window.location.replace(target);
       });
@@ -112,6 +115,18 @@ function readSavedOutputId(raw: string | null) {
   try {
     const parsed = JSON.parse(raw) as { savedOutputId?: unknown };
     return typeof parsed.savedOutputId === "string" ? parsed.savedOutputId : null;
+  } catch {
+    return null;
+  }
+}
+
+function readCheckoutReturnPath() {
+  try {
+    const raw = window.sessionStorage.getItem(CHECKOUT_RETURN_PATH_KEY);
+    if (!raw) return null;
+    const parsed = new URL(raw, window.location.origin);
+    if (parsed.origin !== window.location.origin) return null;
+    return `${parsed.pathname}${parsed.search}${parsed.hash}` || null;
   } catch {
     return null;
   }

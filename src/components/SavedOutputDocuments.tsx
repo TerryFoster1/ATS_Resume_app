@@ -38,6 +38,7 @@ const FS_LETTER_BODY = 11;
 const LH_BODY = 12.8;
 const LH_LETTER = 15;
 const LH_BULLET_GAP = 1.8;
+const CHECKOUT_RETURN_PATH_KEY = "career-ladder:checkout-return-path";
 
 export default function SavedOutputDocuments({
   outputId,
@@ -59,6 +60,17 @@ export default function SavedOutputDocuments({
   useEffect(() => {
     trackEvent("dashboard_reopen", { outputId });
     void refreshCredits();
+    const params = new URLSearchParams(window.location.search);
+    const unlock = params.get("unlock");
+    if (params.get("checkout") === "success" && (unlock === "resume" || unlock === "coverLetter")) {
+      params.delete("checkout");
+      params.delete("unlock");
+      const next = `${window.location.pathname}${params.toString() ? `?${params}` : ""}`;
+      window.history.replaceState(null, "", next);
+      window.setTimeout(() => void requestUnlock(unlock), 700);
+    }
+    // This effect intentionally runs once on page entry.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [outputId]);
 
   async function refreshCredits() {
@@ -80,6 +92,10 @@ export default function SavedOutputDocuments({
   async function confirmUnlock() {
     if (!unlockTarget) return;
     if ((credits ?? 0) <= 0) {
+      window.sessionStorage.setItem(
+        CHECKOUT_RETURN_PATH_KEY,
+        `/outputs/${outputId}?checkout=success&unlock=${unlockTarget}`
+      );
       window.location.href = "/pricing?pack=5&checkout=1";
       return;
     }
