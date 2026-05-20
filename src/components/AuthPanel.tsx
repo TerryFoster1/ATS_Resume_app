@@ -50,8 +50,8 @@ function getCurrentCanonicalOrigin() {
   if (typeof window === "undefined") return "";
   const origin = window.location.origin;
   const host = window.location.host.toLowerCase();
-  if (host.endsWith(".vercel.app") && host !== "ats-resume-app-sage.vercel.app") {
-    return "https://ats-resume-app-sage.vercel.app";
+  if (host === "careerladder.ca" || host.endsWith(".vercel.app")) {
+    return "https://www.careerladder.ca";
   }
   return origin;
 }
@@ -59,7 +59,7 @@ function getCurrentCanonicalOrigin() {
 function normalizeNextPath(next: string, currentOrigin: string) {
   if (!next) return "/dashboard";
   try {
-    const parsed = new URL(next, currentOrigin || "https://ats-resume-app-sage.vercel.app");
+    const parsed = new URL(next, currentOrigin || "https://www.careerladder.ca");
     const currentHost = currentOrigin ? new URL(currentOrigin).host : parsed.host;
     const isSameHost = parsed.host === currentHost;
     const isVercelDeployment = parsed.hostname.endsWith(".vercel.app");

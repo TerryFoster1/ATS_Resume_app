@@ -34,7 +34,7 @@ export default function CheckoutSuccessBridge() {
     window.sessionStorage.setItem(CHECKOUT_RETURN_KEY, "1");
     const target = saved
       ? `/?step=results&checkout=success&session_id=${encodeURIComponent(checkoutSessionId)}${savedOutputId ? `&outputId=${encodeURIComponent(savedOutputId)}` : ""}`
-      : `/?step=results&checkout=success&session_id=${encodeURIComponent(checkoutSessionId)}&restore=failed`;
+      : `/dashboard?checkout=success`;
     setContinueHref(target);
     const timer = window.setTimeout(() => {
       void verifyCheckoutSession(checkoutSessionId).then((verified) => {
@@ -68,7 +68,9 @@ export default function CheckoutSuccessBridge() {
         {checkoutInvalid
           ? "We did not receive a verified Stripe checkout session for this visit, so no payment has been confirmed."
           : checkoutVerified
-            ? "Your credits are being added to your account. Sending you back to the generated output flow."
+            ? hasSavedResults
+              ? "Your credits are being added to your account. Sending you back to the generated output flow."
+              : "Your credits are being added to your account. Sending you back to your career workspace."
             : "This only takes a moment. We will return you to your generated materials after Stripe confirms the session."}
       </p>
       <div className="flex flex-wrap justify-center gap-3">

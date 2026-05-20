@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-const CANONICAL_HOST = "ats-resume-app-sage.vercel.app";
+const CANONICAL_HOST = "www.careerladder.ca";
 const CANONICAL_ORIGIN = `https://${CANONICAL_HOST}`;
 
 export function middleware(request: NextRequest) {
@@ -19,6 +19,7 @@ export function middleware(request: NextRequest) {
 function shouldCanonicalizeHost(host: string) {
   if (host === CANONICAL_HOST) return false;
   if (host === "localhost" || host === "127.0.0.1" || host === "::1") return false;
+  if (host === "careerladder.ca") return true;
 
   return (
     host.endsWith(".vercel.app") &&

@@ -13,6 +13,7 @@ const PENDING_PACK_KEY = "ats-resume-app:pending-checkout-pack";
 
 export default function CheckoutButton({ pack, autoStart = false, children }: CheckoutButtonProps) {
   const [loading, setLoading] = useState(false);
+  const [loadingLabel, setLoadingLabel] = useState("Opening checkout...");
   const [error, setError] = useState<string | null>(null);
 
   async function ensureSignedInBeforeCheckout() {
@@ -32,10 +33,12 @@ export default function CheckoutButton({ pack, autoStart = false, children }: Ch
   async function startCheckout() {
     if (loading) return;
     setLoading(true);
+    setLoadingLabel("Checking account...");
     setError(null);
     try {
       const signedIn = await ensureSignedInBeforeCheckout();
       if (!signedIn) return;
+      setLoadingLabel("Opening secure Stripe checkout...");
       const response = await fetch("/api/checkout/create-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -53,7 +56,11 @@ export default function CheckoutButton({ pack, autoStart = false, children }: Ch
       trackEvent("checkout_started", { pack });
       window.location.href = data.url;
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not start checkout.");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Could not start checkout. Please refresh and try again."
+      );
       setLoading(false);
     }
   }
@@ -76,9 +83,13 @@ export default function CheckoutButton({ pack, autoStart = false, children }: Ch
         disabled={loading}
         className="app-button-primary w-full"
       >
-        {loading ? "Opening checkout..." : children}
+        {loading ? loadingLabel : children}
       </button>
-      {error && <p className="text-xs text-rose-700">{error}</p>}
+      {error && (
+        <p className="rounded-[14px] border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold leading-5 text-rose-800">
+          {error}
+        </p>
+      )}
     </div>
   );
 }

@@ -7,7 +7,11 @@ import { createAdminSupabaseClient, createServerSupabaseClient } from "@/lib/sup
 
 export const dynamic = "force-dynamic";
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams
+}: {
+  searchParams?: { checkout?: string };
+}) {
   const supabase = createServerSupabaseClient();
   if (!supabase) return <DashboardSetupMissing />;
   const {
@@ -37,6 +41,11 @@ export default async function DashboardPage() {
   return (
     <main className="dashboard-workspace space-y-8">
       <AnalyticsEvent name="dashboard_reopen" />
+      {searchParams?.checkout === "success" && (
+        <section className="rounded-[22px] border border-[#bfe3d8] bg-[#effbf7] px-5 py-4 text-sm leading-6 text-[#12604f] shadow-[0_12px_28px_rgba(17,35,63,0.06)]">
+          <strong>Payment successful.</strong> Your credits are now attached to this account. You can reopen a saved application or start a new one when you are ready.
+        </section>
+      )}
       <header className="dashboard-hero">
         <div className="relative z-10 grid gap-6 xl:grid-cols-[1fr_360px] xl:items-center">
           <div className="max-w-3xl">

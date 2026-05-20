@@ -30,8 +30,11 @@ export async function GET(request: Request) {
 }
 
 function getCanonicalOrigin(url: URL) {
-  if (url.hostname.endsWith(".vercel.app") && url.hostname !== "ats-resume-app-sage.vercel.app") {
-    return "https://ats-resume-app-sage.vercel.app";
+  if (
+    url.hostname === "careerladder.ca" ||
+    url.hostname.endsWith(".vercel.app")
+  ) {
+    return "https://www.careerladder.ca";
   }
   return url.origin;
 }
