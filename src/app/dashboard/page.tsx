@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import AnalyticsEvent from "@/components/AnalyticsEvent";
 import DashboardApplications, { type DashboardApplication } from "@/components/DashboardApplications";
 import { getCreditBalance } from "@/lib/accountStorage";
+import { normalizeSavedApplicationTitle } from "@/lib/applicationMeta";
 import { createAdminSupabaseClient, createServerSupabaseClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -24,18 +25,23 @@ export default async function DashboardPage({
   const { data } = admin
     ? await admin
         .from("generated_outputs")
-        .select("id, job_title, company_name, created_at, resume_unlocked, cover_letter_unlocked")
+        .select("id, job_title, company_name, created_at, resume_unlocked, cover_letter_unlocked, interview_prep_status, source_job_description")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false })
     : { data: [] };
 
   const applications: DashboardApplication[] = (data ?? []).map((item) => ({
     id: item.id,
-    jobTitle: item.job_title,
+    jobTitle: normalizeSavedApplicationTitle({
+      title: item.job_title,
+      companyName: item.company_name,
+      sourceJobDescription: item.source_job_description
+    }),
     companyName: item.company_name,
     createdAt: item.created_at,
     resumeUnlocked: Boolean(item.resume_unlocked),
-    coverLetterUnlocked: Boolean(item.cover_letter_unlocked)
+    coverLetterUnlocked: Boolean(item.cover_letter_unlocked),
+    interviewPrepReady: item.interview_prep_status === "completed"
   }));
 
   return (
@@ -133,7 +139,7 @@ export default async function DashboardPage({
             <article className="dashboard-benefit-card">
               <span className="dashboard-benefit-mark">03</span>
               <h3 className="mt-4 text-base font-black text-[#11233f]">
-                Interview prep coming soon
+                Interview prep
               </h3>
               <p className="mt-2 text-sm leading-6 text-[#5d6f85]">
                 Prepare for likely recruiter questions using the same job-fit analysis.

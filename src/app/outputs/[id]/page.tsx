@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import AccountCreditIndicator from "@/components/AccountCreditIndicator";
 import SavedOutputDocuments from "@/components/SavedOutputDocuments";
+import { normalizeSavedApplicationTitle } from "@/lib/applicationMeta";
 import { createAdminSupabaseClient, createServerSupabaseClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -39,6 +40,11 @@ export default async function SavedOutputPage({
       </main>
     );
   }
+  const displayTitle = normalizeSavedApplicationTitle({
+    title: data.job_title,
+    companyName: data.company_name,
+    sourceJobDescription: data.source_job_description
+  });
 
   return (
     <main className="space-y-8">
@@ -46,7 +52,7 @@ export default async function SavedOutputPage({
         <div className="relative z-10 flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <p className="app-kicker">{new Date(data.created_at).toLocaleDateString()}</p>
-            <h1 className="mt-2 text-3xl app-heading">{data.job_title}</h1>
+            <h1 className="mt-2 text-3xl app-heading">{displayTitle}</h1>
             <p className="mt-2 text-sm font-semibold text-[var(--color-text-muted)]">
               {data.company_name ?? "Company not detected"}
             </p>
@@ -62,16 +68,24 @@ export default async function SavedOutputPage({
 
       <SavedOutputDocuments
         outputId={data.id}
-        title={data.job_title ?? "Untitled application"}
+        title={displayTitle}
         companyName={data.company_name}
         resumeText={data.resume_text ?? ""}
         coverLetterText={data.cover_letter_text ?? ""}
         sourceResumeText={data.resume_text ?? null}
         resumeUnlocked={Boolean(data.resume_unlocked)}
         coverLetterUnlocked={Boolean(data.cover_letter_unlocked)}
+        interviewPrepStatus={data.interview_prep_status ?? "pending"}
+        interviewPrepText={readInterviewPrep(data.analysis_snapshot)}
       />
     </main>
   );
+}
+
+function readInterviewPrep(snapshot: unknown) {
+  if (!snapshot || typeof snapshot !== "object" || Array.isArray(snapshot)) return "";
+  const value = (snapshot as { interviewPrep?: unknown }).interviewPrep;
+  return typeof value === "string" ? value : "";
 }
 
 function SetupMissing() {

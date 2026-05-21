@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { inferJobMeta } from "@/lib/applicationMeta";
+import { inferJobMeta, normalizeSavedApplicationTitle } from "@/lib/applicationMeta";
 import { ensureUserProfile, saveGeneratedOutput } from "@/lib/accountStorage";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
@@ -41,9 +41,14 @@ export async function POST(request: Request) {
   });
 
   const meta = inferJobMeta(parsed.data.sourceJobDescription);
+  const applicationTitle = normalizeSavedApplicationTitle({
+    title: parsed.data.applicationTitle,
+    companyName: meta.companyName,
+    sourceJobDescription: parsed.data.sourceJobDescription
+  });
   const saved = await saveGeneratedOutput({
     userId: user.id,
-    jobTitle: parsed.data.applicationTitle ?? buildDefaultApplicationTitle(meta),
+    jobTitle: applicationTitle,
     companyName: meta.companyName,
     resumeText: parsed.data.resumeText,
     coverLetterText: parsed.data.coverLetterText,
@@ -54,14 +59,4 @@ export async function POST(request: Request) {
   });
 
   return NextResponse.json(saved);
-}
-
-function buildDefaultApplicationTitle(meta: {
-  jobTitle?: string;
-  companyName?: string;
-}) {
-  if (meta.jobTitle && meta.companyName) return `${meta.jobTitle} - ${meta.companyName}`;
-  if (meta.jobTitle) return meta.jobTitle;
-  if (meta.companyName) return `${meta.companyName} Application`;
-  return "Untitled application";
 }

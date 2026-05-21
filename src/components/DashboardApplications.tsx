@@ -10,6 +10,7 @@ export type DashboardApplication = {
   createdAt: string;
   resumeUnlocked: boolean;
   coverLetterUnlocked: boolean;
+  interviewPrepReady: boolean;
 };
 
 export default function DashboardApplications({
@@ -70,7 +71,9 @@ export default function DashboardApplications({
                 <span className={item.coverLetterUnlocked ? "dashboard-badge is-ready" : "dashboard-badge"}>
                   Cover letter
                 </span>
-                <span className="dashboard-badge is-pending">Interview prep</span>
+                <span className={item.interviewPrepReady ? "dashboard-badge is-ready" : "dashboard-badge is-pending"}>
+                  Interview prep
+                </span>
               </div>
             </div>
 

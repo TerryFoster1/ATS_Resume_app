@@ -23,6 +23,8 @@ type SavedOutputDocumentsProps = {
   sourceResumeText?: string | null;
   resumeUnlocked: boolean;
   coverLetterUnlocked: boolean;
+  interviewPrepStatus?: string;
+  interviewPrepText?: string;
 };
 
 const PAGE_WIDTH = 612;
@@ -48,13 +50,18 @@ export default function SavedOutputDocuments({
   coverLetterText,
   sourceResumeText,
   resumeUnlocked,
-  coverLetterUnlocked
+  coverLetterUnlocked,
+  interviewPrepStatus = "pending",
+  interviewPrepText = ""
 }: SavedOutputDocumentsProps) {
   const [credits, setCredits] = useState<number | null>(null);
   const [resumeIsUnlocked, setResumeIsUnlocked] = useState(resumeUnlocked);
   const [coverLetterIsUnlocked, setCoverLetterIsUnlocked] = useState(coverLetterUnlocked);
   const [unlockTarget, setUnlockTarget] = useState<DocumentKind | null>(null);
   const [busyTarget, setBusyTarget] = useState<DocumentKind | null>(null);
+  const [interviewPrep, setInterviewPrep] = useState(interviewPrepText);
+  const [interviewPrepBusy, setInterviewPrepBusy] = useState(false);
+  const [interviewPrepError, setInterviewPrepError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -68,6 +75,12 @@ export default function SavedOutputDocuments({
       const next = `${window.location.pathname}${params.toString() ? `?${params}` : ""}`;
       window.history.replaceState(null, "", next);
       window.setTimeout(() => void requestUnlock(unlock), 700);
+    } else if (params.get("checkout") === "success" && params.get("interviewPrep") === "1") {
+      params.delete("checkout");
+      params.delete("interviewPrep");
+      const next = `${window.location.pathname}${params.toString() ? `?${params}` : ""}`;
+      window.history.replaceState(null, "", next);
+      window.setTimeout(() => void generatePrep(), 700);
     }
     // This effect intentionally runs once on page entry.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -130,6 +143,39 @@ export default function SavedOutputDocuments({
     }
   }
 
+  async function generatePrep() {
+    setInterviewPrepError(null);
+    setInterviewPrepBusy(true);
+    try {
+      const response = await fetch(`/api/outputs/${outputId}/interview-prep`, {
+        method: "POST"
+      });
+      const data = (await response.json().catch(() => ({}))) as {
+        interviewPrep?: string;
+        error?: string;
+      };
+      if (response.status === 402) {
+        window.sessionStorage.setItem(
+          CHECKOUT_RETURN_PATH_KEY,
+          `/outputs/${outputId}?checkout=success&interviewPrep=1`
+        );
+        window.location.href = "/pricing?pack=5&checkout=1";
+        return;
+      }
+      if (!response.ok || !data.interviewPrep) {
+        throw new Error(data.error ?? "Could not generate interview prep.");
+      }
+      setInterviewPrep(data.interviewPrep);
+      trackEvent("interview_prep_unlocked", { outputId });
+      window.dispatchEvent(new Event(ACCOUNT_CREDITS_REFRESH_EVENT));
+      await refreshCredits();
+    } catch (err) {
+      setInterviewPrepError(err instanceof Error ? err.message : "Could not generate interview prep.");
+    } finally {
+      setInterviewPrepBusy(false);
+    }
+  }
+
   const safeFilename = filenameFromTitle(title);
 
   return (
@@ -167,18 +213,14 @@ export default function SavedOutputDocuments({
         />
       </section>
 
-      <section className="app-card-soft flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <p className="app-kicker">Next version</p>
-          <h3 className="mt-2 text-xl app-heading">Regenerate a variation</h3>
-          <p className="mt-2 text-sm leading-6 text-[var(--color-text-muted)]">
-            Variations will let you adjust tone or emphasis while keeping the saved version intact.
-          </p>
-        </div>
-        <button type="button" disabled className="app-button-ghost shrink-0">
-          Regenerate, coming soon
-        </button>
-      </section>
+      <InterviewPrepSection
+        interviewPrep={interviewPrep}
+        status={interviewPrepStatus}
+        busy={interviewPrepBusy}
+        error={interviewPrepError}
+        fileBaseName={`${safeFilename}-interview-prep`}
+        onGenerate={generatePrep}
+      />
 
       {unlockTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(32,23,53,0.34)] px-4 py-8 backdrop-blur-sm">
@@ -238,6 +280,91 @@ export default function SavedOutputDocuments({
         </div>
       </section>
     </div>
+  );
+}
+
+function InterviewPrepSection({
+  interviewPrep,
+  status,
+  busy,
+  error,
+  fileBaseName,
+  onGenerate
+}: {
+  interviewPrep: string;
+  status: string;
+  busy: boolean;
+  error: string | null;
+  fileBaseName: string;
+  onGenerate: () => void;
+}) {
+  const [copied, setCopied] = useState(false);
+  const hasPrep = interviewPrep.trim().length > 0;
+
+  async function copy() {
+    if (!hasPrep) return;
+    await navigator.clipboard.writeText(interviewPrep);
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1400);
+  }
+
+  function downloadTxt() {
+    if (!hasPrep) return;
+    triggerDownload(new Blob([interviewPrep], { type: "text/plain;charset=utf-8" }), `${fileBaseName}.txt`);
+  }
+
+  return (
+    <section className="app-card-soft space-y-4">
+      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+        <div>
+          <p className="app-kicker">Interview prep</p>
+          <h3 className="mt-2 text-xl app-heading">
+            {hasPrep ? "Recruiter-style prep is ready." : "Generate recruiter-style interview prep."}
+          </h3>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--color-text-muted)]">
+            {hasPrep
+              ? "Review likely screening, behavioural, role-specific, and gap-focused questions for this application."
+              : "Use 1 credit to generate likely questions, STAR guidance, and preparation notes from this saved resume and job posting."}
+          </p>
+          {status === "failed" && !hasPrep && (
+            <p className="mt-3 rounded-[14px] border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold leading-5 text-rose-900">
+              The last interview prep attempt failed. You can try again.
+            </p>
+          )}
+        </div>
+        {hasPrep ? (
+          <div className="flex flex-wrap gap-2">
+            <button type="button" onClick={copy} className="saved-doc-action">
+              {copied ? "Copied" : "Copy"}
+            </button>
+            <button type="button" onClick={downloadTxt} className="saved-doc-action-primary">
+              TXT
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={onGenerate}
+            disabled={busy}
+            className="app-button-primary shrink-0 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {busy ? "Generating..." : "Generate interview prep - 1 credit"}
+          </button>
+        )}
+      </div>
+      {error && (
+        <p className="rounded-[18px] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-900">
+          {error}
+        </p>
+      )}
+      {hasPrep && (
+        <div className="rounded-[22px] border border-[rgba(30,41,59,0.10)] bg-white p-5 shadow-[var(--shadow-inset-soft)]">
+          <pre className="whitespace-pre-wrap font-sans text-sm leading-7 text-[var(--color-text-primary)]">
+            {interviewPrep}
+          </pre>
+        </div>
+      )}
+    </section>
   );
 }
 

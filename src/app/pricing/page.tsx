@@ -6,7 +6,7 @@ import CheckoutButton from "@/components/CheckoutButton";
 const CREDIT_USES = [
   { label: "Resume PDF export", cost: "1 credit" },
   { label: "Cover letter unlock", cost: "1 credit" },
-  { label: "Interview prep", cost: "1 credit, coming soon" }
+  { label: "Interview prep", cost: "1 credit" }
 ];
 
 const PACKS = [

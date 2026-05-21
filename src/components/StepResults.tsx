@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ACCOUNT_CREDITS_REFRESH_EVENT } from "@/components/AccountCreditIndicator";
 import { trackEvent } from "@/lib/analytics";
-import { inferJobMeta } from "@/lib/applicationMeta";
+import { buildApplicationTitle, inferJobMeta, normalizeSavedApplicationTitle } from "@/lib/applicationMeta";
 import { sanitizeGeneratedText } from "@/lib/sanitizeGeneratedText";
 import { limitSkillsSection } from "@/lib/skillsSection";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
@@ -60,6 +60,7 @@ const CHECKOUT_SNAPSHOT_KEY = "ats-resume-app:checkout-snapshot";
 const PENDING_SAVE_NEXT = "/?step=results&save=1";
 const AUTH_SAVE_NEXT = encodeURIComponent(PENDING_SAVE_NEXT);
 const PENDING_UNLOCK_KEY = "ats-resume-app:pending-unlock";
+const CHECKOUT_RETURN_PATH_KEY = "career-ladder:checkout-return-path";
 
 type UnlockTarget = "resume" | "coverLetter";
 type UnlockMode = "consume" | "purchase";
@@ -104,6 +105,9 @@ export default function StepResults({ state, onRestart }: Props) {
   const [unlockBusy, setUnlockBusy] = useState(false);
   const [unlockError, setUnlockError] = useState<string | null>(null);
   const [interviewPromptOpen, setInterviewPromptOpen] = useState(false);
+  const [interviewPrep, setInterviewPrep] = useState(savedMeta?.interviewPrep ?? "");
+  const [interviewPrepBusy, setInterviewPrepBusy] = useState(false);
+  const [interviewPrepError, setInterviewPrepError] = useState<string | null>(null);
   const [checkoutReturned, setCheckoutReturned] = useState(false);
   const [checkoutCreditMessage, setCheckoutCreditMessage] = useState<string | null>(null);
   const [savedOutputId, setSavedOutputId] = useState<string | null>(
@@ -148,13 +152,14 @@ export default function StepResults({ state, onRestart }: Props) {
           savedOutputId,
           unlockedResume,
           unlockedCoverLetter,
+          interviewPrep,
           revisionPass: state.revisionPass
         })
       );
     } catch {
       // Session continuity is best-effort only until account storage exists.
     }
-  }, [applicationTitle, atsReport, finalAnalysis, savedOutputId, state, tailoredCoverLetter, tailoredResume, unlockedCoverLetter, unlockedResume]);
+  }, [applicationTitle, atsReport, finalAnalysis, interviewPrep, savedOutputId, state, tailoredCoverLetter, tailoredResume, unlockedCoverLetter, unlockedResume]);
 
   useEffect(() => {
     let active = true;
@@ -178,11 +183,17 @@ export default function StepResults({ state, onRestart }: Props) {
     const params = new URLSearchParams(window.location.search);
     if (params.get("checkout") === "success" && params.get("session_id")) {
       setCheckoutReturned(true);
+      const shouldGenerateInterviewPrep = params.get("interviewPrep") === "1";
       params.delete("checkout");
       params.delete("session_id");
+      params.delete("interviewPrep");
       const next = `${window.location.pathname}${params.toString() ? `?${params}` : ""}`;
       window.history.replaceState(null, "", next);
-      void completePendingUnlockAfterCheckout();
+      if (shouldGenerateInterviewPrep) {
+        void requestInterviewPrep();
+      } else {
+        void completePendingUnlockAfterCheckout();
+      }
     } else if (params.get("checkout") === "success") {
       params.delete("checkout");
       const next = `${window.location.pathname}${params.toString() ? `?${params}` : ""}`;
@@ -347,6 +358,64 @@ export default function StepResults({ state, onRestart }: Props) {
       return;
     }
     setCheckoutCreditMessage("Checkout completed, but we could not finish the unlock automatically. Please try again.");
+  }
+
+  async function requestInterviewPrep() {
+    setInterviewPrepError(null);
+    let outputId = savedOutputId;
+    if (!outputId) {
+      const saved = await saveCurrentOutput(false);
+      if (saved.status === "saved") {
+        outputId = saved.id;
+      } else if (saved.status === "signin") {
+        persistCurrentResultsSnapshot();
+        window.location.href = `/auth?next=${encodeURIComponent("/?step=results")}`;
+        return;
+      } else {
+        setInterviewPrepError("Save this application before generating interview prep.");
+        return;
+      }
+    }
+
+    const account = await fetchFreshAccountStatus();
+    if (!account.signedIn) {
+      persistCurrentResultsSnapshot(outputId);
+      window.location.href = `/auth?next=${encodeURIComponent("/?step=results")}`;
+      return;
+    }
+    if (account.credits <= 0) {
+      persistCurrentResultsSnapshot(outputId);
+      window.sessionStorage.setItem(CHECKOUT_RETURN_PATH_KEY, `/?step=results&interviewPrep=1`);
+      window.location.href = "/pricing?pack=5&checkout=1";
+      return;
+    }
+
+    setInterviewPrepBusy(true);
+    try {
+      const response = await fetch(`/api/outputs/${outputId}/interview-prep`, {
+        method: "POST"
+      });
+      const data = (await response.json().catch(() => ({}))) as {
+        interviewPrep?: string;
+        error?: string;
+      };
+      if (response.status === 402) {
+        window.sessionStorage.setItem(CHECKOUT_RETURN_PATH_KEY, `/?step=results&interviewPrep=1`);
+        window.location.href = "/pricing?pack=5&checkout=1";
+        return;
+      }
+      if (!response.ok || !data.interviewPrep) {
+        throw new Error(data.error ?? "Could not generate interview prep.");
+      }
+      setInterviewPrep(data.interviewPrep);
+      setInterviewPromptOpen(false);
+      trackEvent("interview_prep_unlocked", { outputId });
+      window.dispatchEvent(new Event(ACCOUNT_CREDITS_REFRESH_EVENT));
+    } catch (err) {
+      setInterviewPrepError(err instanceof Error ? err.message : "Could not generate interview prep.");
+    } finally {
+      setInterviewPrepBusy(false);
+    }
   }
 
   function applyUnlock(target: UnlockTarget, outputId: string) {
@@ -631,15 +700,6 @@ ${patches.join("\n\n")}`;
               allowDownloads={unlockedResume}
               upgradeLabel="Unlock resume export - 1 credit"
               onRequestUnlock={() => requestUnlock("resume")}
-              variationLabel="Regenerate resume"
-              variationOptions={[
-                "More concise",
-                "More confident",
-                "More corporate",
-                "More metrics-focused",
-                "More customer-success focused",
-                "More leadership-focused"
-              ]}
             />
 
             <ResumePanel
@@ -654,19 +714,18 @@ ${patches.join("\n\n")}`;
               allowDownloads={unlockedCoverLetter}
               upgradeLabel="Unlock full cover letter - 1 credit"
               onRequestUnlock={() => requestUnlock("coverLetter")}
-              variationLabel="Regenerate cover letter"
-              variationOptions={[
-                "Warmer",
-                "More direct",
-                "More concise",
-                "More confident",
-                "More company-specific"
-              ]}
             />
           </div>
         </>
       )}
-      {!blocked && (unlockedResume || unlockedCoverLetter) && <InterviewPrepCard />}
+      {!blocked && (unlockedResume || unlockedCoverLetter) && (
+        <InterviewPrepCard
+          interviewPrep={interviewPrep}
+          busy={interviewPrepBusy}
+          error={interviewPrepError}
+          onGenerate={requestInterviewPrep}
+        />
+      )}
       </div>
 
       {unlockTarget && (
@@ -681,7 +740,11 @@ ${patches.join("\n\n")}`;
       )}
 
       {interviewPromptOpen && (unlockedResume || unlockedCoverLetter) && (
-        <InterviewPrepUpsellModal onClose={() => setInterviewPromptOpen(false)} />
+        <InterviewPrepUpsellModal
+          busy={interviewPrepBusy}
+          onClose={() => setInterviewPromptOpen(false)}
+          onGenerate={requestInterviewPrep}
+        />
       )}
 
       <div className="flex justify-between pt-2">
@@ -1726,15 +1789,14 @@ async function saveOutputForAccount(args: {
 
 function buildDefaultApplicationTitle(jobPostText: string) {
   const meta = inferJobMeta(jobPostText);
-  if (meta.jobTitle && meta.companyName) return `${meta.jobTitle} - ${meta.companyName}`;
-  if (meta.jobTitle) return meta.jobTitle;
-  if (meta.companyName) return `${meta.companyName} Application`;
-  return "Untitled application";
+  return buildApplicationTitle(meta);
 }
 
 function normalizeApplicationTitle(title: string, jobPostText: string) {
-  const trimmed = title.replace(/\s+/g, " ").trim();
-  return trimmed || buildDefaultApplicationTitle(jobPostText);
+  return normalizeSavedApplicationTitle({
+    title,
+    sourceJobDescription: jobPostText
+  });
 }
 
 function readSavedResultMeta() {
@@ -1747,6 +1809,7 @@ function readSavedResultMeta() {
       savedOutputId?: unknown;
       unlockedResume?: unknown;
       unlockedCoverLetter?: unknown;
+      interviewPrep?: unknown;
     };
     return {
       applicationTitle:
@@ -1755,7 +1818,8 @@ function readSavedResultMeta() {
           : null,
       savedOutputId: parsed.savedOutputId,
       unlockedResume: parsed.unlockedResume,
-      unlockedCoverLetter: parsed.unlockedCoverLetter
+      unlockedCoverLetter: parsed.unlockedCoverLetter,
+      interviewPrep: typeof parsed.interviewPrep === "string" ? parsed.interviewPrep : ""
     };
   } catch {
     return null;
@@ -2286,22 +2350,55 @@ function CoverLetterDocumentPreview({
   );
 }
 
-function InterviewPrepCard() {
+function InterviewPrepCard({
+  interviewPrep,
+  busy,
+  error,
+  onGenerate
+}: {
+  interviewPrep: string;
+  busy: boolean;
+  error: string | null;
+  onGenerate: () => void;
+}) {
+  const hasPrep = interviewPrep.trim().length > 0;
   return (
-    <div className="app-card-soft flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-      <div>
-        <p className="app-kicker">Interview prep</p>
-        <h3 className="mt-2 text-xl app-heading">
-          Want the 7 most likely interview questions for this role?
-        </h3>
-        <p className="mt-2 text-sm leading-6 text-[var(--color-text-muted)]">
-          Future credits will unlock recruiter-style interview prep based on the
-          same job analysis and resume positioning.
-        </p>
+    <div className="app-card-soft space-y-4">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div>
+          <p className="app-kicker">Interview prep</p>
+          <h3 className="mt-2 text-xl app-heading">
+            {hasPrep ? "Recruiter-style prep is ready." : "Generate recruiter-style interview prep."}
+          </h3>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--color-text-muted)]">
+            {hasPrep
+              ? "Use these questions and STAR notes to prepare for recruiter screening."
+              : "Use 1 credit to generate likely screening, behavioural, role-specific, and gap-focused questions from this application."}
+          </p>
+        </div>
+        {!hasPrep && (
+          <button
+            type="button"
+            onClick={onGenerate}
+            disabled={busy}
+            className="app-button-primary shrink-0 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {busy ? "Generating..." : "Generate interview prep - 1 credit"}
+          </button>
+        )}
       </div>
-      <Link href="/pricing" className="app-button-secondary shrink-0">
-        Generate 7 interview questions, coming soon
-      </Link>
+      {error && (
+        <p className="rounded-[18px] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-900">
+          {error}
+        </p>
+      )}
+      {hasPrep && (
+        <div className="rounded-[22px] border border-[rgba(30,41,59,0.10)] bg-white p-5 shadow-[var(--shadow-inset-soft)]">
+          <pre className="whitespace-pre-wrap font-sans text-sm leading-7 text-[var(--color-text-primary)]">
+            {interviewPrep}
+          </pre>
+        </div>
+      )}
     </div>
   );
 }
@@ -2380,7 +2477,15 @@ function UnlockModal({
   );
 }
 
-function InterviewPrepUpsellModal({ onClose }: { onClose: () => void }) {
+function InterviewPrepUpsellModal({
+  busy,
+  onClose,
+  onGenerate
+}: {
+  busy: boolean;
+  onClose: () => void;
+  onGenerate: () => void;
+}) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(32,23,53,0.28)] px-4 py-8 backdrop-blur-sm">
       <div className="w-full max-w-lg rounded-[28px] bg-[#fffaf4] p-6 shadow-[0_30px_80px_rgba(32,23,53,0.24)]">
@@ -2393,14 +2498,14 @@ function InterviewPrepUpsellModal({ onClose }: { onClose: () => void }) {
           specific job posting.
         </p>
         <p className="mt-3 text-xs font-semibold text-[var(--color-text-muted)]">
-          Interview prep engine coming soon.
+          Uses 1 credit and saves to this application.
         </p>
         <div className="mt-6 flex flex-wrap justify-end gap-3">
-          <button type="button" onClick={onClose} className="app-button-ghost px-5 py-2.5">
+          <button type="button" onClick={onClose} disabled={busy} className="app-button-ghost px-5 py-2.5">
             Not now
           </button>
-          <button type="button" onClick={onClose} className="app-button-secondary px-5 py-2.5">
-            Generate 7 tailored interview questions for this role
+          <button type="button" onClick={onGenerate} disabled={busy} className="app-button-secondary px-5 py-2.5">
+            {busy ? "Generating..." : "Generate interview prep"}
           </button>
         </div>
       </div>

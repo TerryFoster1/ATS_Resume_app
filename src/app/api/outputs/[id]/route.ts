@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { normalizeSavedApplicationTitle } from "@/lib/applicationMeta";
 import { createAdminSupabaseClient, createServerSupabaseClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -38,7 +39,11 @@ export async function GET(
 
   return NextResponse.json({
     id: data.id,
-    applicationTitle: data.job_title,
+    applicationTitle: normalizeSavedApplicationTitle({
+      title: data.job_title,
+      companyName: data.company_name,
+      sourceJobDescription: data.source_job_description
+    }),
     companyName: data.company_name,
     createdAt: data.created_at,
     resumeText: data.resume_text,
@@ -48,6 +53,14 @@ export async function GET(
     clarificationAnswers: data.clarification_answers,
     analysis: data.analysis_snapshot,
     resumeUnlocked: Boolean(data.resume_unlocked),
-    coverLetterUnlocked: Boolean(data.cover_letter_unlocked)
+    coverLetterUnlocked: Boolean(data.cover_letter_unlocked),
+    interviewPrepStatus: data.interview_prep_status,
+    interviewPrep:
+      data.analysis_snapshot &&
+      typeof data.analysis_snapshot === "object" &&
+      !Array.isArray(data.analysis_snapshot) &&
+      typeof data.analysis_snapshot.interviewPrep === "string"
+        ? data.analysis_snapshot.interviewPrep
+        : null
   }, { headers: { "Cache-Control": "no-store, max-age=0" } });
 }
