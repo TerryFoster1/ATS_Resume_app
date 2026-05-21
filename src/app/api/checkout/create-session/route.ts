@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { ensureUserProfile } from "@/lib/accountStorage";
+import { CANONICAL_APP_ORIGIN, getCanonicalOriginForHost } from "@/lib/canonicalUrl";
 import { createAdminSupabaseClient, createServerSupabaseClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -11,8 +12,6 @@ const PRICE_ENV_BY_PACK: Record<CheckoutPack, string> = {
   "5": "STRIPE_PRICE_5_CREDIT_PACK",
   "10": "STRIPE_PRICE_10_CREDIT_PACK"
 };
-
-const CANONICAL_APP_ORIGIN = "https://www.careerladder.ca";
 
 export async function POST(request: Request) {
   let body: unknown;
@@ -123,7 +122,9 @@ export async function POST(request: Request) {
     userId: user.id,
     pack,
     priceId,
-    sessionId: session.id
+    sessionId: session.id,
+    successUrlHost: safeHost(`${appUrl}/checkout/success`),
+    cancelUrlHost: safeHost(`${appUrl}/pricing`)
   });
 
   const { error: purchaseError } = await admin.from("purchases").insert({
@@ -164,11 +165,21 @@ function getRequestOrigin(request: Request) {
   const forwardedProto = request.headers.get("x-forwarded-proto");
   const forwardedHost = request.headers.get("x-forwarded-host");
   const host = (forwardedHost ?? new URL(request.url).host).toLowerCase().split(":")[0];
-  if (host === "careerladder.ca" || host.endsWith(".vercel.app")) {
-    return CANONICAL_APP_ORIGIN;
-  }
+  const currentOrigin = forwardedProto && forwardedHost
+    ? `${forwardedProto}://${forwardedHost}`
+    : new URL(request.url).origin;
+  const canonicalOrigin = getCanonicalOriginForHost(host, currentOrigin);
+  if (canonicalOrigin === CANONICAL_APP_ORIGIN) return canonicalOrigin;
   if (forwardedProto && forwardedHost) {
     return `${forwardedProto}://${forwardedHost}`;
   }
   return new URL(request.url).origin;
+}
+
+function safeHost(value: string) {
+  try {
+    return new URL(value).host;
+  } catch {
+    return "invalid";
+  }
 }

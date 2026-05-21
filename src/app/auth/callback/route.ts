@@ -1,12 +1,14 @@
 import { NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { ensureUserProfile } from "@/lib/accountStorage";
+import { getCanonicalOriginForHost, normalizeAppReturnPath } from "@/lib/canonicalUrl";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
-  const canonicalOrigin = getCanonicalOrigin(url);
-  const next = normalizeNextPath(url.searchParams.get("next"), canonicalOrigin);
+  const canonicalOrigin = getCanonicalOriginForHost(url.hostname, url.origin);
+  const receivedNext = url.searchParams.get("next");
+  const next = normalizeAppReturnPath(receivedNext, canonicalOrigin);
   const supabase = createServerSupabaseClient();
 
   if (code && supabase) {
@@ -26,29 +28,13 @@ export async function GET(request: Request) {
     }
   }
 
-  return NextResponse.redirect(new URL(next, canonicalOrigin));
-}
-
-function getCanonicalOrigin(url: URL) {
-  if (
-    url.hostname === "careerladder.ca" ||
-    url.hostname.endsWith(".vercel.app")
-  ) {
-    return "https://www.careerladder.ca";
-  }
-  return url.origin;
-}
-
-function normalizeNextPath(next: string | null, currentOrigin: string) {
-  if (!next) return "/dashboard";
-  try {
-    const parsed = new URL(next, currentOrigin);
-    const currentHost = new URL(currentOrigin).host;
-    const isSameHost = parsed.host === currentHost;
-    const isVercelDeployment = parsed.hostname.endsWith(".vercel.app");
-    if (!isSameHost && !isVercelDeployment) return "/dashboard";
-    return `${parsed.pathname}${parsed.search}${parsed.hash}` || "/dashboard";
-  } catch {
-    return next.startsWith("/") ? next : "/dashboard";
-  }
+  const destination = new URL(next, canonicalOrigin);
+  console.info("[auth-callback] Redirect decision", {
+    requestHost: url.host,
+    receivedNext,
+    normalizedNext: next,
+    canonicalOrigin,
+    finalDestination: destination.toString()
+  });
+  return NextResponse.redirect(destination);
 }

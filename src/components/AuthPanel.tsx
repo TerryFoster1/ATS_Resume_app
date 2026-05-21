@@ -1,7 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { trackEvent } from "@/lib/analytics";
+import {
+  CANONICAL_APP_ORIGIN,
+  getCanonicalOriginForHost,
+  normalizeAppReturnPath,
+  scrubStaleVercelUrlsFromStorage
+} from "@/lib/canonicalUrl";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import { getSupabaseBrowserConfigIssue } from "@/lib/supabase/config";
 
@@ -40,34 +46,24 @@ function getFriendlyGoogleAuthError(error: unknown) {
 
 function getAuthRedirectUrl(next: string) {
   const currentOrigin = getCurrentCanonicalOrigin();
-  const configuredOrigin = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/+$/, "") ?? "";
-  const origin = currentOrigin || configuredOrigin;
-  const safeNext = normalizeNextPath(next, origin);
-  return `${origin}/auth/callback?next=${encodeURIComponent(safeNext)}`;
+  const safeNext = normalizeAppReturnPath(next, currentOrigin);
+  const redirectTo = `${currentOrigin}/auth/callback?next=${encodeURIComponent(safeNext)}`;
+  console.info("[auth-client] Generated OAuth redirect URL", {
+    locationHost: typeof window === "undefined" ? null : window.location.host,
+    redirectTo,
+    receivedNext: next,
+    safeNext
+  });
+  return redirectTo;
 }
 
 function getCurrentCanonicalOrigin() {
-  if (typeof window === "undefined") return "";
-  const origin = window.location.origin;
-  const host = window.location.host.toLowerCase();
-  if (host === "careerladder.ca" || host.endsWith(".vercel.app")) {
-    return "https://www.careerladder.ca";
-  }
-  return origin;
+  if (typeof window === "undefined") return CANONICAL_APP_ORIGIN;
+  return getCanonicalOriginForHost(window.location.hostname, window.location.origin);
 }
 
 function normalizeNextPath(next: string, currentOrigin: string) {
-  if (!next) return "/dashboard";
-  try {
-    const parsed = new URL(next, currentOrigin || "https://www.careerladder.ca");
-    const currentHost = currentOrigin ? new URL(currentOrigin).host : parsed.host;
-    const isSameHost = parsed.host === currentHost;
-    const isVercelDeployment = parsed.hostname.endsWith(".vercel.app");
-    if (!isSameHost && !isVercelDeployment) return "/dashboard";
-    return `${parsed.pathname}${parsed.search}${parsed.hash}` || "/dashboard";
-  } catch {
-    return next.startsWith("/") ? next : "/dashboard";
-  }
+  return normalizeAppReturnPath(next, currentOrigin);
 }
 
 export default function AuthPanel({
@@ -85,6 +81,11 @@ export default function AuthPanel({
   const [name, setName] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    scrubStaleVercelUrlsFromStorage(window.localStorage);
+    scrubStaleVercelUrlsFromStorage(window.sessionStorage);
+  }, []);
 
   async function submit() {
     if (!supabase) {
@@ -110,7 +111,8 @@ export default function AuthPanel({
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         trackEvent("sign_in_completed", { provider: "password" });
-        window.location.href = normalizeNextPath(next, window.location.origin);
+        const origin = getCurrentCanonicalOrigin();
+        window.location.href = `${origin}${normalizeNextPath(next, origin)}`;
       }
     } catch (err) {
       console.error("Supabase auth error", err);

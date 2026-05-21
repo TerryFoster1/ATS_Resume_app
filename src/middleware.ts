@@ -1,7 +1,10 @@
 import { NextResponse, type NextRequest } from "next/server";
-
-const CANONICAL_HOST = "www.careerladder.ca";
-const CANONICAL_ORIGIN = `https://${CANONICAL_HOST}`;
+import {
+  CANONICAL_APP_HOST,
+  CANONICAL_APP_ORIGIN,
+  isLocalHost,
+  isVercelDeploymentHost
+} from "@/lib/canonicalUrl";
 
 export function middleware(request: NextRequest) {
   const host = request.headers.get("host")?.toLowerCase().split(":")[0];
@@ -11,22 +14,16 @@ export function middleware(request: NextRequest) {
 
   const url = request.nextUrl.clone();
   url.protocol = "https";
-  url.host = CANONICAL_HOST;
+  url.host = CANONICAL_APP_HOST;
   url.port = "";
   return NextResponse.redirect(url, 302);
 }
 
 function shouldCanonicalizeHost(host: string) {
-  if (host === CANONICAL_HOST) return false;
-  if (host === "localhost" || host === "127.0.0.1" || host === "::1") return false;
+  if (host === CANONICAL_APP_HOST) return false;
+  if (isLocalHost(host)) return false;
   if (host === "careerladder.ca") return true;
-
-  return (
-    host.endsWith(".vercel.app") &&
-    (host.startsWith("ats-resume-") ||
-      host.startsWith("ats-resume-app-") ||
-      host.includes("ats-resume-app"))
-  );
+  return isVercelDeploymentHost(host);
 }
 
 export const config = {
@@ -39,4 +36,4 @@ export const config = {
   ]
 };
 
-export { CANONICAL_ORIGIN };
+export { CANONICAL_APP_ORIGIN as CANONICAL_ORIGIN };

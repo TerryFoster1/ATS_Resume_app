@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { trackEvent } from "@/lib/analytics";
+import { normalizeAppReturnPath } from "@/lib/canonicalUrl";
 
 const SAVED_RESULTS_KEY = "ats-resume-app:last-results";
 const CHECKOUT_SNAPSHOT_KEY = "ats-resume-app:checkout-snapshot";
@@ -124,9 +125,7 @@ function readCheckoutReturnPath() {
   try {
     const raw = window.sessionStorage.getItem(CHECKOUT_RETURN_PATH_KEY);
     if (!raw) return null;
-    const parsed = new URL(raw, window.location.origin);
-    if (parsed.origin !== window.location.origin) return null;
-    return `${parsed.pathname}${parsed.search}${parsed.hash}` || null;
+    return normalizeAppReturnPath(raw, window.location.origin);
   } catch {
     return null;
   }
