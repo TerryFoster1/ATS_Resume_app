@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ACCOUNT_CREDITS_REFRESH_EVENT } from "@/components/AccountCreditIndicator";
+import InterviewPrepDisplay from "@/components/InterviewPrepDisplay";
 import { trackEvent } from "@/lib/analytics";
 import { buildApplicationTitle, inferJobMeta, normalizeSavedApplicationTitle } from "@/lib/applicationMeta";
 import { sanitizeGeneratedText } from "@/lib/sanitizeGeneratedText";
@@ -2363,7 +2364,7 @@ function InterviewPrepCard({
 }) {
   const hasPrep = interviewPrep.trim().length > 0;
   return (
-    <div className="app-card-soft space-y-4">
+    <div className="interview-prep-panel space-y-5">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <p className="app-kicker">Interview prep</p>
@@ -2392,13 +2393,7 @@ function InterviewPrepCard({
           {error}
         </p>
       )}
-      {hasPrep && (
-        <div className="rounded-[22px] border border-[rgba(30,41,59,0.10)] bg-white p-5 shadow-[var(--shadow-inset-soft)]">
-          <pre className="whitespace-pre-wrap font-sans text-sm leading-7 text-[var(--color-text-primary)]">
-            {interviewPrep}
-          </pre>
-        </div>
-      )}
+      {hasPrep && <InterviewPrepDisplay text={interviewPrep} />}
     </div>
   );
 }

@@ -142,69 +142,90 @@ export default function AuthPanel({
   }
 
   return (
-    <div className="app-screen-card mx-auto max-w-xl space-y-5">
-      <div>
-        <p className="app-kicker">Account</p>
-        <h1 className="mt-2 text-3xl app-heading">
-          {mode === "sign-in" ? "Sign in to your career workspace." : "Create your account."}
-        </h1>
-        <p className="mt-3 text-sm leading-6 text-[var(--color-text-muted)]">
-          Save generated resumes, cover letters, unlocks, and future interview prep in one place.
-        </p>
-      </div>
+    <div className="auth-surface mx-auto max-w-5xl">
+      <section className="auth-form-panel space-y-5">
+        <div>
+          <p className="app-kicker">Account</p>
+          <h1 className="mt-2 text-3xl app-heading">
+            {mode === "sign-in" ? "Sign in to your career workspace." : "Create your account."}
+          </h1>
+          <p className="mt-3 text-sm leading-6 text-[var(--color-text-muted)]">
+            Save generated resumes, cover letters, unlocks, and interview prep in one place.
+          </p>
+        </div>
 
-      <button type="button" onClick={continueWithGoogle} className="app-button-secondary w-full">
-        Continue with Google
-      </button>
+        <button type="button" onClick={continueWithGoogle} className="app-button-secondary w-full">
+          Continue with Google
+        </button>
 
-      {configIssue && (
-        <p className="rounded-[18px] bg-white px-4 py-3 text-sm text-[var(--color-text-muted)] shadow-[var(--shadow-inset-soft)]">
-          {configIssue.message}
-        </p>
-      )}
-
-      <div className="space-y-3">
-        {mode === "sign-up" && (
-          <input
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            className="app-input"
-            placeholder="Name"
-          />
+        {configIssue && (
+          <p className="rounded-[18px] bg-white px-4 py-3 text-sm text-[var(--color-text-muted)] shadow-[var(--shadow-inset-soft)]">
+            {configIssue.message}
+          </p>
         )}
-        <input
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-          className="app-input"
-          type="email"
-          placeholder="Email"
-        />
-        <input
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-          className="app-input"
-          type="password"
-          placeholder="Password"
-        />
-      </div>
 
-      {message && (
-        <p className="rounded-[18px] bg-white px-4 py-3 text-sm text-[var(--color-text-muted)] shadow-[var(--shadow-inset-soft)]">
-          {message}
-        </p>
-      )}
+        <div className="space-y-3">
+          {mode === "sign-up" && (
+            <input
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              className="app-input"
+              placeholder="Name"
+            />
+          )}
+          <input
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            className="app-input"
+            type="email"
+            placeholder="Email"
+          />
+          <input
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            className="app-input"
+            type="password"
+            placeholder="Password"
+          />
+        </div>
 
-      <button type="button" onClick={submit} disabled={busy} className="app-button-primary w-full">
-        {busy ? "Working..." : mode === "sign-in" ? "Sign in" : "Create account"}
-      </button>
+        {message && (
+          <p className="rounded-[18px] bg-white px-4 py-3 text-sm text-[var(--color-text-muted)] shadow-[var(--shadow-inset-soft)]">
+            {message}
+          </p>
+        )}
 
-      <button
-        type="button"
-        onClick={() => setMode(mode === "sign-in" ? "sign-up" : "sign-in")}
-        className="text-sm font-semibold text-[var(--color-accent-purple)]"
-      >
-        {mode === "sign-in" ? "Need an account? Create one." : "Already have an account? Sign in."}
-      </button>
+        <button type="button" onClick={submit} disabled={busy} className="app-button-primary w-full">
+          {busy ? "Working..." : mode === "sign-in" ? "Sign in" : "Create account"}
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setMode(mode === "sign-in" ? "sign-up" : "sign-in")}
+          className="text-sm font-semibold text-[var(--color-accent-purple)]"
+        >
+          {mode === "sign-in" ? "Need an account? Create one." : "Already have an account? Sign in."}
+        </button>
+      </section>
+
+      <aside className="auth-proof-panel">
+        <p className="app-kicker">Why save your work</p>
+        <h2 className="mt-3 text-2xl app-heading">Keep each application moving.</h2>
+        <div className="mt-6 grid gap-3">
+          <div>
+            <strong>Reopen tailored materials</strong>
+            <span>Resume, cover letter, credits, and unlocks stay connected to the role.</span>
+          </div>
+          <div>
+            <strong>Prepare after export</strong>
+            <span>Interview prep can build from the same recruiter-style positioning.</span>
+          </div>
+          <div>
+            <strong>No fake experience</strong>
+            <span>Career Ladder keeps your real background at the center.</span>
+          </div>
+        </div>
+      </aside>
     </div>
   );
 }

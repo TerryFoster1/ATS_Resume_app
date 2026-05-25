@@ -96,11 +96,11 @@ export default function AccountCreditIndicator() {
       >
         <span
           aria-hidden
-          className="flex h-6 w-6 items-center justify-center rounded-full bg-[#eef6ff] text-[11px] font-black text-[#2464a7]"
+          className="app-account-avatar"
         >
           {status.email?.[0]?.toUpperCase() ?? "A"}
         </span>
-        <span>{status.credits} credits</span>
+        <span className="app-account-credit-label">{status.credits} credits</span>
       </button>
 
       {open && mounted
@@ -112,24 +112,36 @@ export default function AccountCreditIndicator() {
                 right: menuPosition.right
               }}
             >
+              <div className="app-account-menu-header">
+                <span className="app-account-avatar" aria-hidden>
+                  {status.email?.[0]?.toUpperCase() ?? "A"}
+                </span>
+                <div className="min-w-0">
+                  <p>{status.email ?? "Signed in"}</p>
+                  <strong>{status.credits} credits available</strong>
+                </div>
+              </div>
               <Link
                 href="/dashboard"
-                className="block rounded-[14px] px-3 py-2 font-bold text-[var(--color-text-primary)] hover:bg-[#f4f8fb]"
+                className="app-account-menu-item"
               >
-                Dashboard
+                <span>Dashboard</span>
+                <small>Open saved applications</small>
               </Link>
               <Link
                 href="/pricing?pack=5&checkout=1"
-                className="block rounded-[14px] px-3 py-2 font-bold text-[var(--color-text-primary)] hover:bg-[#f4f8fb]"
+                className="app-account-menu-item"
               >
-                Buy credits
+                <span>Buy credits</span>
+                <small>Add exports and prep unlocks</small>
               </Link>
               <form action="/auth/signout" method="post">
                 <button
                   type="submit"
-                  className="block w-full rounded-[14px] px-3 py-2 text-left font-bold text-[var(--color-text-muted)] hover:bg-[#f4f8fb]"
+                  className="app-account-menu-item app-account-menu-button"
                 >
-                  Sign out
+                  <span>Sign out</span>
+                  <small>Leave this workspace</small>
                 </button>
               </form>
             </div>,

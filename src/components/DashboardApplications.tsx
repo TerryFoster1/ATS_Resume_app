@@ -64,15 +64,18 @@ export default function DashboardApplications({
                 </span>
               </div>
               <h3 className="mt-3 text-xl app-heading">{item.jobTitle}</h3>
+              <p className="mt-2 text-sm leading-6 text-[#65748a]">
+                Saved application materials for this role.
+              </p>
               <div className="mt-4 flex flex-wrap gap-2">
                 <span className={item.resumeUnlocked ? "dashboard-badge is-ready" : "dashboard-badge"}>
-                  Resume
+                  Resume {item.resumeUnlocked ? "unlocked" : "locked"}
                 </span>
                 <span className={item.coverLetterUnlocked ? "dashboard-badge is-ready" : "dashboard-badge"}>
-                  Cover letter
+                  Cover letter {item.coverLetterUnlocked ? "unlocked" : "locked"}
                 </span>
                 <span className={item.interviewPrepReady ? "dashboard-badge is-ready" : "dashboard-badge is-pending"}>
-                  Interview prep
+                  Interview prep {item.interviewPrepReady ? "ready" : "pending"}
                 </span>
               </div>
             </div>

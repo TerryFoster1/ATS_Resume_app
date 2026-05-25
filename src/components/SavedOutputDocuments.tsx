@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ACCOUNT_CREDITS_REFRESH_EVENT } from "@/components/AccountCreditIndicator";
+import InterviewPrepDisplay from "@/components/InterviewPrepDisplay";
 import { trackEvent } from "@/lib/analytics";
 import { sanitizeGeneratedText } from "@/lib/sanitizeGeneratedText";
 import { limitSkillsSection } from "@/lib/skillsSection";
@@ -177,9 +178,14 @@ export default function SavedOutputDocuments({
   }
 
   const safeFilename = filenameFromTitle(title);
+  const materialStatus = [
+    { label: "Resume export", value: resumeIsUnlocked ? "Unlocked" : "Locked preview" },
+    { label: "Cover letter", value: coverLetterIsUnlocked ? "Unlocked" : "Locked preview" },
+    { label: "Interview prep", value: interviewPrep.trim() ? "Ready" : interviewPrepStatus === "failed" ? "Retry needed" : "Not generated" }
+  ];
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <section className="saved-output-toolbar">
         <div>
           <p className="app-kicker">Saved materials</p>
@@ -193,7 +199,16 @@ export default function SavedOutputDocuments({
         </div>
       </section>
 
-      <section className="grid gap-5 xl:grid-cols-2">
+      <section className="saved-output-status-grid" aria-label="Saved material status">
+        {materialStatus.map((item) => (
+          <article key={item.label}>
+            <span>{item.label}</span>
+            <strong>{item.value}</strong>
+          </article>
+        ))}
+      </section>
+
+      <section className="grid gap-6 xl:grid-cols-2">
         <SavedDocumentPanel
           kind="resume"
           title="Resume"
@@ -314,7 +329,7 @@ function InterviewPrepSection({
   }
 
   return (
-    <section className="app-card-soft space-y-4">
+    <section className="interview-prep-panel space-y-5">
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div>
           <p className="app-kicker">Interview prep</p>
@@ -357,13 +372,7 @@ function InterviewPrepSection({
           {error}
         </p>
       )}
-      {hasPrep && (
-        <div className="rounded-[22px] border border-[rgba(30,41,59,0.10)] bg-white p-5 shadow-[var(--shadow-inset-soft)]">
-          <pre className="whitespace-pre-wrap font-sans text-sm leading-7 text-[var(--color-text-primary)]">
-            {interviewPrep}
-          </pre>
-        </div>
-      )}
+      {hasPrep && <InterviewPrepDisplay text={interviewPrep} />}
     </section>
   );
 }

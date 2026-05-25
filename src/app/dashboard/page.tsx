@@ -43,6 +43,11 @@ export default async function DashboardPage({
     coverLetterUnlocked: Boolean(item.cover_letter_unlocked),
     interviewPrepReady: item.interview_prep_status === "completed"
   }));
+  const unlockedExports = applications.reduce(
+    (total, item) => total + Number(item.resumeUnlocked) + Number(item.coverLetterUnlocked),
+    0
+  );
+  const interviewPrepReady = applications.filter((item) => item.interviewPrepReady).length;
 
   return (
     <main className="dashboard-workspace space-y-8">
@@ -97,6 +102,24 @@ export default async function DashboardPage({
           </div>
         </div>
       </header>
+
+      <section className="dashboard-metric-grid">
+        <article className="dashboard-metric-card">
+          <span>Saved roles</span>
+          <strong>{applications.length}</strong>
+          <p>Application workspaces tied to real postings.</p>
+        </article>
+        <article className="dashboard-metric-card">
+          <span>Unlocked materials</span>
+          <strong>{unlockedExports}</strong>
+          <p>Resume and cover letter exports ready to reuse.</p>
+        </article>
+        <article className="dashboard-metric-card">
+          <span>Interview prep ready</span>
+          <strong>{interviewPrepReady}</strong>
+          <p>Prep packs generated from saved application context.</p>
+        </article>
+      </section>
 
       {applications.length > 0 ? (
         <DashboardApplications applications={applications} />

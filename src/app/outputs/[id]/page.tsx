@@ -56,6 +56,17 @@ export default async function SavedOutputPage({
             <p className="mt-2 text-sm font-semibold text-[var(--color-text-muted)]">
               {data.company_name ?? "Company not detected"}
             </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <span className={data.resume_unlocked ? "dashboard-badge is-ready" : "dashboard-badge"}>
+                Resume {data.resume_unlocked ? "unlocked" : "locked"}
+              </span>
+              <span className={data.cover_letter_unlocked ? "dashboard-badge is-ready" : "dashboard-badge"}>
+                Cover letter {data.cover_letter_unlocked ? "unlocked" : "locked"}
+              </span>
+              <span className={data.interview_prep_status === "completed" ? "dashboard-badge is-ready" : "dashboard-badge is-pending"}>
+                Interview prep {data.interview_prep_status === "completed" ? "ready" : "pending"}
+              </span>
+            </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <AccountCreditIndicator />

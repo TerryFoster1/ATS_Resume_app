@@ -67,9 +67,24 @@ export default function PricingPage({
         </div>
       )}
 
+      <section className="pricing-trust-strip">
+        <div>
+          <p className="app-kicker">Preview first</p>
+          <strong>No subscription. Unlock only what you need.</strong>
+        </div>
+        <div>
+          <p className="app-kicker">Secure checkout</p>
+          <strong>Payments are handled by Stripe.</strong>
+        </div>
+        <div>
+          <p className="app-kicker">Career materials</p>
+          <strong>Credits apply to exports, letters, and prep.</strong>
+        </div>
+      </section>
+
       <section className="grid gap-5 md:grid-cols-2">
         {PACKS.map((pack) => (
-          <article key={pack.name} className="app-screen-card space-y-5">
+          <article key={pack.name} className="pricing-pack-card space-y-5">
             <div>
               <p className="app-section-label">{pack.name}</p>
               <h2 className="mt-3 text-4xl font-black text-[var(--color-text-primary)]">
@@ -89,7 +104,7 @@ export default function PricingPage({
         ))}
       </section>
 
-      <section className="app-card-soft">
+      <section className="pricing-usage-panel">
         <p className="app-kicker">Credit usage</p>
         <div className="mt-4 grid gap-3 md:grid-cols-3">
           {CREDIT_USES.map((item) => (
