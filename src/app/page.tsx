@@ -83,7 +83,7 @@ function LandingPage() {
               <span className="app-chip">ATS-safe output</span>
             </div>
 
-            <h2 className="mt-7 max-w-3xl text-4xl font-black leading-tight tracking-tight text-[var(--color-text-primary)] sm:text-6xl">
+            <h2 className="mt-7 max-w-3xl text-4xl font-black leading-tight text-[var(--color-text-primary)] sm:text-6xl">
               Position your experience for the roles you actually want.
             </h2>
             <p className="mt-5 max-w-2xl text-base leading-8 text-[var(--color-text-primary)]/74 sm:text-lg">
@@ -116,7 +116,7 @@ function LandingPage() {
             </ol>
           </div>
 
-          <div className="bg-gradient-to-br from-[#f7fbff] via-white to-[#fff8f1] p-5 sm:p-8 lg:p-10">
+          <div className="bg-gradient-to-br from-[#f5f9fd] via-white to-[#fff7ed] p-5 sm:p-8 lg:p-10">
             <ProductPreview />
           </div>
         </div>
@@ -146,10 +146,10 @@ function LandingPage() {
                   </p>
                 </div>
                 <div className="rounded-[18px] bg-[#eef6ff] p-4">
-                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#2464a7]">
+                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#245f9f]">
                     Positioned as
                   </p>
-                  <p className="mt-2 text-sm font-bold leading-6 text-[#173b61]">
+                  <p className="mt-2 text-sm font-bold leading-6 text-[#143456]">
                     {item.after}
                   </p>
                 </div>
@@ -181,14 +181,14 @@ function ProductPreview() {
       <div className="rounded-[26px] border border-[#d9e8f5] bg-white p-5 shadow-[0_22px_54px_rgba(17,35,63,0.11)]">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#2464a7]">
+            <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#245f9f]">
               Recruiter insight
             </p>
             <h3 className="mt-2 text-xl font-black text-[var(--color-text-primary)]">
               Transferable alignment found
             </h3>
           </div>
-          <div className="rounded-full bg-[#eef6ff] px-3 py-1.5 text-xs font-black text-[#2464a7]">
+          <div className="rounded-full bg-[#eef6ff] px-3 py-1.5 text-xs font-black text-[#245f9f]">
             Close fit
           </div>
         </div>
@@ -225,7 +225,7 @@ function ProductPreview() {
             <div className="h-2 w-4/5 rounded-full bg-[#27364a]/18" />
             <div className="h-2 rounded-full bg-[#27364a]/12" />
             <div className="h-2 w-11/12 rounded-full bg-[#27364a]/12" />
-            <div className="h-2 w-3/5 rounded-full bg-[#f59a3d]/55" />
+            <div className="h-2 w-3/5 rounded-full bg-[#2f80ed]/55" />
           </div>
         </div>
       </div>
@@ -243,7 +243,7 @@ function ProductHeader() {
           </div>
           <div>
             <p className="app-kicker">Resume positioning engine</p>
-            <h1 className="mt-1 text-2xl font-black tracking-tight text-[var(--color-text-primary)] sm:text-3xl">
+            <h1 className="mt-1 text-2xl font-black text-[var(--color-text-primary)] sm:text-3xl">
               Career Ladder
             </h1>
           </div>

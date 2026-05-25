@@ -12,24 +12,27 @@
    ========================================================================= */
 :root {
   /* Surface */
-  --color-bg: #f7f3ee;
-  --color-bg-lift: #fffaf4;
-  --color-surface-orange-from: #ffb36b;
-  --color-surface-orange-to: #ff7a1a;
-  --color-surface-purple: #2b174a;
+  --color-bg: #f6f7f4;
+  --color-bg-lift: #fbfaf6;
+  --color-surface-orange-from: #f8b26c;
+  --color-surface-orange-to: #e87728;
+  --color-surface-purple: #12233d;
   --color-surface-white: #ffffff;
 
   /* Text */
-  --color-text-primary: #201735;
-  --color-text-muted: #706a78;
+  --color-text-primary: #102033;
+  --color-text-muted: #65748a;
 
   /* Accent */
-  --color-accent-orange: #ff7a1a;
-  --color-accent-orange-soft: #ffb36b;
-  --color-accent-purple: #2b174a;
+  --color-accent-orange: #e87728;
+  --color-accent-orange-soft: #f8b26c;
+  --color-accent-purple: #143456;
+  --color-accent-blue: #2f80ed;
+  --color-accent-teal: #2aa99a;
+  --color-accent-indigo: #626be6;
 
   /* Lines / shapes */
-  --color-border-light: #ebe3da;
+  --color-border-light: #dfe7ef;
 
   /* Radii */
   --radius-card: 24px;
@@ -37,11 +40,11 @@
   --radius-button: 999px;
 
   /* Shadows */
-  --shadow-card: 0 18px 44px rgba(32, 23, 53, 0.1);
-  --shadow-button: 0 10px 22px rgba(255, 122, 26, 0.26);
-  --shadow-button-purple: 0 10px 22px rgba(43, 23, 74, 0.2);
+  --shadow-card: 0 22px 70px rgba(16, 32, 51, 0.1);
+  --shadow-button: 0 14px 30px rgba(47, 128, 237, 0.22);
+  --shadow-button-purple: 0 14px 30px rgba(20, 52, 86, 0.18);
   --shadow-inset-soft: inset 0 1px 0 rgba(255, 255, 255, 0.85),
-    0 8px 18px rgba(45, 30, 74, 0.06);
+    0 10px 24px rgba(16, 32, 51, 0.06);
 
   /* Legacy aliases — keep older class references working unchanged. */
   --app-bg: var(--color-bg);
@@ -51,17 +54,25 @@
   --app-orange-light: var(--color-accent-orange-soft);
   --app-muted: var(--color-text-muted);
   --app-shadow: var(--shadow-card);
-  --app-shadow-lift: 0 16px 36px rgba(255, 140, 66, 0.18),
-    0 8px 18px rgba(45, 30, 74, 0.08);
+  --app-shadow-lift: 0 18px 42px rgba(47, 128, 237, 0.14),
+    0 8px 20px rgba(16, 32, 51, 0.08);
 
   /* Next.js theme handles */
   --background: var(--color-bg);
   --foreground: var(--color-text-primary);
 }
 
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 html,
 body {
   min-height: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
   background: var(--color-bg);
   color: var(--color-text-primary);
   font-family: Inter, ui-rounded, system-ui, -apple-system, BlinkMacSystemFont,
@@ -73,22 +84,29 @@ body {
 
 body {
   background:
-    linear-gradient(180deg, rgba(255, 250, 244, 0.92) 0%, rgba(247, 243, 238, 1) 44%, rgba(246, 247, 249, 1) 100%);
+    linear-gradient(180deg, rgba(251, 250, 246, 0.98) 0%, rgba(246, 248, 250, 1) 52%, rgba(244, 247, 250, 1) 100%);
 }
 
 @layer components {
   /* Page chrome ------------------------------------------------------------ */
   .app-page {
     min-height: 100vh;
+    max-width: 100%;
+    overflow-x: hidden;
     color: var(--color-text-primary);
     background:
-      linear-gradient(145deg, rgba(255, 179, 107, 0.16) 0%, transparent 32%),
-      linear-gradient(215deg, rgba(43, 23, 74, 0.08) 0%, transparent 38%),
+      linear-gradient(145deg, rgba(47, 128, 237, 0.12) 0%, transparent 34%),
+      linear-gradient(215deg, rgba(42, 169, 154, 0.09) 0%, transparent 38%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.62) 0%, transparent 28%),
       var(--color-bg);
   }
 
   .app-shell {
     @apply mx-auto w-full max-w-6xl px-4 py-6 sm:px-8 lg:px-10;
+    box-sizing: border-box;
+    width: auto;
+    max-width: min(72rem, 100vw);
+    overflow-x: clip;
   }
 
   /* Cards ----------------------------------------------------------------- */
@@ -101,10 +119,11 @@ body {
     padding: 24px;
     color: var(--color-text-primary);
     background:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0) 36%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.32), rgba(255, 255, 255, 0) 42%),
       linear-gradient(
         135deg,
-        var(--color-surface-orange-from) 0%,
+        #fff4e8 0%,
+        var(--color-surface-orange-from) 46%,
         var(--color-surface-orange-to) 100%
       );
     box-shadow: var(--shadow-card);
@@ -160,12 +179,12 @@ body {
   }
 
   .app-input::placeholder {
-    color: rgba(45, 30, 74, 0.45);
+    color: rgba(16, 32, 51, 0.42);
   }
 
   .app-input:focus {
-    border-color: var(--color-accent-orange);
-    box-shadow: 0 0 0 3px rgba(255, 140, 66, 0.12);
+    border-color: var(--color-accent-blue);
+    box-shadow: 0 0 0 3px rgba(47, 128, 237, 0.12);
   }
 
   .app-textarea-mono {
@@ -184,12 +203,12 @@ body {
   }
 
   .app-textarea-mono::placeholder {
-    color: rgba(45, 30, 74, 0.45);
+    color: rgba(16, 32, 51, 0.42);
   }
 
   .app-textarea-mono:focus {
-    border-color: var(--color-accent-orange);
-    box-shadow: 0 0 0 3px rgba(255, 140, 66, 0.12);
+    border-color: var(--color-accent-blue);
+    box-shadow: 0 0 0 3px rgba(47, 128, 237, 0.12);
   }
 
   /* Buttons --------------------------------------------------------------- */
@@ -197,8 +216,9 @@ body {
     @apply inline-flex items-center justify-center disabled:cursor-not-allowed disabled:opacity-50;
     background: linear-gradient(
       135deg,
-      var(--color-surface-orange-from),
-      var(--color-surface-orange-to)
+      #102033,
+      #173a62 54%,
+      #2f80ed
     );
     color: #ffffff;
     border: none;
@@ -206,14 +226,18 @@ body {
     padding: 14px 32px;
     font-size: 14px;
     font-weight: 600;
-    letter-spacing: 0.01em;
+    letter-spacing: 0;
     box-shadow: var(--shadow-button);
     transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease;
+    max-width: 100%;
+    text-align: center;
+    white-space: normal;
   }
 
   .app-button-primary:hover:not(:disabled) {
     transform: translateY(-1px);
-    filter: brightness(1.05);
+    filter: brightness(1.04);
+    box-shadow: 0 18px 34px rgba(47, 128, 237, 0.26);
   }
 
   .app-button-primary:active:not(:disabled) {
@@ -223,16 +247,19 @@ body {
 
   .app-button-secondary {
     @apply inline-flex items-center justify-center disabled:cursor-not-allowed disabled:opacity-50;
-    background: var(--color-accent-purple);
+    background: linear-gradient(135deg, var(--color-accent-purple), #295b87);
     color: #ffffff;
     border: none;
     border-radius: var(--radius-button);
     padding: 14px 32px;
     font-size: 14px;
     font-weight: 600;
-    letter-spacing: 0.01em;
+    letter-spacing: 0;
     box-shadow: var(--shadow-button-purple);
     transition: transform 0.15s ease, filter 0.15s ease;
+    max-width: 100%;
+    text-align: center;
+    white-space: normal;
   }
 
   .app-button-secondary:hover:not(:disabled) {
@@ -249,31 +276,34 @@ body {
     @apply inline-flex items-center justify-center disabled:cursor-not-allowed disabled:opacity-50;
     background: var(--color-surface-white);
     color: var(--color-accent-purple);
-    border: none;
+    border: 1px solid rgba(20, 52, 86, 0.1);
     border-radius: var(--radius-button);
     padding: 14px 28px;
     font-size: 14px;
     font-weight: 600;
-    letter-spacing: 0.01em;
-    box-shadow: 0 6px 16px rgba(45, 30, 74, 0.08);
+    letter-spacing: 0;
+    box-shadow: 0 8px 20px rgba(16, 32, 51, 0.07);
     transition: transform 0.15s ease, box-shadow 0.15s ease;
+    max-width: 100%;
+    text-align: center;
+    white-space: normal;
   }
 
   .app-button-ghost:hover:not(:disabled) {
     transform: translateY(-1px);
-    box-shadow: 0 10px 22px rgba(45, 30, 74, 0.1);
+    box-shadow: 0 14px 28px rgba(16, 32, 51, 0.1);
   }
 
   /* Typography helpers ---------------------------------------------------- */
   .app-kicker {
     @apply text-[11px] font-bold uppercase tracking-wider;
-    color: rgba(45, 30, 74, 0.68);
+    color: rgba(20, 52, 86, 0.68);
   }
 
   .app-heading {
-    font-weight: 800;
+    font-weight: 850;
     color: var(--color-text-primary);
-    letter-spacing: -0.01em;
+    letter-spacing: 0;
   }
 
   .app-muted {
@@ -335,24 +365,30 @@ body {
 @layer components {
   .app-shell {
     @apply mx-auto w-full max-w-6xl px-4 py-6 sm:px-8 lg:px-10;
+    box-sizing: border-box;
+    width: auto;
+    max-width: min(72rem, 100vw);
+    overflow-x: clip;
   }
 
   .app-card-warm {
-    border-radius: 28px;
+    border-radius: 24px;
     padding: 24px;
     color: var(--color-text-primary);
-    background: var(--color-surface-white);
-    box-shadow: 0 18px 45px rgba(45, 30, 74, 0.09);
-    border: 1px solid rgba(45, 30, 74, 0.06);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 251, 253, 0.94));
+    box-shadow: 0 22px 58px rgba(16, 32, 51, 0.09);
+    border: 1px solid rgba(211, 223, 235, 0.76);
   }
 
   .app-screen-card {
-    border-radius: 32px;
+    border-radius: 28px;
     padding: 20px;
     color: var(--color-text-primary);
-    background: #ffffff;
-    box-shadow: 0 24px 65px rgba(45, 30, 74, 0.12);
-    border: 1px solid rgba(45, 30, 74, 0.06);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(250, 252, 253, 0.96));
+    box-shadow: 0 28px 74px rgba(16, 32, 51, 0.11);
+    border: 1px solid rgba(211, 223, 235, 0.72);
+    min-width: 0;
   }
 
   @media (min-width: 640px) {
@@ -364,13 +400,13 @@ body {
   .app-feature-panel {
     position: relative;
     overflow: hidden;
-    border-radius: 28px;
+    border-radius: 24px;
     padding: 24px;
     color: var(--color-text-primary);
     background:
-      radial-gradient(circle at 88% 18%, rgba(255,255,255,0.34), transparent 28%),
-      linear-gradient(135deg, var(--color-surface-orange-from), var(--color-surface-orange-to));
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.35), 0 14px 34px rgba(255, 140, 66, 0.22);
+      linear-gradient(115deg, rgba(255,255,255,0.42), rgba(255,255,255,0) 44%),
+      linear-gradient(135deg, #fff5e8, var(--color-surface-orange-from) 45%, var(--color-surface-orange-to));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.46), 0 18px 42px rgba(232, 119, 40, 0.16);
   }
 
   @media (min-width: 640px) {
@@ -382,13 +418,13 @@ body {
   .app-feature-panel-purple {
     position: relative;
     overflow: hidden;
-    border-radius: 28px;
+    border-radius: 24px;
     padding: 24px;
     color: #ffffff;
     background:
-      radial-gradient(circle at 88% 18%, rgba(255,255,255,0.16), transparent 28%),
-      linear-gradient(135deg, #4a2a68, #2d1e4a);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 18px 44px rgba(45, 30, 74, 0.22);
+      linear-gradient(120deg, rgba(255,255,255,0.14), rgba(255,255,255,0) 42%),
+      linear-gradient(135deg, #102033, #173a62 58%, #295b87);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 22px 54px rgba(16, 32, 51, 0.22);
   }
 
   @media (min-width: 640px) {
@@ -398,16 +434,16 @@ body {
   }
 
   .app-work-panel {
-    border-radius: 24px;
-    background: #ffffff;
-    border: 1px solid rgba(45, 30, 74, 0.07);
-    box-shadow: 0 12px 30px rgba(45, 30, 74, 0.07);
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid rgba(211, 223, 235, 0.76);
+    box-shadow: 0 16px 42px rgba(16, 32, 51, 0.08);
   }
 
   .app-inset-surface {
-    border-radius: 22px;
-    background: #f8f4ef;
-    border: 1px solid rgba(45, 30, 74, 0.06);
+    border-radius: 20px;
+    background: #f5f8fb;
+    border: 1px solid rgba(211, 223, 235, 0.74);
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.9);
   }
 
@@ -419,19 +455,23 @@ body {
     font-size: 11px;
     font-weight: 800;
     letter-spacing: 0.02em;
-    color: var(--color-accent-purple);
-    background: rgba(255, 255, 255, 0.75);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.7), 0 4px 12px rgba(45, 30, 74, 0.07);
+    color: #173a62;
+    background: rgba(255, 255, 255, 0.78);
+    border: 1px solid rgba(211, 223, 235, 0.78);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.74), 0 6px 16px rgba(16, 32, 51, 0.06);
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    line-height: 1.25;
   }
 
   .app-question-card {
     position: relative;
     overflow: hidden;
-    border-radius: 24px;
+    border-radius: 22px;
     padding: 22px;
     background: #ffffff;
-    border: 1px solid rgba(45, 30, 74, 0.07);
-    box-shadow: 0 14px 35px rgba(45, 30, 74, 0.08);
+    border: 1px solid rgba(211, 223, 235, 0.76);
+    box-shadow: 0 18px 44px rgba(16, 32, 51, 0.08);
   }
 
   .app-question-card::before {
@@ -443,43 +483,40 @@ body {
   }
 
   .app-document-panel {
-    border-radius: 26px;
+    border-radius: 22px;
     padding: 22px;
     background: #ffffff;
-    border: 1px solid rgba(45, 30, 74, 0.08);
-    box-shadow: 0 16px 42px rgba(45, 30, 74, 0.09);
+    border: 1px solid rgba(211, 223, 235, 0.78);
+    box-shadow: 0 18px 52px rgba(16, 32, 51, 0.09);
   }
 
   .app-mini-card {
-    border-radius: 22px;
+    border-radius: 20px;
     padding: 18px;
     background: #ffffff;
-    border: 1px solid rgba(45, 30, 74, 0.06);
-    box-shadow: 0 10px 28px rgba(45, 30, 74, 0.07);
+    border: 1px solid rgba(211, 223, 235, 0.74);
+    box-shadow: 0 14px 34px rgba(16, 32, 51, 0.07);
   }
 
   .app-product-header {
     position: relative;
     overflow: visible;
     z-index: 30;
-    border-radius: 34px;
+    border-radius: 28px;
     background:
-      linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(255, 250, 244, 0.92));
-    border: 1px solid rgba(255, 255, 255, 0.84);
-    box-shadow: 0 28px 70px rgba(32, 23, 53, 0.12);
+      linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(245, 250, 253, 0.93));
+    border: 1px solid rgba(211, 223, 235, 0.78);
+    box-shadow: 0 24px 64px rgba(16, 32, 51, 0.1);
+    min-width: 0;
   }
 
   .app-product-header::after {
     content: "";
     position: absolute;
     z-index: 0;
-    right: 24px;
-    top: 22px;
-    height: 86px;
-    width: 210px;
-    border-radius: 999px;
-    background: linear-gradient(135deg, rgba(255, 122, 26, 0.16), rgba(43, 23, 74, 0.08));
-    transform: rotate(-8deg);
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(120deg, transparent 42%, rgba(47, 128, 237, 0.08) 68%, rgba(232, 119, 40, 0.08));
     pointer-events: none;
   }
 
@@ -489,11 +526,11 @@ body {
     width: 42px;
     align-items: center;
     justify-content: center;
-    border-radius: 16px;
-    background: linear-gradient(135deg, var(--color-surface-orange-from), var(--color-surface-orange-to));
+    border-radius: 14px;
+    background: linear-gradient(135deg, #102033, #2f80ed);
     color: #ffffff;
     font-weight: 900;
-    box-shadow: 0 12px 25px rgba(255, 122, 26, 0.28);
+    box-shadow: 0 14px 28px rgba(47, 128, 237, 0.24);
   }
 
   .app-header-pill {
@@ -502,12 +539,12 @@ body {
     gap: 8px;
     border-radius: 999px;
     background: #ffffff;
-    border: 1px solid rgba(43, 23, 74, 0.07);
+    border: 1px solid rgba(211, 223, 235, 0.76);
     padding: 8px 12px;
-    color: rgba(32, 23, 53, 0.72);
+    color: rgba(16, 32, 51, 0.72);
     font-size: 12px;
     font-weight: 750;
-    box-shadow: 0 8px 20px rgba(32, 23, 53, 0.06);
+    box-shadow: 0 8px 20px rgba(16, 32, 51, 0.06);
   }
 
   .app-account-menu {
@@ -680,14 +717,14 @@ body {
     border: 1px solid var(--color-border-light);
     background: #ffffff;
     color: var(--color-accent-purple);
-    box-shadow: 0 6px 16px rgba(45, 30, 74, 0.08);
+    box-shadow: 0 8px 18px rgba(16, 32, 51, 0.07);
   }
 
   .saved-doc-action-primary {
     border: 0;
-    background: var(--color-accent-purple);
+    background: linear-gradient(135deg, var(--color-accent-purple), #2f80ed);
     color: #ffffff;
-    box-shadow: 0 10px 24px rgba(45, 30, 74, 0.14);
+    box-shadow: 0 12px 28px rgba(47, 128, 237, 0.18);
   }
 
   .saved-doc-action:hover,
@@ -697,37 +734,37 @@ body {
   }
 
   .app-step-hero {
-    border-radius: 30px;
+    border-radius: 26px;
     background:
-      linear-gradient(135deg, rgba(255, 255, 255, 0.18), transparent 38%),
-      linear-gradient(135deg, var(--color-surface-orange-from), var(--color-surface-orange-to));
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.42), 0 20px 48px rgba(255, 122, 26, 0.2);
+      linear-gradient(135deg, rgba(255, 255, 255, 0.22), transparent 40%),
+      linear-gradient(135deg, #fff5e8, var(--color-surface-orange-from) 48%, var(--color-surface-orange-to));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.42), 0 20px 48px rgba(232, 119, 40, 0.16);
   }
 
   .app-consult-card {
-    border-radius: 28px;
+    border-radius: 24px;
     background: rgba(255, 255, 255, 0.94);
-    border: 1px solid rgba(255, 255, 255, 0.78);
-    box-shadow: 0 20px 52px rgba(32, 23, 53, 0.1);
+    border: 1px solid rgba(211, 223, 235, 0.78);
+    box-shadow: 0 22px 58px rgba(16, 32, 51, 0.09);
   }
 
   .app-soft-band {
-    border-radius: 26px;
-    background: linear-gradient(135deg, #fffaf4, #ffffff);
-    border: 1px solid rgba(43, 23, 74, 0.06);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.88), 0 10px 24px rgba(32, 23, 53, 0.05);
+    border-radius: 22px;
+    background: linear-gradient(135deg, #f6f9fb, #ffffff);
+    border: 1px solid rgba(211, 223, 235, 0.74);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.88), 0 12px 26px rgba(16, 32, 51, 0.05);
   }
 
   .app-section-label {
     @apply text-xs font-black uppercase tracking-[0.18em];
-    color: rgba(43, 23, 74, 0.52);
+    color: rgba(20, 52, 86, 0.56);
   }
 
   .app-quiet-list-card {
-    border-radius: 24px;
-    background: linear-gradient(180deg, #ffffff, #fffaf4);
-    border: 1px solid rgba(43, 23, 74, 0.06);
-    box-shadow: 0 14px 32px rgba(32, 23, 53, 0.07);
+    border-radius: 22px;
+    background: linear-gradient(180deg, #ffffff, #f6f9fb);
+    border: 1px solid rgba(211, 223, 235, 0.76);
+    box-shadow: 0 16px 38px rgba(16, 32, 51, 0.07);
   }
 
   .dashboard-workspace {
@@ -737,11 +774,11 @@ body {
   .dashboard-hero {
     position: relative;
     overflow: hidden;
-    border-radius: 34px;
+    border-radius: 28px;
     padding: 24px;
     background:
-      radial-gradient(circle at 14% 10%, rgba(82, 166, 255, 0.18), transparent 32%),
-      radial-gradient(circle at 92% 10%, rgba(64, 179, 162, 0.16), transparent 26%),
+      linear-gradient(135deg, rgba(47, 128, 237, 0.12), transparent 38%),
+      linear-gradient(225deg, rgba(42, 169, 154, 0.1), transparent 42%),
       linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(244, 249, 253, 0.94));
     border: 1px solid rgba(196, 213, 229, 0.74);
     box-shadow: 0 28px 70px rgba(17, 35, 63, 0.1);
@@ -750,12 +787,9 @@ body {
   .dashboard-hero::after {
     content: "";
     position: absolute;
-    right: -76px;
-    bottom: -118px;
-    width: 320px;
-    height: 320px;
-    border-radius: 999px;
-    background: linear-gradient(135deg, rgba(47, 128, 237, 0.13), rgba(64, 179, 162, 0.11));
+    inset: auto 0 0 0;
+    height: 42%;
+    background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.42));
     pointer-events: none;
   }
 
@@ -812,7 +846,7 @@ body {
   }
 
   .dashboard-credit-card {
-    border-radius: 28px;
+    border-radius: 24px;
     padding: 24px;
     background: rgba(255, 255, 255, 0.86);
     border: 1px solid rgba(196, 213, 229, 0.78);
@@ -821,7 +855,7 @@ body {
   }
 
   .dashboard-empty-state {
-    border-radius: 34px;
+    border-radius: 28px;
     padding: 28px;
     background:
       linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 252, 255, 0.94));
@@ -836,7 +870,7 @@ body {
   }
 
   .dashboard-benefit-card {
-    border-radius: 24px;
+    border-radius: 22px;
     padding: 22px;
     text-align: left;
     background: #ffffff;
@@ -971,5 +1005,40 @@ body {
     font-size: 13px;
     font-weight: 900;
     box-shadow: 0 12px 24px rgba(17, 35, 63, 0.16);
+  }
+
+  @media (max-width: 639px) {
+    .app-product-header,
+    .app-screen-card,
+    .app-card-soft,
+    .app-card-warm,
+    .app-mini-card,
+    .app-quiet-list-card,
+    .dashboard-hero,
+    .dashboard-empty-state,
+    .dashboard-list-section,
+    .saved-output-toolbar,
+    .legal-document {
+      width: calc(100vw - 2rem);
+      max-width: calc(100vw - 2rem);
+    }
+
+    .app-screen-card > *,
+    .app-product-header > *,
+    .app-card-soft > *,
+    .app-mini-card > * {
+      min-width: 0;
+    }
+
+    .app-product-header nav,
+    .app-product-header .flex {
+      max-width: 100%;
+    }
+
+    .app-button-primary,
+    .app-button-secondary,
+    .app-button-ghost {
+      min-width: 0;
+    }
   }
 }
