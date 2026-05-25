@@ -102,7 +102,7 @@ function LandingPage() {
               </Link>
             </div>
 
-            <ol className="mt-9 grid gap-3 sm:grid-cols-2">
+            <ol className="mt-9 hidden gap-3 sm:grid sm:grid-cols-2">
               {FLOW.map((item, index) => (
                 <li key={item} className="app-soft-band flex items-center gap-3 px-4 py-3">
                   <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--color-accent-purple)] text-xs font-black text-white">
@@ -177,57 +177,68 @@ function LandingPage() {
 
 function ProductPreview() {
   return (
-    <div className="mx-auto flex max-w-xl flex-col gap-4">
-      <div className="rounded-[26px] border border-[#d9e8f5] bg-white p-5 shadow-[0_22px_54px_rgba(17,35,63,0.11)]">
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#245f9f]">
-              Recruiter insight
-            </p>
-            <h3 className="mt-2 text-xl font-black text-[var(--color-text-primary)]">
-              Transferable alignment found
-            </h3>
-          </div>
-          <div className="rounded-full bg-[#eef6ff] px-3 py-1.5 text-xs font-black text-[#245f9f]">
-            Close fit
-          </div>
+    <div className="hero-intelligence mx-auto max-w-xl">
+      <div className="hero-insight-card">
+        <div>
+          <p className="hero-label">Recruiter insight</p>
+          <h3>Transferable alignment found</h3>
         </div>
-        <p className="mt-4 text-sm leading-6 text-[var(--color-text-muted)]">
-          Your background shows client communication, marketing execution, and
-          reporting overlap. A few platform details could strengthen the final
-          application.
-        </p>
-        <div className="mt-5 h-2 rounded-full bg-[#e7edf3]">
-          <div className="h-2 w-[63%] rounded-full bg-gradient-to-r from-[#5ca8d6] to-[#2f6fba]" />
-        </div>
-        <div className="mt-2 flex justify-between text-[11px] font-bold text-[var(--color-text-muted)]">
-          <span>Not a good fit</span>
-          <span>Close fit</span>
-          <span>Great fit</span>
-        </div>
+        <span>Close fit</span>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="rounded-[24px] border border-[var(--color-border-light)] bg-white p-5 shadow-[0_14px_34px_rgba(17,35,63,0.08)]">
-          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
-            Smart question
-          </p>
-          <p className="mt-3 text-sm font-semibold leading-6 text-[var(--color-text-primary)]">
-            Have you maintained CRM records, client notes, follow-up trackers,
-            or internal documentation systems?
-          </p>
-        </div>
-        <div className="rounded-[24px] border border-[var(--color-border-light)] bg-white p-5 shadow-[0_14px_34px_rgba(17,35,63,0.08)]">
-          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
-            Resume preview
-          </p>
-          <div className="mt-4 space-y-2">
-            <div className="h-2 w-4/5 rounded-full bg-[#27364a]/18" />
-            <div className="h-2 rounded-full bg-[#27364a]/12" />
-            <div className="h-2 w-11/12 rounded-full bg-[#27364a]/12" />
-            <div className="h-2 w-3/5 rounded-full bg-[#2f80ed]/55" />
+      <div className="hero-doc-stack" aria-label="Resume transformation preview">
+        <article className="hero-document hero-document-before">
+          <div className="hero-doc-topline">
+            <span>Before</span>
+            <span>Generic resume language</span>
           </div>
+          <h4>Communications & Digital Media</h4>
+          <p>
+            Social media management, customer communication, content creation,
+            website updates, analytics.
+          </p>
+          <div className="hero-section-title">Experience signal</div>
+          <ul>
+            <li>Managed social content across platforms</li>
+            <li>Worked with clients on messaging and updates</li>
+            <li>Tracked engagement and content performance</li>
+          </ul>
+        </article>
+
+        <div className="hero-transform-rail" aria-hidden>
+          <span>translated into hiring language</span>
         </div>
+
+        <article className="hero-document hero-document-after">
+          <div className="hero-doc-topline">
+            <span>Tailored</span>
+            <span>Recruiter-readable positioning</span>
+          </div>
+          <h4>Client Success & Marketing Operations</h4>
+          <p>
+            Client-facing communicator with hands-on marketing execution,
+            workflow follow-through, and campaign performance reporting.
+          </p>
+          <div className="hero-section-title">Positioned evidence</div>
+          <ul>
+            <li>Guides clients through content, reporting, and next steps</li>
+            <li>Connects social media execution to business goals</li>
+            <li>Uses KPI signals to strengthen client recommendations</li>
+          </ul>
+        </article>
+      </div>
+
+      <div className="hero-signal-grid">
+        <article>
+          <p>Smart question</p>
+          <strong>Meta Ads or CRM proof?</strong>
+          <span>Clarify gaps before the final application.</span>
+        </article>
+        <article>
+          <p>Interview prep</p>
+          <strong>Likely screen topics</strong>
+          <span>Prepare for platform, reporting, and client follow-through.</span>
+        </article>
       </div>
     </div>
   );
