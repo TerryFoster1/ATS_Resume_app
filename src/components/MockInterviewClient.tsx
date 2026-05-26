@@ -29,6 +29,8 @@ const FEEDBACK_STAGES = [
   "Building your interview feedback report..."
 ];
 
+const CHECKOUT_RETURN_PATH_KEY = "career-ladder:checkout-return-path";
+
 type MockInterviewClientProps = {
   outputId: string;
   title: string;
@@ -63,6 +65,18 @@ export default function MockInterviewClient({
   const currentQuestion = questions[currentIndex];
   const progress = questions.length ? Math.round(((currentIndex + 1) / questions.length) * 100) : 0;
   const completed = mockInterview?.status === "completed" && mockInterview.feedback;
+
+  useEffect(() => {
+    if (mockInterview?.questions.length || busy) return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("start") !== "1") return;
+    params.delete("start");
+    const next = `${window.location.pathname}${params.toString() ? `?${params}` : ""}`;
+    window.history.replaceState(null, "", next);
+    window.setTimeout(() => void startInterview(), 300);
+    // This should only run once on entry from the intent router.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (busy !== "start") {
@@ -123,6 +137,10 @@ export default function MockInterviewClient({
         body: JSON.stringify({ action: "start" })
       });
       if (response.status === 402) {
+        window.sessionStorage.setItem(
+          CHECKOUT_RETURN_PATH_KEY,
+          `/outputs/${outputId}/interview?start=1`
+        );
         window.location.href = "/pricing?pack=5&checkout=1";
         return;
       }

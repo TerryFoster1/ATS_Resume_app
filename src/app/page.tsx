@@ -2,9 +2,9 @@ import Link from "next/link";
 import AccountCreditIndicator from "@/components/AccountCreditIndicator";
 import ResumeWizard from "@/components/ResumeWizard";
 
-type Step = "intro" | "resume" | "job" | "analysis" | "generate" | "results";
+type Step = "intro" | "intake" | "intent" | "resume" | "job" | "analysis" | "generate" | "results";
 
-const VALID_STEPS: Step[] = ["intro", "resume", "job", "analysis", "generate", "results"];
+const VALID_STEPS: Step[] = ["intro", "intake", "intent", "resume", "job", "analysis", "generate", "results"];
 
 const FLOW = [
   "Upload your resume",
@@ -84,18 +84,17 @@ function LandingPage() {
             </div>
 
             <h2 className="mt-7 max-w-3xl text-4xl font-black leading-tight text-[var(--color-text-primary)] sm:text-6xl">
-              Position your experience for the roles you actually want.
+              Prepare for the jobs you actually want.
             </h2>
             <p className="mt-5 max-w-2xl text-base leading-8 text-[var(--color-text-primary)]/74 sm:text-lg">
-              You may already have the right experience. Your resume may just
-              not be communicating it clearly. Upload your resume, paste the job
-              description, answer recruiter-style follow-up questions, and
-              generate tailored materials built around your real work.
+              Paste a job posting, choose your goal, and Career Ladder helps you
+              tailor your resume, write your cover letter, or prepare for the
+              interview with recruiter-style guidance.
             </p>
 
             <div className="mt-8 flex flex-wrap items-center gap-3">
-              <Link href="/?step=resume" className="app-button-primary text-base">
-                Tailor my resume
+              <Link href="/?step=intake" className="app-button-primary text-base">
+                Choose my goal
               </Link>
               <Link href="#example-transformation" className="app-button-ghost text-base">
                 See example transformation
@@ -286,7 +285,7 @@ function ProductHeader() {
           <Link href="/pricing" className="app-header-pill">
             Credits
           </Link>
-          <Link href="/?step=resume" className="app-header-pill">
+          <Link href="/?step=intake" className="app-header-pill">
             Start
           </Link>
           <AccountCreditIndicator />

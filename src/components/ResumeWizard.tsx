@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 
+import JobIntentFlow from "@/components/JobIntentFlow";
 import StepAnalysis from "@/components/StepAnalysis";
 import StepGenerate from "@/components/StepGenerate";
 import StepIntro from "@/components/StepIntro";
@@ -30,7 +31,7 @@ const INITIAL_STATE: SessionState = {
 
 const SAVED_RESULTS_KEY = "ats-resume-app:last-results";
 
-type Step = "intro" | "resume" | "job" | "analysis" | "generate" | "results";
+type Step = "intro" | "intake" | "intent" | "resume" | "job" | "analysis" | "generate" | "results";
 type RestoreStatus = "idle" | "restoring" | "failed";
 type RestoreFailureReason = "checkout" | "generic";
 type StoredResults = SessionState & {
@@ -166,6 +167,17 @@ export default function ResumeWizard({ initialStep }: { initialStep: Step }) {
   return (
     <>
       {step === "intro" && <StepIntro onNext={() => setStep("resume")} />}
+
+      {(step === "intake" || step === "intent") && (
+        <JobIntentFlow
+          initialContextText={state.jobPostText}
+          onResumeIntent={(jobPostText) => {
+            updateState({ jobPostText });
+            setStep("resume");
+            window.history.replaceState(null, "", "/?step=resume");
+          }}
+        />
+      )}
 
       {step === "resume" && (
         <StepResume

@@ -16,9 +16,10 @@ export async function generateInterviewPrep(input: InterviewPrepInput) {
     timeoutMs: 90000,
     system: [
       "You are a recruiter-style interview coach for Career Ladder.",
-      "Generate practical interview prep from the candidate's tailored application materials.",
-      "Be specific to the role and candidate evidence.",
+      "Generate practical interview prep from the available role context and application materials.",
+      "Be specific to the role, posting, and any candidate evidence that is available.",
       "Do not invent experience, metrics, employers, tools, credentials, or dates.",
+      "If no resume or cover letter is available, create role-based prep and clearly frame candidate-specific examples as stories to prepare, not proven facts.",
       "If a hard skill or platform is weak or missing, frame it as an honest preparation area.",
       "Use plain professional language. Avoid hype, generic motivation, and AI cliches.",
       "Do not use em dashes."
@@ -27,10 +28,10 @@ export async function generateInterviewPrep(input: InterviewPrepInput) {
 ${clip(input.jobDescription, 6000)}
 
 TAILORED RESUME
-${clip(input.tailoredResume, 6000)}
+${clip(input.tailoredResume || "No tailored resume has been provided yet.", 6000)}
 
 COVER LETTER
-${clip(input.coverLetter, 3500)}
+${clip(input.coverLetter || "No cover letter has been provided yet.", 3500)}
 
 CLARIFICATION ANSWERS
 ${clip(formatAnswers(input.clarificationAnswers), 2500)}
@@ -89,6 +90,7 @@ Include 2 to 3 questions if relevant. If the role has no technical or operationa
 Rules:
 - Do not include generic advice that could fit any candidate.
 - Do not overclaim missing tools, platforms, metrics, credentials, or dates.
+- If resume or cover letter context is absent, focus on role expectations, likely evaluation areas, and examples the user should prepare.
 - If direct platform ownership is weak, recommend adjacent positioning clearly.
 - Keep every answer easy to read on mobile.
 - Avoid em dashes.`

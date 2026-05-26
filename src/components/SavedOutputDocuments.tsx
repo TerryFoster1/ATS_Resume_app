@@ -64,6 +64,9 @@ export default function SavedOutputDocuments({
   const [interviewPrepBusy, setInterviewPrepBusy] = useState(false);
   const [interviewPrepError, setInterviewPrepError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const hasResume = resumeText.trim().length > 0;
+  const hasCoverLetter = coverLetterText.trim().length > 0;
+  const opportunityOnly = !hasResume && !hasCoverLetter;
 
   useEffect(() => {
     trackEvent("dashboard_reopen", { outputId });
@@ -79,6 +82,11 @@ export default function SavedOutputDocuments({
     } else if (params.get("checkout") === "success" && params.get("interviewPrep") === "1") {
       params.delete("checkout");
       params.delete("interviewPrep");
+      const next = `${window.location.pathname}${params.toString() ? `?${params}` : ""}`;
+      window.history.replaceState(null, "", next);
+      window.setTimeout(() => void generatePrep(), 700);
+    } else if (params.get("intent") === "interview-prep") {
+      params.delete("intent");
       const next = `${window.location.pathname}${params.toString() ? `?${params}` : ""}`;
       window.history.replaceState(null, "", next);
       window.setTimeout(() => void generatePrep(), 700);
@@ -179,8 +187,8 @@ export default function SavedOutputDocuments({
 
   const safeFilename = filenameFromTitle(title);
   const materialStatus = [
-    { label: "Resume export", value: resumeIsUnlocked ? "Unlocked" : "Locked preview" },
-    { label: "Cover letter", value: coverLetterIsUnlocked ? "Unlocked" : "Locked preview" },
+    { label: "Resume export", value: hasResume ? (resumeIsUnlocked ? "Unlocked" : "Locked preview") : "Not generated" },
+    { label: "Cover letter", value: hasCoverLetter ? (coverLetterIsUnlocked ? "Unlocked" : "Locked preview") : "Not generated" },
     { label: "Interview prep", value: interviewPrep.trim() ? "Ready" : interviewPrepStatus === "failed" ? "Retry needed" : "Not generated" }
   ];
 
@@ -190,7 +198,9 @@ export default function SavedOutputDocuments({
         <div>
           <p className="app-kicker">Saved materials</p>
           <h2 className="mt-2 text-xl app-heading">
-            Reopen, unlock, and export this application.
+            {opportunityOnly
+              ? "Prepare for this opportunity."
+              : "Reopen, unlock, and export this application."}
           </h2>
         </div>
         <div className="saved-output-credit-card">
@@ -208,25 +218,40 @@ export default function SavedOutputDocuments({
         ))}
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-2">
-        <SavedDocumentPanel
-          kind="resume"
-          title="Resume"
-          text={resumeText}
-          fileBaseName={safeFilename}
-          unlocked={resumeIsUnlocked}
-          onRequestUnlock={() => requestUnlock("resume")}
-        />
-        <SavedDocumentPanel
-          kind="coverLetter"
-          title="Cover Letter"
-          text={coverLetterText}
-          headerSource={sourceResumeText ?? resumeText}
-          fileBaseName={`${safeFilename}-cover-letter`}
-          unlocked={coverLetterIsUnlocked}
-          onRequestUnlock={() => requestUnlock("coverLetter")}
-        />
-      </section>
+      {(hasResume || hasCoverLetter) ? (
+        <section className="grid gap-6 xl:grid-cols-2">
+          {hasResume && (
+            <SavedDocumentPanel
+              kind="resume"
+              title="Resume"
+              text={resumeText}
+              fileBaseName={safeFilename}
+              unlocked={resumeIsUnlocked}
+              onRequestUnlock={() => requestUnlock("resume")}
+            />
+          )}
+          {hasCoverLetter && (
+            <SavedDocumentPanel
+              kind="coverLetter"
+              title="Cover Letter"
+              text={coverLetterText}
+              headerSource={sourceResumeText ?? resumeText}
+              fileBaseName={`${safeFilename}-cover-letter`}
+              unlocked={coverLetterIsUnlocked}
+              onRequestUnlock={() => requestUnlock("coverLetter")}
+            />
+          )}
+        </section>
+      ) : (
+        <section className="app-card-soft">
+          <p className="app-kicker">Opportunity context</p>
+          <h3 className="mt-3 text-xl app-heading">No resume or cover letter has been generated yet.</h3>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--color-text-muted)]">
+            This saved opportunity was created from a target role first. You can generate interview
+            prep or start a mock interview now, then return later to tailor documents for the same role.
+          </p>
+        </section>
+      )}
 
       <InterviewPrepSection
         outputId={outputId}
@@ -290,7 +315,7 @@ export default function SavedOutputDocuments({
           <p className="max-w-2xl text-sm leading-6 text-[var(--color-text-muted)]">
             Start a new application when you want to reposition this background for a different role or posting.
           </p>
-          <Link href="/?step=resume" className="app-button-secondary shrink-0">
+          <Link href="/?step=intake" className="app-button-secondary shrink-0">
             Start a new application
           </Link>
         </div>

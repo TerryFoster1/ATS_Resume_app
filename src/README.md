@@ -1,6 +1,6 @@
-# ATS Resume App — `src/`
+# Career Ladder - `src/`
 
-The Next.js application for the ATS Resume App. Session-only MVP.
+The Next.js application for Career Ladder.
 
 ## Run locally
 
@@ -28,14 +28,14 @@ Then open http://localhost:3000.
 src/
 ├── app/
 │   ├── layout.tsx
-│   ├── page.tsx              ← the wizard
+│   ├── page.tsx              ← the main workflow
 │   ├── globals.css
 │   └── api/
 │       ├── parse-resume/     ← pdf/docx → text
 │       ├── analyze/          ← resume vs JD → gaps + follow-ups
 │       ├── generate/         ← tailored resume + cover letter
-│       └── check/            ← ATS checker + revise loop
-├── components/               ← one component per wizard step
+│       └── check/            ← internal validation + revise loop
+├── components/               ← product workflow components
 └── lib/                      ← shared logic (no UI)
 ```
 
@@ -46,5 +46,5 @@ src/
 
 ## Notes
 
-- No persistent storage. State lives in React.
+- Persistent app state is backed by Supabase where enabled; local session state is still used for in-progress generation flows.
 - Server-only libraries (`pdf-parse`, `mammoth`, `@anthropic-ai/sdk`) are only imported in `app/api/**` and `lib/**`.

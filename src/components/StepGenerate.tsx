@@ -40,7 +40,7 @@ const PHASES = [
   "Reading the analysis and confirmed details",
   "Drafting a tailored resume in your voice",
   "Writing a cover letter grounded in your real experience",
-  "Running ATS-style formatting checks",
+  "Running document structure checks",
   "Checking the tailored resume against the posting"
 ];
 

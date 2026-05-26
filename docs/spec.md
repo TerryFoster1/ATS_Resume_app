@@ -1,14 +1,14 @@
-# ATS Resume App — Spec
+# Career Ladder - Spec
 
 A working spec for the V1 MVP.
 
 ## Summary
 
-A session-only web app that takes a user's resume and a pasted job posting, compares them, asks up to three targeted follow-up questions to fill obvious gaps, and generates a tailored resume and cover letter. Output is validated against a basic internal ATS-style checker and revised until it passes, or until the retry cap is hit.
+An application-prep platform that starts with a job posting or target role, helps users choose the right next step, and can generate tailored resumes, cover letters, interview prep, and mock interview practice around a specific opportunity.
 
 ## Problem
 
-Candidates submit the same generic resume to every posting. ATS filters and human recruiters penalize resumes that don't reflect the specific posting's keywords, scope, and tools. Manually tailoring for each application is slow, so most people skip it.
+Candidates often have relevant experience but their materials do not frame it clearly for the role they want. Recruiters need credible, role-specific evidence, and manually tailoring every application is slow enough that many people skip it.
 
 ## Users
 
@@ -17,9 +17,10 @@ Candidates submit the same generic resume to every posting. ATS filters and huma
 
 ## Core user stories
 
-- As a job-seeker, I can paste or upload my resume and paste a job posting so that the app can compare them.
+- As a job-seeker, I can paste a job posting or enter a target role so that the app can help me choose the right preparation path.
+- As a job-seeker, I can paste or upload my resume when I want tailored documents for a specific role.
 - As a job-seeker, I can answer a few short follow-up questions so that the generated output reflects experience my resume didn't capture.
-- As a job-seeker, I can see my tailored resume and cover letter and know they pass basic ATS-style formatting and keyword checks so that I feel comfortable submitting them.
+- As a job-seeker, I can see my tailored resume and cover letter and understand how they position my experience for the role.
 - As a job-seeker, I can copy or download the final outputs so that I can paste them into an application.
 
 ## Features (v1)
@@ -32,7 +33,7 @@ Candidates submit the same generic resume to every posting. ATS filters and huma
 - [ ] Up to 3 targeted follow-up questions (up to 5 when gap score is high)
 - [ ] Tailored resume generation
 - [ ] Tailored cover letter generation
-- [ ] Internal ATS-style checker with per-rule pass/fail
+- [ ] Internal formatting and quality validation
 - [ ] Check → revise → re-check loop (max 3 revise passes)
 - [ ] Results page with Copy and Download (TXT) per output
 - [ ] Honest framing: improves ATS compatibility, does not guarantee pass/hire
@@ -100,7 +101,7 @@ Questions are generated from specific gap signals in the JD-vs-resume diff. None
 
 Cap at 3 by default. Up to 5 only if gap score is high. Each question is one sentence and optional.
 
-## ATS checker rules
+## Internal validation rules
 
 The checker returns a per-rule pass/fail with a short reason. Rules:
 
@@ -132,6 +133,6 @@ If any rule fails, the failing rules and reasons are passed back to the LLM with
 ## Milestones
 
 - [x] Prototype — structure, scaffolded routes and components
-- [ ] MVP — parsing, analysis, generation, ATS checker, revise loop, results UI
+- [ ] MVP — parsing, analysis, generation, validation, revise loop, results UI
 - [ ] Beta — real PDF/DOCX testing, prompt tuning, UX polish
 - [ ] Launch — if Terry decides to deploy

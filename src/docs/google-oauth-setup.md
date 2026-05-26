@@ -1,6 +1,6 @@
 # Google OAuth Setup for Supabase Auth
 
-The ATS Resume App uses Supabase Auth for Google sign-in. Do not store the Google Client Secret in this Next.js app. The Google Client ID and Client Secret belong in the Supabase dashboard.
+Career Ladder uses Supabase Auth for Google sign-in. Do not store the Google Client Secret in this Next.js app. The Google Client ID and Client Secret belong in the Supabase dashboard.
 
 ## Local Development URLs
 
@@ -36,4 +36,3 @@ Use these values when testing locally:
 For production, add the deployed app origin as an authorized JavaScript origin in Google Cloud, and keep the same Supabase callback URI format:
 
 `https://YOUR_SUPABASE_PROJECT_REF.supabase.co/auth/v1/callback`
-

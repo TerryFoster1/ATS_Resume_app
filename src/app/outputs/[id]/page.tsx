@@ -45,6 +45,8 @@ export default async function SavedOutputPage({
     companyName: data.company_name,
     sourceJobDescription: data.source_job_description
   });
+  const hasResume = Boolean(data.resume_text?.trim());
+  const hasCoverLetter = Boolean(data.cover_letter_text?.trim());
 
   return (
     <main className="space-y-8">
@@ -58,10 +60,10 @@ export default async function SavedOutputPage({
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
               <span className={data.resume_unlocked ? "dashboard-badge is-ready" : "dashboard-badge"}>
-                Resume {data.resume_unlocked ? "unlocked" : "locked"}
+                Resume {hasResume ? (data.resume_unlocked ? "unlocked" : "locked") : "not generated"}
               </span>
               <span className={data.cover_letter_unlocked ? "dashboard-badge is-ready" : "dashboard-badge"}>
-                Cover letter {data.cover_letter_unlocked ? "unlocked" : "locked"}
+                Cover letter {hasCoverLetter ? (data.cover_letter_unlocked ? "unlocked" : "locked") : "not generated"}
               </span>
               <span className={data.interview_prep_status === "completed" ? "dashboard-badge is-ready" : "dashboard-badge is-pending"}>
                 Interview prep {data.interview_prep_status === "completed" ? "ready" : "pending"}

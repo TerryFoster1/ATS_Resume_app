@@ -68,9 +68,10 @@ export async function generateMockInterviewQuestions(
       timeoutMs: 90000,
       system: [
         "You are a recruiter and hiring-manager interview coach for Career Ladder.",
-        "Create a focused mock interview based only on the saved application context.",
+        "Create a focused mock interview based only on the saved role context and available application materials.",
         "Questions must be specific, recruiter-realistic, and useful for practice.",
         "Do not invent experience, tools, employers, credentials, metrics, or dates.",
+        "If no resume or cover letter is available, ask role-based questions and evaluate the user's answers against the posting rather than assumed background.",
         "If a skill gap is likely, ask about it honestly without sounding punitive.",
         "Use clear professional language. Do not use em dashes."
       ].join("\n"),
@@ -96,10 +97,10 @@ JOB DESCRIPTION
 ${clip(context.jobDescription, 6000)}
 
 TAILORED RESUME
-${clip(context.tailoredResume, 6000)}
+${clip(context.tailoredResume || "No tailored resume has been provided yet.", 6000)}
 
 COVER LETTER
-${clip(context.coverLetter, 3500)}
+${clip(context.coverLetter || "No cover letter has been provided yet.", 3500)}
 
 CLARIFICATION ANSWERS
 ${clip(formatAnswers(context.clarificationAnswers), 2500)}
@@ -186,10 +187,10 @@ JOB DESCRIPTION
 ${clip(args.context.jobDescription, 6000)}
 
 TAILORED RESUME
-${clip(args.context.tailoredResume, 6000)}
+${clip(args.context.tailoredResume || "No tailored resume has been provided yet.", 6000)}
 
 COVER LETTER
-${clip(args.context.coverLetter, 3500)}
+${clip(args.context.coverLetter || "No cover letter has been provided yet.", 3500)}
 
 QUESTIONS AND ANSWERS
 ${args.questions
