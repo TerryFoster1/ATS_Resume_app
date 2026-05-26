@@ -123,16 +123,7 @@ function LandingPage() {
       </section>
 
       <section id="example-transformation" className="grid gap-4 lg:grid-cols-[0.92fr_1.08fr]">
-        <article className="app-mini-card p-6 sm:p-7">
-          <p className="app-section-label">Example transformation</p>
-          <h3 className="mt-3 text-2xl app-heading">
-            From generic experience to recruiter-readable evidence.
-          </h3>
-          <p className="mt-3 text-sm leading-6 text-[var(--color-text-muted)]">
-            The app does not stuff keywords into your resume. It helps translate
-            what you have done into the language a hiring team can recognize.
-          </p>
-        </article>
+        <TransformationVisual />
         <div className="grid gap-3">
           {POSITIONING_EXAMPLES.map((item) => (
             <article key={item.before} className="rounded-[22px] border border-[var(--color-border-light)] bg-white p-5 shadow-[0_14px_34px_rgba(17,35,63,0.07)]">
@@ -178,23 +169,12 @@ function LandingPage() {
 function ProductPreview() {
   return (
     <div className="hero-intelligence mx-auto max-w-xl">
-      <div className="hero-recruiter-scene" aria-label="Recruiter reviewing application materials">
-        <img
-          src="/career-ladder-recruiter-interview.jpg"
-          alt="Recruiter holding a resume during an interview conversation"
-        />
-        <div className="hero-photo-scrim" aria-hidden />
-        <div className="hero-insight-card hero-insight-card-overlay">
-          <div>
-            <p className="hero-label">Recruiter insight</p>
-            <h3>Transferable alignment found</h3>
-          </div>
-          <span>Close fit</span>
+      <div className="hero-insight-card">
+        <div>
+          <p className="hero-label">Recruiter insight</p>
+          <h3>Transferable alignment found</h3>
         </div>
-        <div className="hero-review-note">
-          <p>Hiring signal</p>
-          <strong>Client communication, reporting, and follow-through are now visible.</strong>
-        </div>
+        <span>Close fit</span>
       </div>
 
       <div className="hero-doc-stack" aria-label="Resume transformation preview">
@@ -252,6 +232,34 @@ function ProductPreview() {
         </article>
       </div>
     </div>
+  );
+}
+
+function TransformationVisual() {
+  return (
+    <article className="transformation-visual-card">
+      <div className="transformation-photo" aria-label="Recruiter reviewing resume during an interview">
+        <img
+          src="/career-ladder-recruiter-interview.jpg"
+          alt="Recruiter holding a resume during an interview conversation"
+        />
+        <div className="transformation-photo-scrim" aria-hidden />
+        <div className="transformation-photo-note">
+          <p>Recruiter lens</p>
+          <strong>Translate real experience into evidence a hiring team can recognize.</strong>
+        </div>
+      </div>
+      <div className="transformation-visual-copy">
+        <p className="app-section-label">Example transformation</p>
+        <h3 className="mt-3 text-2xl app-heading">
+          From generic experience to recruiter-readable evidence.
+        </h3>
+        <p className="mt-3 text-sm leading-6 text-[var(--color-text-muted)]">
+          The app does not stuff keywords into your resume. It helps translate
+          what you have done into the language a hiring team can recognize.
+        </p>
+      </div>
+    </article>
   );
 }
 
