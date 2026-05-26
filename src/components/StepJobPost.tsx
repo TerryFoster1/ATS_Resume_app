@@ -127,7 +127,7 @@ export default function StepJobPost({
               type="url"
               disabled
               className="app-input mt-3 bg-[#f9f4ee] text-[var(--color-text-muted)]"
-              placeholder="Paste job posting URL, coming soon"
+              placeholder="Paste the full posting below for now"
             />
           </div>
 

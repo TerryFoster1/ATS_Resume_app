@@ -405,3 +405,58 @@ Validation:
 - `npm.cmd run build`: PASS
 - `npm.cmd run typecheck`: PASS
 - Local production route checks: `/?step=intake`, `/?step=intent`, and `/?step=resume` returned `200`.
+
+## Focused QA pass on `e855cd6` - 2026-05-26
+
+Scope:
+
+- Goal-first onboarding surfaces.
+- Existing resume-first entry route.
+- Standalone opportunity creation guardrails.
+- Copy cleanup for obvious launch-facing leftovers.
+
+Goal selection QA:
+
+- `Tailor My Resume`: present with resume-positioning copy and routes into the existing resume workflow after role context.
+- `Resume + Cover Letter`: present with application-package copy and routes into the existing resume workflow after role context.
+- `Prepare for an Interview`: present with interview-readiness copy and uses standalone saved opportunity creation.
+- `Practice a Mock Interview`: present with focused practice-room copy and routes to the existing mock interview path.
+- `Explore a Career Path`: present with pathway-analysis copy and routes to the pathway preview/unlock workflow.
+- `Track Applications & Offers`: present as a beta workspace entry and routes to dashboard instead of pretending a full tracking workflow exists.
+
+Context and experience hierarchy QA:
+
+- The first screen now shows goal cards only.
+- Role, company, and posting fields appear after a goal is selected.
+- Resume upload appears on the experience step for services where resume evidence is useful.
+- Application tracking does not request resume upload.
+- Additional context is optional and secondary.
+
+Fixes made during QA:
+
+- Replaced the remaining onboarding phrase "not another form to complete" with "not another task to complete."
+- Removed an old disabled job-post URL placeholder that said "coming soon"; it now directs users to paste the full posting below.
+
+Regression checks:
+
+- `/?step=intake`: `200`
+- `/?step=intent`: `200`
+- `/?step=resume`: `200`
+- `/pricing`: `200`
+- Anonymous `POST /api/opportunities` for `careerPathway`: `401 Sign in required`
+- `npm.cmd run build`: PASS
+- `npm.cmd run typecheck`: PASS
+
+Credit behavior audit:
+
+- Pathway unlock still checks for an existing completed pathway before checking balance or consuming credits.
+- Existing full pathway responses return without another credit deduction.
+- Insufficient credits still return a clear `402` from the pathway endpoint.
+- The generation path still calls `consumeCredits(user.id, 1, "unlock_pathway_analysis")` once.
+- Interview prep and mock interview credit behavior were not redesigned.
+
+Known limitations from this QA pass:
+
+- Full signed-in pathway unlock, refresh/reopen, and dashboard reopen were code-path reviewed but not executed with a live authenticated credit balance in this local pass.
+- Resume generation, cover letter generation, interview prep generation, and mock interview generation were not rerun end-to-end because no generation prompts or engines changed.
+- Mobile layout was reviewed by responsive class structure and route smoke checks, but not with a visual browser screenshot tool in this pass.

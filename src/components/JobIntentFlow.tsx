@@ -450,7 +450,7 @@ export default function JobIntentFlow({
           Additional context optional
           <span className="mt-2 block text-sm font-normal leading-6 text-[var(--color-text-muted)]">
             Add anything the resume might not explain clearly. This is a secondary
-            signal, not another form to complete.
+            signal, not another task to complete.
           </span>
           <textarea
             value={currentBackground}
