@@ -229,6 +229,7 @@ export default function SavedOutputDocuments({
       </section>
 
       <InterviewPrepSection
+        outputId={outputId}
         interviewPrep={interviewPrep}
         status={interviewPrepStatus}
         busy={interviewPrepBusy}
@@ -299,6 +300,7 @@ export default function SavedOutputDocuments({
 }
 
 function InterviewPrepSection({
+  outputId,
   interviewPrep,
   status,
   busy,
@@ -306,6 +308,7 @@ function InterviewPrepSection({
   fileBaseName,
   onGenerate
 }: {
+  outputId: string;
   interviewPrep: string;
   status: string;
   busy: boolean;
@@ -332,14 +335,13 @@ function InterviewPrepSection({
     <section className="interview-prep-panel space-y-5">
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div>
-          <p className="app-kicker">Interview prep</p>
+          <p className="app-kicker">Interview practice</p>
           <h3 className="mt-2 text-xl app-heading">
-            {hasPrep ? "Recruiter-style prep is ready." : "Generate recruiter-style interview prep."}
+            Practice this application like a real recruiter screen.
           </h3>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--color-text-muted)]">
-            {hasPrep
-              ? "Review likely screening, behavioural, role-specific, and gap-focused questions for this application."
-              : "Use 1 credit to generate likely questions, STAR guidance, and preparation notes from this saved resume and job posting."}
+            Start an interactive mock interview with one question at a time, saved answers, and
+            hiring-manager style feedback. Static prep notes are still available below when generated.
           </p>
           {status === "failed" && !hasPrep && (
             <p className="mt-3 rounded-[14px] border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold leading-5 text-rose-900">
@@ -347,25 +349,30 @@ function InterviewPrepSection({
             </p>
           )}
         </div>
-        {hasPrep ? (
-          <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2">
+          <Link href={`/outputs/${outputId}/interview`} className="app-button-primary shrink-0">
+            Start mock interview
+          </Link>
+          {hasPrep ? (
+            <>
             <button type="button" onClick={copy} className="saved-doc-action">
               {copied ? "Copied" : "Copy"}
             </button>
             <button type="button" onClick={downloadTxt} className="saved-doc-action-primary">
               TXT
             </button>
-          </div>
-        ) : (
-          <button
-            type="button"
-            onClick={onGenerate}
-            disabled={busy}
-            className="app-button-primary shrink-0 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {busy ? "Generating..." : "Generate interview prep - 1 credit"}
-          </button>
-        )}
+            </>
+          ) : (
+            <button
+              type="button"
+              onClick={onGenerate}
+              disabled={busy}
+              className="app-button-ghost shrink-0 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {busy ? "Generating notes..." : "Generate prep notes - 1 credit"}
+            </button>
+          )}
+        </div>
       </div>
       {error && (
         <p className="rounded-[18px] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-900">

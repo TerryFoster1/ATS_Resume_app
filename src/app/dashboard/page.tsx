@@ -4,6 +4,7 @@ import AnalyticsEvent from "@/components/AnalyticsEvent";
 import DashboardApplications, { type DashboardApplication } from "@/components/DashboardApplications";
 import { getCreditBalance } from "@/lib/accountStorage";
 import { normalizeSavedApplicationTitle } from "@/lib/applicationMeta";
+import { readMockInterview } from "@/lib/mockInterview";
 import { createAdminSupabaseClient, createServerSupabaseClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -25,24 +26,28 @@ export default async function DashboardPage({
   const { data } = admin
     ? await admin
         .from("generated_outputs")
-        .select("id, job_title, company_name, created_at, resume_unlocked, cover_letter_unlocked, interview_prep_status, source_job_description")
+        .select("id, job_title, company_name, created_at, resume_unlocked, cover_letter_unlocked, interview_prep_status, source_job_description, analysis_snapshot")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false })
     : { data: [] };
 
-  const applications: DashboardApplication[] = (data ?? []).map((item) => ({
-    id: item.id,
-    jobTitle: normalizeSavedApplicationTitle({
-      title: item.job_title,
+  const applications: DashboardApplication[] = (data ?? []).map((item) => {
+    const mockInterview = readMockInterview(item.analysis_snapshot);
+    return {
+      id: item.id,
+      jobTitle: normalizeSavedApplicationTitle({
+        title: item.job_title,
+        companyName: item.company_name,
+        sourceJobDescription: item.source_job_description
+      }),
       companyName: item.company_name,
-      sourceJobDescription: item.source_job_description
-    }),
-    companyName: item.company_name,
-    createdAt: item.created_at,
-    resumeUnlocked: Boolean(item.resume_unlocked),
-    coverLetterUnlocked: Boolean(item.cover_letter_unlocked),
-    interviewPrepReady: item.interview_prep_status === "completed"
-  }));
+      createdAt: item.created_at,
+      resumeUnlocked: Boolean(item.resume_unlocked),
+      coverLetterUnlocked: Boolean(item.cover_letter_unlocked),
+      interviewPrepReady: item.interview_prep_status === "completed",
+      mockInterviewStatus: mockInterview?.status ?? "not_started"
+    };
+  });
   const unlockedExports = applications.reduce(
     (total, item) => total + Number(item.resumeUnlocked) + Number(item.coverLetterUnlocked),
     0

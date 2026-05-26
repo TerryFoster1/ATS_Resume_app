@@ -11,6 +11,7 @@ export type DashboardApplication = {
   resumeUnlocked: boolean;
   coverLetterUnlocked: boolean;
   interviewPrepReady: boolean;
+  mockInterviewStatus?: "not_started" | "in_progress" | "completed";
 };
 
 export default function DashboardApplications({
@@ -76,6 +77,9 @@ export default function DashboardApplications({
                 </span>
                 <span className={item.interviewPrepReady ? "dashboard-badge is-ready" : "dashboard-badge is-pending"}>
                   Interview prep {item.interviewPrepReady ? "ready" : "pending"}
+                </span>
+                <span className={item.mockInterviewStatus === "completed" ? "dashboard-badge is-ready" : item.mockInterviewStatus === "in_progress" ? "dashboard-badge is-pending" : "dashboard-badge"}>
+                  Mock interview {item.mockInterviewStatus === "completed" ? "complete" : item.mockInterviewStatus === "in_progress" ? "in progress" : "not started"}
                 </span>
               </div>
             </div>
