@@ -171,8 +171,11 @@ export default function ResumeWizard({ initialStep }: { initialStep: Step }) {
       {(step === "intake" || step === "intent") && (
         <JobIntentFlow
           initialContextText={state.jobPostText}
-          onResumeIntent={(jobPostText) => {
-            updateState({ jobPostText });
+          onResumeIntent={(jobPostText, resumeText) => {
+            updateState({
+              jobPostText,
+              ...(resumeText ? { resumeText } : {})
+            });
             setStep("resume");
             window.history.replaceState(null, "", "/?step=resume");
           }}

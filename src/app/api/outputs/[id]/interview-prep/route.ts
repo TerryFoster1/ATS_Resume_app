@@ -51,14 +51,18 @@ export async function POST(
   }
 
   try {
+    const snapshot = isRecord(output.analysis_snapshot) ? output.analysis_snapshot : {};
+    const jobContext = isRecord(snapshot.jobContext) ? snapshot.jobContext : {};
+    const resumeContext =
+      typeof jobContext.resumeText === "string" ? jobContext.resumeText : output.resume_text ?? "";
     const interviewPrep = await generateInterviewPrep({
       jobDescription: output.source_job_description ?? "",
-      tailoredResume: output.resume_text ?? "",
+      tailoredResume: resumeContext,
       coverLetter: output.cover_letter_text ?? "",
       clarificationAnswers: output.clarification_answers
     });
     const nextSnapshot = {
-      ...(isRecord(output.analysis_snapshot) ? output.analysis_snapshot : {}),
+      ...snapshot,
       interviewPrep,
       interviewPrepGeneratedAt: new Date().toISOString()
     };

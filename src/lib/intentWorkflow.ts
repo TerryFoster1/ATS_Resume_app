@@ -10,6 +10,8 @@ export type JobContext = {
   companyName?: string;
   jobPosting?: string;
   currentBackground?: string;
+  resumeText?: string;
+  resumeFileName?: string;
 };
 
 export const INTENT_JOB_CONTEXT_KEY = "career-ladder:intent-job-context";

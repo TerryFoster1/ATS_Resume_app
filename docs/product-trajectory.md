@@ -12,26 +12,34 @@ The emotional promise is:
 
 > You may already have relevant experience. Career Ladder helps you understand, position, and communicate it for the roles you actually want.
 
-## Intent-First Product Model
+## Goal-First Service Model
 
-The product should start with the opportunity, not the document.
+The product should start with the user's goal, then collect the opportunity context needed to support that service.
 
-User enters one or more of:
+The first screen should ask:
 
-- job title
-- company
-- full job posting
+```text
+What would you like help with?
+```
 
-Then the user chooses what they want help with:
+Career Ladder should present clear career services:
 
 - Tailor resume
 - Generate resume + cover letter
 - Generate interview prep
 - Practice mock interview
 - Explore skill gaps / career pathway
-- Future application tracking and analytics
+- Track applications and offers
 
-This model keeps the existing resume workflow intact while placing it inside a larger preparation system. The target role or job posting becomes the shared context for every module.
+After the goal is selected, the app asks for job context:
+
+- job title
+- company
+- full job posting
+
+Then it asks for experience context only when it improves the selected service. Resume upload should be the primary experience input for resume, interview, and pathway services because it lets Career Ladder extract real evidence instead of forcing users through a manual questionnaire.
+
+This model keeps the existing resume workflow intact while placing it inside a larger preparation system. The selected goal, target role, job posting, and available resume evidence become the shared context for every module.
 
 ## Central Object: The Opportunity
 
@@ -50,6 +58,32 @@ That opportunity context can power:
 - future application performance analytics
 
 Over time, saved outputs should feel less like disposable generated files and more like tracked hiring opportunities with materials, preparation, status, and next steps.
+
+## Contextual Upsell Strategy
+
+Upsells should be framed as helpful adjacent services, not generic ecommerce prompts.
+
+Examples:
+
+- After resume tailoring: offer a tailored cover letter for the same role.
+- After interview prep: offer a mock interview using those questions.
+- After pathway analysis: offer resume tailoring toward the chosen path.
+- After saved opportunity creation: offer tracking, interview status, and next-step planning.
+
+Credit language can remain in the mechanics, but product copy should emphasize the service outcome being unlocked.
+
+## Onboarding Guardrails
+
+The goal-first flow should remain an orchestration layer above the working engines.
+
+Guardrails:
+
+- Do not ask for every possible input up front.
+- Ask for resume upload only when it improves the selected service.
+- Treat resume upload as intelligent experience extraction, not document processing.
+- Keep optional context secondary and short.
+- Preserve shared context so users do not repeat role, company, posting, or resume evidence across services.
+- Keep application tracking visible as a future workspace concept without pretending the full pipeline system is complete.
 
 ## SEO, AEO, and GEO Strategy
 

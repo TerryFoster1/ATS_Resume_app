@@ -57,6 +57,10 @@ export async function POST(
       targetRole: output.job_title ?? "Untitled application",
       companyName: output.company_name,
       jobPosting: output.source_job_description,
+      resumeText:
+        typeof jobContext.resumeText === "string"
+          ? jobContext.resumeText
+          : output.resume_text,
       currentBackground:
         typeof jobContext.currentBackground === "string"
           ? jobContext.currentBackground

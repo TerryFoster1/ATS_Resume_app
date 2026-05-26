@@ -12,6 +12,8 @@ const Body = z
     companyName: z.string().trim().max(120).optional(),
     jobPosting: z.string().trim().max(20000).optional(),
     currentBackground: z.string().trim().max(12000).optional(),
+    resumeText: z.string().trim().max(30000).optional(),
+    resumeFileName: z.string().trim().max(180).optional(),
     intent: z.enum(["interviewPrep", "mockInterview", "careerPathway"])
   })
   .refine(
@@ -49,7 +51,9 @@ export async function POST(request: Request) {
       targetRole: parsed.data.targetRole ?? "",
       companyName: parsed.data.companyName,
       currentBackground: parsed.data.currentBackground,
-      jobPosting: parsed.data.jobPosting
+      jobPosting: parsed.data.jobPosting,
+      resumeText: parsed.data.resumeText,
+      resumeFileName: parsed.data.resumeFileName
     })
   );
   const jobTitle = parsed.data.targetRole?.trim() || inferredMeta.jobTitle || "Untitled application";
@@ -58,7 +62,9 @@ export async function POST(request: Request) {
     targetRole: jobTitle === "Untitled application" ? "" : jobTitle,
     companyName,
     currentBackground: parsed.data.currentBackground,
-    jobPosting: parsed.data.jobPosting
+    jobPosting: parsed.data.jobPosting,
+    resumeText: parsed.data.resumeText,
+    resumeFileName: parsed.data.resumeFileName
   });
   const title = buildApplicationTitle({
     jobTitle,
@@ -84,6 +90,9 @@ export async function POST(request: Request) {
         companyName: companyName ?? null,
         hasFullPosting: Boolean(parsed.data.jobPosting?.trim()),
         hasCurrentBackground: Boolean(parsed.data.currentBackground?.trim()),
+        hasResumeContext: Boolean(parsed.data.resumeText?.trim()),
+        resumeFileName: parsed.data.resumeFileName?.trim() || null,
+        resumeText: parsed.data.resumeText?.trim() || null,
         currentBackground: parsed.data.currentBackground?.trim() || null
       },
       pathway:
@@ -92,7 +101,8 @@ export async function POST(request: Request) {
               targetRole: jobTitle,
               companyName,
               jobPosting: parsed.data.jobPosting,
-              currentBackground: parsed.data.currentBackground
+              currentBackground: parsed.data.currentBackground,
+              resumeText: parsed.data.resumeText
             })
           : undefined
     }

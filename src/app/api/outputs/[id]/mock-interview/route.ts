@@ -61,9 +61,14 @@ async function startInterview(access: OutputAccess) {
 
   try {
     const snapshot = toRecord(access.output.analysis_snapshot);
+    const jobContext = isRecord(snapshot.jobContext) ? snapshot.jobContext : {};
+    const resumeContext =
+      typeof jobContext.resumeText === "string"
+        ? jobContext.resumeText
+        : access.output.resume_text ?? "";
     const questions = await generateMockInterviewQuestions({
       jobDescription: access.output.source_job_description ?? "",
-      tailoredResume: access.output.resume_text ?? "",
+      tailoredResume: resumeContext,
       coverLetter: access.output.cover_letter_text ?? "",
       clarificationAnswers: access.output.clarification_answers,
       interviewPrep: typeof snapshot.interviewPrep === "string" ? snapshot.interviewPrep : null
@@ -154,10 +159,15 @@ async function finishInterview(access: OutputAccess) {
 
   try {
     const snapshot = toRecord(access.output.analysis_snapshot);
+    const jobContext = isRecord(snapshot.jobContext) ? snapshot.jobContext : {};
+    const resumeContext =
+      typeof jobContext.resumeText === "string"
+        ? jobContext.resumeText
+        : access.output.resume_text ?? "";
     const feedback = await evaluateMockInterview({
       context: {
         jobDescription: access.output.source_job_description ?? "",
-        tailoredResume: access.output.resume_text ?? "",
+        tailoredResume: resumeContext,
         coverLetter: access.output.cover_letter_text ?? "",
         clarificationAnswers: access.output.clarification_answers,
         interviewPrep: typeof snapshot.interviewPrep === "string" ? snapshot.interviewPrep : null

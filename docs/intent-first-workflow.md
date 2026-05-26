@@ -4,28 +4,51 @@ Implementation date: 2026-05-26
 
 ## Goal
 
-Career Ladder now has a safe orchestration layer above the existing resume workflow. The app can start with job context first, then let the user choose whether they want resume tailoring, resume plus cover letter, interview prep, mock interview practice, or a future skill-gap pathway.
+Career Ladder now has a safe orchestration layer above the existing resume workflow. The app starts with the user's goal, then gathers the job and experience context needed for resume tailoring, resume plus cover letter, interview prep, mock interview practice, career pathway analysis, or application tracking.
 
 This was implemented incrementally. The existing resume analysis, generation, saved outputs, auth, Stripe, credit, unlock, dashboard, and production routing systems were preserved.
 
 For the broader long-term product and SEO/AEO/GEO direction, see `docs/product-trajectory.md`.
 
-## New user flow
+## Service-oriented user flow
 
 1. User starts from `/?step=intake`.
-2. User enters one or more of:
+2. User selects the career service first:
+   - Tailor My Resume
+   - Resume + Cover Letter
+   - Prepare for an Interview
+   - Practice a Mock Interview
+   - Explore a Career Path
+   - Track Applications & Offers, beta workspace entry
+3. User adds job context:
    - target role / job title
    - company name optional
    - full job posting optional but recommended
-3. User chooses an intent:
-   - Tailor Resume
-   - Resume + Cover Letter
-   - Interview Prep
-   - Mock Interview
-   - Career Pathway
-4. Resume intents route into the existing resume upload workflow with the job context preserved.
-5. Interview Prep creates a saved opportunity from the job context and opens the saved output page with interview prep generation queued.
-6. Mock Interview creates a saved opportunity from the job context and opens the existing interactive mock interview route with question generation queued.
+4. User adds experience context only when it helps the selected service:
+   - resume tailoring: recommended, then continues into the existing resume step
+   - resume plus cover letter: required by the existing resume workflow
+   - interview prep and mock interview: optional but recommended
+   - career pathway: optional but strongly encouraged
+   - tracking: not requested up front
+5. Resume intents route into the existing resume upload workflow with the job context and any uploaded resume text preserved.
+6. Interview Prep creates a saved opportunity from the job context and opens the saved output page with interview prep generation queued.
+7. Mock Interview creates a saved opportunity from the job context and opens the existing interactive mock interview route with question generation queued.
+8. Career Pathway creates a saved opportunity with a free pathway preview and optional 1-credit personalized unlock.
+
+## UX philosophy
+
+The onboarding flow is now goal-first instead of form-first. Career Ladder asks what the user is trying to accomplish before requesting job or experience inputs. This makes the product feel more like a set of recruiter-aware career services and less like a linear resume wizard.
+
+Resume upload is treated as the primary experience input when it meaningfully improves the selected service. The optional text area is now secondary context for details the resume may not explain, such as career changes, outdated resumes, or unlisted freelance work.
+
+The selected goal adapts the role-context copy so the user understands why the app is asking for a posting:
+
+- resume flows: recruiter expectations and positioning
+- interview flows: realistic recruiter-style questions
+- pathway: comparison against real hiring expectations
+- tracking: opportunity workspace context
+
+The service framing also prepares future monetization copy around outcomes and unlocks rather than abstract credit consumption.
 
 ## Files changed
 
@@ -70,6 +93,8 @@ career-ladder:intent-job-context
 ```
 
 This lets the app preserve target role, company, and posting through auth redirects for standalone interview prep or mock interview starts.
+
+The saved session context can also include uploaded resume text and file name. Standalone interview prep, mock interview, and pathway records keep that resume evidence in `analysis_snapshot.jobContext` so saved-output pages do not show blank generated resume panels as if a document had already been produced.
 
 ### Saved opportunity records
 
@@ -125,6 +150,8 @@ The prompt now supports job-context-only records. If no resume or cover letter e
 - No cover letter generation pipeline was rewritten.
 - No export or unlock entitlement logic was changed.
 - Middleware and canonical routing were not changed.
+- No new Stripe products or service-specific pricing model was added.
+- Application tracking remains a beta workspace entry rather than a full pipeline system.
 
 ## Credit behavior
 
@@ -200,8 +227,8 @@ curl.exe -s "http://localhost:3011/?step=intake" --max-time 15 -o intent-intake.
 Result: PASS. Initial HTML contains:
 
 ```text
-Prepare for the jobs you actually want.
-Choose what to work on
+What would you like help with?
+Tailor My Resume
 ```
 
 Checked old resume-first route:
@@ -253,7 +280,7 @@ curl.exe -s "http://localhost:3013/?step=resume" --max-time 15
 Results:
 
 - `/` renders the updated homepage positioning and links into the new intake flow.
-- `/?step=intake` renders the role/posting intake screen and "Choose what to work on" action.
+- `/?step=intake` renders the goal-first service selection screen.
 - `/?step=intent` safely falls back to the intake screen when no prior job context exists, avoiding a blank intent screen.
 - `/?step=resume` still renders the existing resume-first upload path.
 
@@ -352,3 +379,29 @@ The `401` results are expected for anonymous requests because standalone intervi
 - Career Pathway is now live as a lightweight MVP; the fuller pathway system remains future work.
 - The old resume workflow still expects a real resume upload before document generation.
 - The dashboard now receives opportunity-only saved records, but a fuller opportunity pipeline redesign remains future work.
+
+## Goal-first refinement - 2026-05-26
+
+The onboarding layer was refined from a role-intake-first flow into a service-first flow.
+
+The first screen now asks what the user wants help with, then gathers context based on that goal. This keeps Career Ladder positioned as a recruiter-aware career platform instead of a generic form sequence.
+
+Hierarchy decisions:
+
+- Step 1: select the career service.
+- Step 2: add role/company/posting context with goal-specific copy.
+- Step 3: add experience context only when it improves the selected service.
+- Resume upload is the primary experience signal for resume, interview, mock interview, and pathway services.
+- Additional context remains optional and visually secondary.
+
+What was intentionally not changed:
+
+- No resume generation, cover letter generation, interview prep, mock interview, pathway, Stripe, auth, middleware, dashboard, or unlock engine was rewritten.
+- No new pricing model or Stripe product was added.
+- Application tracking remains a beta workspace entry, not a full application pipeline.
+
+Validation:
+
+- `npm.cmd run build`: PASS
+- `npm.cmd run typecheck`: PASS
+- Local production route checks: `/?step=intake`, `/?step=intent`, and `/?step=resume` returned `200`.

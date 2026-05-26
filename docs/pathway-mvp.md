@@ -15,20 +15,23 @@ The MVP is meant to validate:
 
 ## User Flow
 
-In the intent-first workflow, users can now choose:
+In the goal-first workflow, users can now choose:
 
 ```text
-Career Pathway
+Explore a Career Path
 ```
 
-The intake screen accepts:
+The orchestration flow asks users to choose the pathway service before requesting role details. This keeps the experience from feeling like a generic form and frames it as a career guidance service.
+
+The pathway flow accepts:
 
 - target role / job title
 - optional company
 - optional full job posting
-- optional current background / experience text
+- optional resume upload as the primary experience signal
+- optional additional context text as a secondary signal
 
-Resume upload is not required.
+Resume upload is not required, but it is strongly encouraged. The resume gives Career Ladder real evidence for transferable strengths and likely gaps. The additional text area is only for context the resume may not explain, such as career changes, outdated resumes, or unlisted freelance work.
 
 ## Architecture Decisions
 
@@ -44,8 +47,12 @@ The saved record stores:
 - `analysis_snapshot.workflowIntent = "careerPathway"`
 - `analysis_snapshot.opportunityOnly = true`
 - `analysis_snapshot.pathway`
+- optional `analysis_snapshot.jobContext.resumeText`
+- optional `analysis_snapshot.jobContext.resumeFileName`
 
 This keeps dashboard and saved-output reopening compatible with existing persistence.
+
+Resume evidence is intentionally stored in `analysis_snapshot.jobContext` for opportunity-only records rather than `resume_text`. That prevents saved pathway records from rendering a resume document panel before the user has generated an actual tailored resume.
 
 ### Pathway logic
 
@@ -108,6 +115,15 @@ The route:
 - stores the result in `analysis_snapshot.pathway`
 
 No Stripe products, prices, checkout routes, or webhook logic were changed.
+
+## Service Positioning
+
+The pathway MVP should feel like a lightweight career intelligence service:
+
+- free preview: high-level role expectations and one transferable insight
+- premium unlock: personalized gap analysis and path recommendations for 1 credit
+
+The UI should describe the value as unlocking a personalized pathway analysis, not simply spending a credit.
 
 ## Saved Opportunity Behavior
 
@@ -257,3 +273,25 @@ Pathway-specific follow-up still recommended:
 - Use a signed-in QA account with known credits to unlock a pathway analysis in production.
 - Confirm refresh and dashboard reopen do not consume another credit.
 - Confirm a 0-credit signed-in account sees the existing pricing path from pathway unlock.
+
+## Goal-first UX refinement - 2026-05-26
+
+The pathway entry point now appears as `Explore a Career Path` in the first service-selection screen.
+
+UX decisions:
+
+- The user chooses the pathway service before seeing role and experience fields.
+- Role/company/posting context explains that the posting is used to compare experience against real hiring expectations.
+- Resume upload is strongly encouraged as the primary experience signal.
+- Additional context is secondary and intended for career-change notes, outdated resume caveats, or unlisted experience.
+
+Storage behavior:
+
+- Uploaded resume evidence for opportunity-only pathway records is stored in `analysis_snapshot.jobContext`.
+- It is not stored as generated `resume_text`, so saved pathway records do not show a resume panel until an actual resume is generated.
+
+Validation:
+
+- `npm.cmd run build`: PASS
+- `npm.cmd run typecheck`: PASS
+- Local production checks confirmed the goal-first entry and old resume-first route still return `200`.

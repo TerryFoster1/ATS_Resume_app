@@ -23,6 +23,7 @@ export type PathwayInput = {
   companyName?: string | null;
   jobPosting?: string | null;
   currentBackground?: string | null;
+  resumeText?: string | null;
 };
 
 const DEFAULT_REQUIREMENTS = [
@@ -57,6 +58,7 @@ export async function generatePathwayAnalysis(input: PathwayInput): Promise<Path
       user: [
         `Target role: ${role}`,
         input.companyName ? `Company: ${input.companyName}` : "",
+        input.resumeText ? `Resume evidence:\n${input.resumeText.slice(0, 12000)}` : "",
         input.currentBackground ? `Current background: ${input.currentBackground}` : "",
         input.jobPosting ? `Job posting:\n${input.jobPosting}` : "",
         "",
@@ -145,7 +147,7 @@ function inferCommonRequirements(input: PathwayInput): string[] {
 }
 
 function buildTransferableInsight(input: PathwayInput): string {
-  const background = input.currentBackground?.toLowerCase() ?? "";
+  const background = `${input.resumeText ?? ""}\n${input.currentBackground ?? ""}`.toLowerCase();
   if (/\b(retail|restaurant|hospitality|server|chef|barista)\b/.test(background)) {
     return "Your customer-facing background may already support relationship management, prioritization under pressure, conflict resolution, and service recovery examples if you frame them in the language of the target role.";
   }
