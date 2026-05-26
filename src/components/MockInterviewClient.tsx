@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ACCOUNT_CREDITS_REFRESH_EVENT } from "@/components/AccountCreditIndicator";
 import { trackEvent } from "@/lib/analytics";
 import type {
@@ -10,6 +10,15 @@ import type {
   MockInterviewQuestion,
   MockInterviewState
 } from "@/lib/mockInterview";
+
+const GENERATION_STAGES = [
+  "Reading the job description...",
+  "Identifying what the hiring manager will likely test...",
+  "Comparing the role against your tailored resume...",
+  "Finding weak spots and follow-up risks...",
+  "Building recruiter-style questions...",
+  "Preparing answer-evaluation criteria..."
+];
 
 type MockInterviewClientProps = {
   outputId: string;
@@ -33,15 +42,46 @@ export default function MockInterviewClient({
   const [showHint, setShowHint] = useState(false);
   const [busy, setBusy] = useState<"start" | "save" | "finish" | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [generationStage, setGenerationStage] = useState(0);
+  const [generationStartedAt, setGenerationStartedAt] = useState<number | null>(null);
+  const [generationLongRunning, setGenerationLongRunning] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
 
   const questions = mockInterview?.questions ?? [];
   const currentQuestion = questions[currentIndex];
   const progress = questions.length ? Math.round(((currentIndex + 1) / questions.length) * 100) : 0;
   const completed = mockInterview?.status === "completed" && mockInterview.feedback;
 
+  useEffect(() => {
+    if (busy !== "start") {
+      setGenerationStage(0);
+      setGenerationStartedAt(null);
+      setGenerationLongRunning(false);
+      return;
+    }
+    if (!generationStartedAt) setGenerationStartedAt(Date.now());
+
+    const stageTimer = window.setInterval(() => {
+      setGenerationStage((index) => Math.min(index + 1, GENERATION_STAGES.length - 1));
+    }, 8500);
+    const longTimer = window.setTimeout(() => {
+      setGenerationLongRunning(true);
+    }, 60000);
+
+    return () => {
+      window.clearInterval(stageTimer);
+      window.clearTimeout(longTimer);
+    };
+  }, [busy, generationStartedAt]);
+
   async function startInterview() {
+    if (busy === "start") return;
     setBusy("start");
     setError(null);
+    setStatusMessage(null);
+    setGenerationStage(0);
+    setGenerationLongRunning(false);
+    setGenerationStartedAt(Date.now());
     try {
       const response = await fetch(`/api/outputs/${outputId}/mock-interview`, {
         method: "POST",
@@ -67,9 +107,38 @@ export default function MockInterviewClient({
       trackEvent("interview_mock_started", { outputId });
       window.dispatchEvent(new Event(ACCOUNT_CREDITS_REFRESH_EVENT));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not start the mock interview.");
+      const recovered = await recoverExistingInterview();
+      if (!recovered) {
+        setError(err instanceof Error ? err.message : "Could not start the mock interview.");
+      }
     } finally {
       setBusy(null);
+    }
+  }
+
+  async function recoverExistingInterview() {
+    setStatusMessage("Checking whether your questions were saved...");
+    try {
+      const response = await fetch(`/api/outputs/${outputId}/mock-interview`, {
+        cache: "no-store"
+      });
+      const data = (await response.json().catch(() => ({}))) as {
+        mockInterview?: MockInterviewState | null;
+      };
+      if (response.ok && data.mockInterview?.questions?.length) {
+        setMockInterview(data.mockInterview);
+        const index = firstUnansweredIndex(data.mockInterview);
+        setCurrentIndex(index);
+        setDraft(answerFor(data.mockInterview.answers, data.mockInterview.questions[index]?.id ?? ""));
+        setShowHint(false);
+        setStatusMessage("Recovered your saved mock interview questions.");
+        return true;
+      }
+      setStatusMessage("No generated questions have been saved yet.");
+      return false;
+    } catch {
+      setStatusMessage("Could not check saved status right now.");
+      return false;
     }
   }
 
@@ -220,7 +289,15 @@ export default function MockInterviewClient({
         </p>
       )}
 
-      {!mockInterview?.questions.length ? (
+      {!mockInterview?.questions.length && busy === "start" ? (
+        <GenerationProgressPanel
+          stageIndex={generationStage}
+          longRunning={generationLongRunning}
+          statusMessage={statusMessage}
+          onCheckStatus={() => void recoverExistingInterview()}
+          onTryAgain={() => void recoverExistingInterview()}
+        />
+      ) : !mockInterview?.questions.length ? (
         <StartPanel busy={busy === "start"} onStart={startInterview} />
       ) : completed ? (
         <ResultsPanel
@@ -306,6 +383,83 @@ export default function MockInterviewClient({
         <Link href="/dashboard" className="text-sm font-bold text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]">
           Dashboard
         </Link>
+      </div>
+    </section>
+  );
+}
+
+function GenerationProgressPanel({
+  stageIndex,
+  longRunning,
+  statusMessage,
+  onCheckStatus,
+  onTryAgain
+}: {
+  stageIndex: number;
+  longRunning: boolean;
+  statusMessage: string | null;
+  onCheckStatus: () => void;
+  onTryAgain: () => void;
+}) {
+  const boundedStageIndex = Math.min(stageIndex, GENERATION_STAGES.length - 1);
+  const progress = Math.max(12, Math.round(((boundedStageIndex + 1) / GENERATION_STAGES.length) * 88));
+
+  return (
+    <section className="mock-generation-panel" aria-live="polite">
+      <div className="mock-generation-orbit" aria-hidden>
+        <span />
+      </div>
+      <div className="mock-generation-content">
+        <p className="app-kicker">Building your mock interview</p>
+        <h2 className="mt-3 app-heading text-2xl sm:text-3xl">
+          {longRunning
+            ? "This is taking longer than expected, but we are still working."
+            : "Career Ladder is thinking through the interview."}
+        </h2>
+        <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--color-text-muted)]">
+          This usually takes 20-60 seconds. Your saved application is still available if you
+          leave and come back later.
+        </p>
+
+        <div className="mock-generation-progress" aria-hidden>
+          <span style={{ width: `${progress}%` }} />
+        </div>
+
+        <ol className="mock-generation-steps">
+          {GENERATION_STAGES.map((stage, index) => (
+            <li
+              key={stage}
+              className={
+                index < boundedStageIndex
+                  ? "is-complete"
+                  : index === boundedStageIndex
+                    ? "is-active"
+                    : ""
+              }
+            >
+              <span>{index + 1}</span>
+              <p>{stage}</p>
+            </li>
+          ))}
+        </ol>
+
+        {statusMessage && (
+          <p className="mock-generation-status">{statusMessage}</p>
+        )}
+
+        {longRunning && (
+          <div className="mock-generation-actions">
+            <button type="button" className="app-button-ghost px-4 py-2 text-sm" onClick={onCheckStatus}>
+              Check status
+            </button>
+            <button type="button" className="app-button-ghost px-4 py-2 text-sm" onClick={onTryAgain}>
+              Try again
+            </button>
+            <Link href="/dashboard" className="app-button-ghost px-4 py-2 text-sm">
+              Back to dashboard
+            </Link>
+          </div>
+        )}
       </div>
     </section>
   );

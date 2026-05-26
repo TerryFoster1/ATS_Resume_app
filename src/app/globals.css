@@ -1305,6 +1305,171 @@ body {
     padding: 8px 12px;
   }
 
+  .mock-generation-panel {
+    position: relative;
+    overflow: hidden;
+    display: grid;
+    min-height: 420px;
+    border-radius: 34px;
+    border: 1px solid rgba(196, 213, 229, 0.72);
+    background:
+      radial-gradient(circle at 18% 10%, rgba(47, 128, 237, 0.14), transparent 28%),
+      radial-gradient(circle at 88% 30%, rgba(64, 179, 162, 0.12), transparent 32%),
+      linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(244, 249, 252, 0.92));
+    box-shadow: 0 28px 80px rgba(17, 35, 63, 0.1);
+    padding: clamp(22px, 4vw, 38px);
+  }
+
+  .mock-generation-orbit {
+    position: absolute;
+    right: clamp(18px, 6vw, 70px);
+    top: clamp(18px, 5vw, 58px);
+    height: 120px;
+    width: 120px;
+    border-radius: 999px;
+    border: 1px solid rgba(47, 128, 237, 0.16);
+    background: rgba(255, 255, 255, 0.44);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      0 18px 48px rgba(47, 128, 237, 0.12);
+  }
+
+  .mock-generation-orbit::before,
+  .mock-generation-orbit::after {
+    content: "";
+    position: absolute;
+    inset: 16px;
+    border-radius: inherit;
+    border: 1px solid rgba(64, 179, 162, 0.2);
+  }
+
+  .mock-generation-orbit::after {
+    inset: 38px;
+    background: linear-gradient(135deg, #2f80ed, #40b3a2);
+    border: 0;
+    animation: mock-pulse 1.8s ease-in-out infinite;
+  }
+
+  .mock-generation-orbit span {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    height: 10px;
+    width: 10px;
+    border-radius: 999px;
+    background: #2f80ed;
+    transform-origin: 0 0;
+    animation: mock-orbit 2.2s linear infinite;
+  }
+
+  .mock-generation-content {
+    position: relative;
+    z-index: 1;
+    max-width: 780px;
+  }
+
+  .mock-generation-progress {
+    margin-top: 24px;
+    height: 10px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: rgba(230, 237, 244, 0.92);
+  }
+
+  .mock-generation-progress span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #2f80ed, #40b3a2);
+    transition: width 520ms ease;
+  }
+
+  .mock-generation-steps {
+    margin-top: 24px;
+    display: grid;
+    gap: 12px;
+  }
+
+  .mock-generation-steps li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #7a8aa0;
+    font-size: 14px;
+    font-weight: 750;
+    line-height: 1.45;
+  }
+
+  .mock-generation-steps li span {
+    display: inline-flex;
+    height: 28px;
+    width: 28px;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: #edf3f8;
+    color: #7a8aa0;
+    font-size: 11px;
+    font-weight: 950;
+  }
+
+  .mock-generation-steps li.is-complete,
+  .mock-generation-steps li.is-active {
+    color: #11233f;
+  }
+
+  .mock-generation-steps li.is-complete span {
+    background: rgba(64, 179, 162, 0.14);
+    color: #22796f;
+  }
+
+  .mock-generation-steps li.is-active span {
+    background: #11233f;
+    color: #fff;
+    box-shadow: 0 10px 22px rgba(17, 35, 63, 0.16);
+  }
+
+  .mock-generation-status {
+    margin-top: 18px;
+    width: fit-content;
+    border-radius: 18px;
+    background: rgba(238, 246, 255, 0.82);
+    color: #245f9f;
+    font-size: 13px;
+    font-weight: 850;
+    line-height: 1.5;
+    padding: 10px 13px;
+  }
+
+  .mock-generation-actions {
+    margin-top: 22px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  @keyframes mock-orbit {
+    from {
+      transform: rotate(0deg) translateX(58px) translateY(-5px);
+    }
+    to {
+      transform: rotate(360deg) translateX(58px) translateY(-5px);
+    }
+  }
+
+  @keyframes mock-pulse {
+    0%,
+    100% {
+      opacity: 0.72;
+      transform: scale(0.9);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.08);
+    }
+  }
+
   .mock-interview-stage {
     display: grid;
     gap: 18px;
@@ -2538,6 +2703,7 @@ body {
     .hero-intelligence,
     .hero-insight-card,
     .hero-document,
+    .mock-generation-panel,
     .hero-signal-grid article {
       width: 100%;
       max-width: 100%;
@@ -2545,6 +2711,29 @@ body {
 
     .hero-insight-card {
       flex-direction: column;
+    }
+
+    .mock-generation-panel {
+      min-height: auto;
+      padding: 20px;
+    }
+
+    .mock-generation-orbit {
+      height: 86px;
+      width: 86px;
+      opacity: 0.55;
+      right: 10px;
+      top: 10px;
+    }
+
+    .mock-generation-orbit span {
+      animation-name: none;
+      display: none;
+    }
+
+    .mock-generation-steps li {
+      align-items: flex-start;
+      font-size: 13px;
     }
 
     .hero-recruiter-scene {
