@@ -8,6 +8,8 @@ Career Ladder now has a safe orchestration layer above the existing resume workf
 
 This was implemented incrementally. The existing resume analysis, generation, saved outputs, auth, Stripe, credit, unlock, dashboard, and production routing systems were preserved.
 
+For the broader long-term product and SEO/AEO/GEO direction, see `docs/product-trajectory.md`.
+
 ## New user flow
 
 1. User starts from `/?step=intake`.

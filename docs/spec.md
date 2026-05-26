@@ -1,10 +1,12 @@
-# Career Ladder - Spec
+# Career Ladder - Product Spec
 
-A working spec for the V1 MVP.
+This spec began as the V1 resume workflow spec. It now sits under the broader product trajectory documented in `docs/product-trajectory.md`.
 
 ## Summary
 
-An application-prep platform that starts with a job posting or target role, helps users choose the right next step, and can generate tailored resumes, cover letters, interview prep, and mock interview practice around a specific opportunity.
+Career Ladder is a recruiter-aware career preparation and career intelligence platform. It starts with a job posting or target role, helps users choose the right next step, and can generate tailored resumes, cover letters, interview prep, and mock interview practice around a specific opportunity.
+
+The resume workflow remains important, but it is one module inside a broader career operating system.
 
 ## Problem
 
@@ -23,12 +25,12 @@ Candidates often have relevant experience but their materials do not frame it cl
 - As a job-seeker, I can see my tailored resume and cover letter and understand how they position my experience for the role.
 - As a job-seeker, I can copy or download the final outputs so that I can paste them into an application.
 
-## Features (v1)
+## Current Core Modules
 
 - [ ] Resume input — upload `.pdf` or `.docx`, or paste plain text
 - [ ] Extracted-text preview with inline editing when parsing looks messy
 - [ ] Job posting paste (plain text)
-- [ ] JD keyword / requirement extraction
+- [ ] Job requirement and recruiter-signal extraction
 - [ ] Resume-vs-JD gap analysis
 - [ ] Up to 3 targeted follow-up questions (up to 5 when gap score is high)
 - [ ] Tailored resume generation
@@ -36,35 +38,45 @@ Candidates often have relevant experience but their materials do not frame it cl
 - [ ] Internal formatting and quality validation
 - [ ] Check → revise → re-check loop (max 3 revise passes)
 - [ ] Results page with Copy and Download (TXT) per output
-- [ ] Honest framing: improves ATS compatibility, does not guarantee pass/hire
+- [ ] Honest framing: improves role positioning and document quality, does not guarantee interviews or hiring
 
-## Features (later)
+Additional current modules:
+
+- [ ] Intent-first intake before document generation
+- [ ] Standalone interview prep from job context
+- [ ] Mock interview practice tied to saved opportunities
+
+## Future Modules
 
 - [ ] DOCX download
 - [ ] Side-by-side diff view of original resume vs. tailored resume
-- [ ] Save/restore a session locally (opt-in, still no accounts)
 - [ ] Multi-language support
+- [ ] Skill-gap and career pathway analysis
+- [ ] Application tracking and pipeline analytics
+- [ ] Course/certification recommendation layer
+- [ ] Structured SEO content hubs
+
+Historical note: local-only session restore was a V1 assumption. The current product now has Supabase auth, saved outputs, credits, and dashboard persistence.
 
 ## Non-goals
 
-- Accounts, login, saved history, profiles
 - LinkedIn or social analysis
 - Job board scraping, recruiter tools
 - Subscriptions, payments, analytics dashboards
-- Any guarantee of ATS pass or hiring outcome
+- Any guarantee of interview selection or hiring outcome
 
 ## Platform and stack
 
 - Platform: web
 - Frontend: Next.js 14 App Router, TypeScript, Tailwind CSS
 - Backend: Next.js API routes (same repo)
-- Data: none — session state only (React state in the browser)
-- Hosting: local dev for MVP (`npm run dev`); Vercel-compatible later
-- Auth: none
+- Data: Supabase-backed account, credit, saved-output, and opportunity records where enabled
+- Hosting: Vercel
+- Auth: Supabase Auth
 
 ## Data model
 
-Session state only — nothing persisted. Shape in the browser:
+Historical V1 browser session shape:
 
 ```
 {
@@ -80,6 +92,8 @@ Session state only — nothing persisted. Shape in the browser:
 }
 ```
 
+Current implementation also persists saved opportunities and generated outputs in Supabase. Opportunity-only records currently reuse the saved-output model and store extra workflow metadata in `analysis_snapshot` to avoid a premature schema expansion.
+
 ## Key screens / flows
 
 1. **Landing** — short explanation, honest framing, "Start" button.
@@ -87,7 +101,7 @@ Session state only — nothing persisted. Shape in the browser:
 3. **Job posting step** — paste textarea.
 4. **Review gaps + follow-ups** — shows detected gaps and up to 3 targeted questions.
 5. **Generating…** — loading state while resume + cover letter are produced.
-6. **ATS check** — per-rule pass/fail; if any fail, revise-and-recheck loop runs automatically up to 3 passes.
+6. **Internal document check** — per-rule pass/fail; if any fail, revise-and-recheck loop runs automatically up to 3 passes.
 7. **Results** — tailored resume and cover letter side-by-side, Copy and Download buttons, report visible.
 
 ## Follow-up question logic
@@ -112,7 +126,7 @@ The checker returns a per-rule pass/fail with a short reason. Rules:
 5. Parseable work history — each role has company, title, dates, and at least one bullet.
 6. Parseable education — institution, degree/credential, year.
 7. Parseable skills — flat comma-or-line list, no nesting.
-8. ATS-friendly formatting — no emojis, no decorative unicode, no headers/footers, no page numbers in body, bullets limited to `-` or `•`.
+8. Recruiter- and parser-friendly formatting — no emojis, no decorative unicode, no headers/footers, no page numbers in body, bullets limited to `-` or `•`.
 9. Length sanity — resume ≤ ~800 words, cover letter ≤ ~400 words.
 
 If any rule fails, the failing rules and reasons are passed back to the LLM with an instruction to fix only those issues. Then re-run the checker. Max 3 revise passes. If still failing, show remaining warnings honestly.
@@ -136,3 +150,4 @@ If any rule fails, the failing rules and reasons are passed back to the LLM with
 - [ ] MVP — parsing, analysis, generation, validation, revise loop, results UI
 - [ ] Beta — real PDF/DOCX testing, prompt tuning, UX polish
 - [ ] Launch — if Terry decides to deploy
+
