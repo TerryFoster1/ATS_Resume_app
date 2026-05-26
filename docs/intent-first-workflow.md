@@ -22,7 +22,7 @@ For the broader long-term product and SEO/AEO/GEO direction, see `docs/product-t
    - Resume + Cover Letter
    - Interview Prep
    - Mock Interview
-   - Skill Gap / Career Pathway, disabled placeholder
+   - Career Pathway
 4. Resume intents route into the existing resume upload workflow with the job context preserved.
 5. Interview Prep creates a saved opportunity from the job context and opens the saved output page with interview prep generation queued.
 6. Mock Interview creates a saved opportunity from the job context and opens the existing interactive mock interview route with question generation queued.
@@ -305,7 +305,7 @@ The local production smoke check confirmed it still renders the existing resume 
 - Full browser automation against localhost was attempted with the in-app browser, but localhost navigation was blocked by the browser surface with `ERR_BLOCKED_BY_CLIENT`. Local production HTTP checks were used instead.
 - The standalone interview flows still require sign-in because saved opportunity records and credits are account-backed.
 - The long-term schema should eventually separate "opportunities" from generated document records instead of storing opportunity-only records in `generated_outputs`.
-- The Skill Gap / Career Pathway card remains intentionally disabled.
+- Career Pathway is now live as a lightweight preview-plus-unlock workflow.
 - Full end-to-end generation was not rerun in this focused pass because the request constrained changes away from core generation logic; the build and old route smoke checks confirmed the workflow was not structurally degraded.
 
 ### Recommended Phase 2 improvements
@@ -349,6 +349,6 @@ The `401` results are expected for anonymous requests because standalone intervi
 
 - Standalone interview prep and mock interview require sign-in because they create saved opportunity records and use the existing credit model.
 - Job-context-only opportunities reuse `generated_outputs` with empty resume and cover letter fields. This avoids a migration but is not the final long-term opportunity schema.
-- The disabled Skill Gap / Career Pathway card is a placeholder only.
+- Career Pathway is now live as a lightweight MVP; the fuller pathway system remains future work.
 - The old resume workflow still expects a real resume upload before document generation.
 - The dashboard now receives opportunity-only saved records, but a fuller opportunity pipeline redesign remains future work.

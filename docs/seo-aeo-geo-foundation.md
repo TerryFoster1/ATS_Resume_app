@@ -169,6 +169,7 @@ Results:
 
 - Build: PASS
 - Typecheck: PASS
+- Lint: NOT RUNNABLE without configuration. `npm.cmd run lint` opens Next.js' interactive ESLint setup prompt.
 
 Local production smoke checks:
 
@@ -178,3 +179,72 @@ Local production smoke checks:
 - `/interview-prep/account-manager-interview-questions` rendered publicly with canonical metadata and JSON-LD.
 - `/resume-help/how-to-tailor-a-resume-for-a-job-posting` rendered publicly with canonical metadata and JSON-LD.
 - `/sitemap.xml` returned canonical `https://www.careerladder.ca` URLs, including the new SEO pages.
+
+## Production-readiness QA pass - 2026-05-26
+
+Validated on commit `ed702a6` plus documentation-only QA fixes.
+
+### Public route checks
+
+Local production server confirmed:
+
+- `/` -> `200`
+- `/sitemap.xml` -> `200`
+- `/robots.txt` -> `200`
+- `/interview-prep/account-manager-interview-questions` -> `200`
+- `/resume-help/how-to-tailor-a-resume-for-a-job-posting` -> `200`
+- `/career-transitions/retail-to-customer-success` -> `200`
+- `/recruiter-insights/what-recruiters-look-for-in-a-resume` -> `200`
+- `/interview-prep/not-a-real-page` -> `404`
+- `/cover-letters/not-a-real-page` -> `404`
+- `/job-guides/not-a-real-page` -> `404`
+
+### Metadata checks
+
+Raw HTML for `/interview-prep/account-manager-interview-questions` includes:
+
+- `<title>`
+- meta description
+- canonical link
+- OpenGraph title
+- Twitter card
+- JSON-LD
+
+### Sitemap checks
+
+The sitemap includes only public canonical URLs. It includes the SEO pages and excludes:
+
+- `/dashboard`
+- `/auth`
+- `/api`
+- `/outputs`
+- `/checkout`
+
+### Free-preview funnel checks
+
+The Account Manager interview page renders the free preview panel with:
+
+- optional company input
+- optional posting excerpt input
+- one recruiter-style question
+- one recruiter insight
+- one preparation recommendation
+- CTA into the existing intent-first workflow
+
+No checkout, auth, or credit behavior is triggered from the public page itself.
+
+### Fixes made during QA
+
+- Updated stale planning copy in `docs/intent-first-workflow.md` that still described Career Pathway as a disabled placeholder.
+
+### Remaining known limitations
+
+- `/cover-letters/[slug]` and `/job-guides/[slug]` are route foundations only until real content objects are added.
+- Browser automation against localhost was not used in this pass; local production HTTP checks were used for route, status, metadata, sitemap, and API validation.
+
+### Production deployment checklist
+
+- Build from commit with the QA documentation fixes.
+- Verify production `/sitemap.xml` includes the new canonical SEO URLs.
+- Verify production `/interview-prep/account-manager-interview-questions` returns `200` and contains JSON-LD.
+- Submit or refresh sitemap in search tooling after production deploy.

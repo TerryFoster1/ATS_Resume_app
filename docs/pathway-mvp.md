@@ -159,9 +159,69 @@ Results:
 
 - Build: PASS
 - Typecheck: PASS
+- Lint: NOT RUNNABLE without configuration. `npm.cmd run lint` opens Next.js' interactive ESLint setup prompt.
 
 Smoke checks:
 
 - Existing home, intake, and resume routes still render.
 - Anonymous pathway opportunity creation returns `401 Sign in required`, matching the existing account-backed saved opportunity model.
 - Build output includes `POST /api/outputs/[id]/pathway`.
+
+## Production-readiness QA pass - 2026-05-26
+
+Validated on commit `ed702a6` plus documentation-only QA fixes.
+
+### Intent workflow checks
+
+Local production checks confirmed:
+
+- `/?step=intake` renders the role/posting intake screen.
+- `/?step=intent` falls back safely to intake when no saved browser job context exists.
+- `/?step=resume` still renders the old resume-first path.
+- Company-only input is not sufficient to continue; the UI copy asks for a target role or enough of the job posting.
+- Current background input is available for pathway context.
+
+### Career Pathway checks
+
+Anonymous API checks:
+
+- `POST /api/opportunities` with `intent: "careerPathway"` returns `401 Sign in required`.
+- `POST /api/outputs/fake-id/pathway` returns `401 Sign in required`.
+
+Expected behavior:
+
+- Signed-in users create a saved opportunity record.
+- The saved output page displays the free pathway preview instead of blank resume/cover panels.
+- Unlocking full pathway analysis costs 1 credit.
+- Reopening an already-unlocked pathway returns the stored full analysis and should not consume another credit.
+- Users without credits are routed through the existing pricing/checkout flow.
+
+### Existing workflow checks
+
+The build output still includes existing routes for:
+
+- resume generation APIs
+- interview prep
+- mock interview
+- unlock/export APIs
+- checkout APIs
+- dashboard and saved outputs
+
+No Stripe, auth, middleware, resume generation, cover letter generation, or credit product logic was changed.
+
+### Fixes made during QA
+
+- Updated stale planning copy in `docs/intent-first-workflow.md` that still described Career Pathway as a disabled placeholder.
+
+### Remaining known limitations
+
+- Full signed-in credit-consumption verification was not run in this local documentation QA pass.
+- Pathway records still reuse `generated_outputs` and `analysis_snapshot`; a first-class opportunities schema remains future work.
+- The full pathway analysis depends on Anthropic availability and the existing server-side LLM configuration.
+
+### Production deployment checklist
+
+- Verify signed-in user with 0 credits sees the existing pricing path from pathway unlock.
+- Verify signed-in user with credits can unlock full pathway analysis.
+- Refresh saved output and confirm the unlocked pathway does not consume another credit.
+- Confirm dashboard card shows `Pathway preview` or `Pathway unlocked`.
