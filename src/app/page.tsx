@@ -116,7 +116,7 @@ function LandingPage() {
             </ol>
           </div>
 
-          <div className="bg-gradient-to-br from-[#f5f9fd] via-white to-[#fff7ed] p-5 sm:p-8 lg:p-10">
+          <div className="hero-visual-zone p-5 sm:p-8 lg:p-10">
             <ProductPreview />
           </div>
         </div>
@@ -178,12 +178,23 @@ function LandingPage() {
 function ProductPreview() {
   return (
     <div className="hero-intelligence mx-auto max-w-xl">
-      <div className="hero-insight-card">
-        <div>
-          <p className="hero-label">Recruiter insight</p>
-          <h3>Transferable alignment found</h3>
+      <div className="hero-recruiter-scene" aria-label="Recruiter reviewing application materials">
+        <img
+          src="/career-ladder-recruiter-interview.jpg"
+          alt="Recruiter holding a resume during an interview conversation"
+        />
+        <div className="hero-photo-scrim" aria-hidden />
+        <div className="hero-insight-card hero-insight-card-overlay">
+          <div>
+            <p className="hero-label">Recruiter insight</p>
+            <h3>Transferable alignment found</h3>
+          </div>
+          <span>Close fit</span>
         </div>
-        <span>Close fit</span>
+        <div className="hero-review-note">
+          <p>Hiring signal</p>
+          <strong>Client communication, reporting, and follow-through are now visible.</strong>
+        </div>
       </div>
 
       <div className="hero-doc-stack" aria-label="Resume transformation preview">

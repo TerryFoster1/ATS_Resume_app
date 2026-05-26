@@ -1763,10 +1763,34 @@ body {
     box-shadow: 0 16px 38px rgba(16, 32, 51, 0.07);
   }
 
+  .hero-visual-zone {
+    position: relative;
+    overflow: hidden;
+    background:
+      radial-gradient(circle at 18% 14%, rgba(64, 179, 162, 0.13), transparent 26%),
+      radial-gradient(circle at 86% 20%, rgba(47, 128, 237, 0.14), transparent 30%),
+      linear-gradient(145deg, #f7fafc 0%, #ffffff 42%, #fff7ed 100%);
+  }
+
+  .hero-visual-zone::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(90deg, rgba(255, 255, 255, 0.68), transparent 28%),
+      linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.74));
+    pointer-events: none;
+  }
+
+  .hero-visual-zone > * {
+    position: relative;
+    z-index: 1;
+  }
+
   .hero-intelligence {
     position: relative;
     display: grid;
-    gap: 18px;
+    gap: 16px;
     isolation: isolate;
     animation: atmospheric-reveal 0.7s ease-out both;
   }
@@ -1784,6 +1808,47 @@ body {
     filter: blur(2px);
   }
 
+  .hero-recruiter-scene {
+    position: relative;
+    min-height: 330px;
+    overflow: hidden;
+    border-radius: 34px;
+    border: 1px solid rgba(211, 223, 235, 0.82);
+    background: #eef4f8;
+    box-shadow:
+      0 30px 80px rgba(17, 35, 63, 0.14),
+      inset 0 1px 0 rgba(255, 255, 255, 0.72);
+  }
+
+  .hero-recruiter-scene img {
+    position: absolute;
+    inset: 0;
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+    object-position: 47% 45%;
+    filter: saturate(0.92) contrast(0.98) brightness(1.03);
+    transform: scale(1.02);
+  }
+
+  .hero-photo-scrim {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(90deg, rgba(255, 255, 255, 0.84), rgba(255, 255, 255, 0.28) 38%, rgba(17, 35, 63, 0.2) 100%),
+      linear-gradient(180deg, rgba(248, 250, 252, 0.04), rgba(248, 250, 252, 0.72) 82%, rgba(248, 250, 252, 0.96));
+  }
+
+  .hero-recruiter-scene::after {
+    content: "";
+    position: absolute;
+    inset: auto -18% -28% 10%;
+    height: 210px;
+    border-radius: 999px;
+    background: radial-gradient(circle, rgba(47, 128, 237, 0.18), transparent 68%);
+    filter: blur(8px);
+  }
+
   .hero-insight-card {
     display: flex;
     align-items: flex-start;
@@ -1797,6 +1862,15 @@ body {
     backdrop-filter: blur(12px);
     animation: atmospheric-reveal 0.72s ease-out both;
     transition: transform 0.24s ease, box-shadow 0.24s ease, border-color 0.24s ease;
+  }
+
+  .hero-insight-card-overlay {
+    position: absolute;
+    left: 18px;
+    right: 18px;
+    top: 18px;
+    z-index: 2;
+    background: rgba(255, 255, 255, 0.86);
   }
 
   .hero-insight-card:hover {
@@ -1831,11 +1905,44 @@ body {
     font-weight: 900;
   }
 
+  .hero-review-note {
+    position: absolute;
+    right: 18px;
+    bottom: 18px;
+    z-index: 2;
+    max-width: 260px;
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.62);
+    background: rgba(17, 35, 63, 0.72);
+    padding: 16px;
+    color: #fff;
+    box-shadow: 0 22px 54px rgba(17, 35, 63, 0.22);
+    backdrop-filter: blur(16px);
+    animation: atmospheric-reveal 0.74s ease-out 0.16s both;
+  }
+
+  .hero-review-note p {
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .hero-review-note strong {
+    display: block;
+    margin-top: 8px;
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
   .hero-doc-stack {
     position: relative;
     display: grid;
     gap: 14px;
-    padding: 6px 0;
+    margin-top: -34px;
+    padding: 6px 0 0;
+    z-index: 2;
   }
 
   .hero-document {
@@ -2401,6 +2508,45 @@ body {
 
     .hero-insight-card {
       flex-direction: column;
+    }
+
+    .hero-recruiter-scene {
+      min-height: 300px;
+      border-radius: 28px;
+    }
+
+    .hero-recruiter-scene img {
+      object-position: 43% 46%;
+      transform: scale(1.12);
+    }
+
+    .hero-photo-scrim {
+      background:
+        linear-gradient(90deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.18) 44%, rgba(17, 35, 63, 0.16) 100%),
+        linear-gradient(180deg, rgba(248, 250, 252, 0.02), rgba(248, 250, 252, 0.76) 74%, rgba(248, 250, 252, 0.98));
+    }
+
+    .hero-insight-card-overlay {
+      left: 14px;
+      right: 14px;
+      top: 14px;
+      padding: 15px;
+    }
+
+    .hero-insight-card h3 {
+      font-size: 18px;
+    }
+
+    .hero-review-note {
+      left: 14px;
+      right: 14px;
+      bottom: 14px;
+      max-width: none;
+      padding: 14px;
+    }
+
+    .hero-doc-stack {
+      margin-top: -18px;
     }
 
     .hero-document-before,
