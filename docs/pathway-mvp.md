@@ -225,3 +225,35 @@ No Stripe, auth, middleware, resume generation, cover letter generation, or cred
 - Verify signed-in user with credits can unlock full pathway analysis.
 - Refresh saved output and confirm the unlocked pathway does not consume another credit.
 - Confirm dashboard card shows `Pathway preview` or `Pathway unlocked`.
+
+## Production deployment record - 2026-05-26
+
+Application commit deployed: `ad0fc48456e1e9d71d6fd5a618471a1bd0d7a8c5`
+
+Production URL: `https://www.careerladder.ca`
+
+Deployment status:
+
+- Vercel production deployment: Ready
+- Deployment URL: `https://ats-resume-hmwgx7ml4-terryfoster1s-projects.vercel.app`
+
+Validation:
+
+- `npm.cmd run build`: PASS
+- `npm.cmd run typecheck`: PASS after rerunning separately from the build
+- `npm.cmd run lint`: NOT RUNNABLE without interactive ESLint setup
+
+Production smoke evidence:
+
+- `/?step=intake` returned `200`.
+- `/?step=resume` returned `200`.
+- `/pricing` returned `200`.
+- `/auth` returned `200`.
+- `/dashboard` redirected anonymous traffic to `/auth?next=/dashboard`.
+- Vercel logs showed `/api/account/status` returning `200` during the smoke window.
+
+Pathway-specific follow-up still recommended:
+
+- Use a signed-in QA account with known credits to unlock a pathway analysis in production.
+- Confirm refresh and dashboard reopen do not consume another credit.
+- Confirm a 0-credit signed-in account sees the existing pricing path from pathway unlock.

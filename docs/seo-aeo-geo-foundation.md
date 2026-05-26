@@ -248,3 +248,52 @@ No checkout, auth, or credit behavior is triggered from the public page itself.
 - Verify production `/sitemap.xml` includes the new canonical SEO URLs.
 - Verify production `/interview-prep/account-manager-interview-questions` returns `200` and contains JSON-LD.
 - Submit or refresh sitemap in search tooling after production deploy.
+
+## Production deployment record - 2026-05-26
+
+Application commit deployed: `ad0fc48456e1e9d71d6fd5a618471a1bd0d7a8c5`
+
+Production URL: `https://www.careerladder.ca`
+
+Vercel deployment:
+
+- Deployment URL: `https://ats-resume-hmwgx7ml4-terryfoster1s-projects.vercel.app`
+- Target: production
+- Status: Ready
+- Aliases include `https://www.careerladder.ca` and `https://careerladder.ca`
+
+Pre-deploy validation:
+
+- `npm.cmd run build`: PASS
+- `npm.cmd run typecheck`: PASS after rerunning separately from the build. The first parallel run collided with `.next/types` generation.
+- `npm.cmd run lint`: NOT RUNNABLE without choosing an ESLint setup. `next lint` opens the interactive configuration prompt.
+
+Production smoke checks:
+
+- `/` -> `200`
+- `/sitemap.xml` -> `200`
+- `/robots.txt` -> `200`
+- `/interview-prep/account-manager-interview-questions` -> `200`
+- `/resume-help/how-to-tailor-a-resume-for-a-job-posting` -> `200`
+- `/pricing` -> `200`
+- `/auth` -> `200`
+- `/?step=resume` -> `200`
+- `/?step=intake` -> `200`
+- `/dashboard` redirects anonymous traffic to `/auth?next=/dashboard`
+
+SEO evidence:
+
+- Production `/sitemap.xml` uses canonical `https://www.careerladder.ca` URLs.
+- Production interview-prep HTML includes title, description, canonical, OpenGraph, Twitter metadata, and JSON-LD.
+- The Account Manager page renders the free-preview CTA `Unlock Full Interview Prep`.
+
+Deployment logs:
+
+- Vercel runtime logs during the smoke window showed expected `200` and `307` responses.
+- No Stripe webhook errors, Stripe environment errors, or API failures appeared in the fetched deployment logs.
+
+Known QA limitations:
+
+- No live paid Stripe checkout was run.
+- Google OAuth was not completed interactively in this deployment documentation pass; `/auth` renders and protected dashboard redirect behavior was verified.
+- Full signed-in resume generation, cover letter generation, pathway unlock, and saved-output reopen were not executed end-to-end during this deployment pass.
