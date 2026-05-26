@@ -6,7 +6,9 @@ import { useMemo, useState } from "react";
 export type DashboardApplication = {
   id: string;
   jobTitle: string;
+  displayTitle: string;
   companyName?: string | null;
+  applicationStatus: "Draft" | "Applied" | "Interviewing" | "Offer" | "Rejected" | "Archived";
   createdAt: string;
   resumeUnlocked: boolean;
   coverLetterUnlocked: boolean;
@@ -24,7 +26,7 @@ export default function DashboardApplications({
     const q = query.trim().toLowerCase();
     if (!q) return applications;
     return applications.filter((item) =>
-      `${item.jobTitle} ${item.companyName ?? ""}`.toLowerCase().includes(q)
+      `${item.jobTitle} ${item.companyName ?? ""} ${item.applicationStatus}`.toLowerCase().includes(q)
     );
   }, [applications, query]);
 
@@ -32,10 +34,10 @@ export default function DashboardApplications({
     <section className="dashboard-list-section">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="dashboard-eyebrow">Saved applications</p>
-          <h2 className="mt-2 text-2xl app-heading">Your active materials</h2>
+          <p className="dashboard-eyebrow">Hiring pipeline</p>
+          <h2 className="mt-2 text-2xl app-heading">Tracked opportunities</h2>
           <p className="mt-2 text-sm leading-6 text-[#5d6f85]">
-            Reopen prior drafts, exports, and cover letters from the roles you are pursuing.
+            Reopen each role workspace, see what assets are ready, and keep a lightweight view of where the opportunity stands.
           </p>
         </div>
         <label className="dashboard-search">
@@ -54,19 +56,23 @@ export default function DashboardApplications({
             key={item.id}
             href={`/outputs/${item.id}`}
             className="dashboard-application-card group"
+            aria-label={`Open ${item.displayTitle}`}
           >
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="dashboard-date-pill">
-                  {new Date(item.createdAt).toLocaleDateString()}
+                <span className={`dashboard-status-pill ${statusClassName(item.applicationStatus)}`}>
+                  {item.applicationStatus}
                 </span>
-                <span className="text-xs font-bold text-[#7a8aa0]">
-                  {item.companyName ?? "Company not detected"}
+                <span className="dashboard-date-pill">
+                  Created {new Date(item.createdAt).toLocaleDateString()}
                 </span>
               </div>
-              <h3 className="mt-3 text-xl app-heading">{item.jobTitle}</h3>
+              <h3 className="mt-3 text-2xl app-heading">{item.jobTitle}</h3>
+              <p className="mt-2 text-sm font-bold leading-6 text-[#65748a]">
+                {item.companyName ?? "Company not detected"}
+              </p>
               <p className="mt-2 text-sm leading-6 text-[#65748a]">
-                Saved application materials for this role.
+                Application workspace with generated materials and interview preparation.
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
                 <span className={item.resumeUnlocked ? "dashboard-badge is-ready" : "dashboard-badge"}>
@@ -97,4 +103,13 @@ export default function DashboardApplications({
       )}
     </section>
   );
+}
+
+function statusClassName(status: DashboardApplication["applicationStatus"]) {
+  if (status === "Applied") return "is-applied";
+  if (status === "Interviewing") return "is-interviewing";
+  if (status === "Offer") return "is-offer";
+  if (status === "Rejected") return "is-rejected";
+  if (status === "Archived") return "is-archived";
+  return "is-draft";
 }

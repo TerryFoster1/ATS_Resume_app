@@ -1,4 +1,4 @@
-import type { AnalysisResult, FollowUp } from "./types";
+import type { FollowUp } from "./types";
 import { createAdminSupabaseClient } from "./supabase/server";
 
 export type GeneratedOutputInsert = {
@@ -10,7 +10,7 @@ export type GeneratedOutputInsert = {
   sourceJobDescription: string;
   analysisSummary?: string;
   clarificationAnswers: FollowUp[];
-  analysis?: AnalysisResult;
+  analysis?: unknown;
 };
 
 export async function ensureUserProfile(args: {

@@ -2451,6 +2451,43 @@ body {
     font-weight: 900;
   }
 
+  .dashboard-status-pill {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 7px 11px;
+    font-size: 11px;
+    font-weight: 950;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .dashboard-status-pill.is-draft {
+    background: rgba(47, 128, 237, 0.1);
+    color: #2464a7;
+  }
+
+  .dashboard-status-pill.is-applied {
+    background: rgba(64, 179, 162, 0.12);
+    color: #22796f;
+  }
+
+  .dashboard-status-pill.is-interviewing {
+    background: rgba(98, 107, 230, 0.12);
+    color: #5058aa;
+  }
+
+  .dashboard-status-pill.is-offer {
+    background: rgba(245, 151, 75, 0.16);
+    color: #9a531d;
+  }
+
+  .dashboard-status-pill.is-rejected,
+  .dashboard-status-pill.is-archived {
+    background: rgba(96, 115, 138, 0.12);
+    color: #60738a;
+  }
+
   .dashboard-badge {
     display: inline-flex;
     align-items: center;

@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import AnalyticsEvent from "@/components/AnalyticsEvent";
 import DashboardApplications, { type DashboardApplication } from "@/components/DashboardApplications";
 import { getCreditBalance } from "@/lib/accountStorage";
-import { normalizeSavedApplicationTitle } from "@/lib/applicationMeta";
+import { resolveApplicationPipelineMeta } from "@/lib/applicationMeta";
 import { readMockInterview } from "@/lib/mockInterview";
 import { createAdminSupabaseClient, createServerSupabaseClient } from "@/lib/supabase/server";
 
@@ -33,14 +33,18 @@ export default async function DashboardPage({
 
   const applications: DashboardApplication[] = (data ?? []).map((item) => {
     const mockInterview = readMockInterview(item.analysis_snapshot);
+    const pipelineMeta = resolveApplicationPipelineMeta({
+      title: item.job_title,
+      companyName: item.company_name,
+      sourceJobDescription: item.source_job_description,
+      analysisSnapshot: item.analysis_snapshot
+    });
     return {
       id: item.id,
-      jobTitle: normalizeSavedApplicationTitle({
-        title: item.job_title,
-        companyName: item.company_name,
-        sourceJobDescription: item.source_job_description
-      }),
-      companyName: item.company_name,
+      jobTitle: pipelineMeta.jobTitle,
+      companyName: pipelineMeta.companyName,
+      displayTitle: pipelineMeta.displayTitle,
+      applicationStatus: pipelineMeta.status,
       createdAt: item.created_at,
       resumeUnlocked: Boolean(item.resume_unlocked),
       coverLetterUnlocked: Boolean(item.cover_letter_unlocked),

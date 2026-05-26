@@ -1,3 +1,12 @@
+export type ApplicationStatus = "Draft" | "Applied" | "Interviewing" | "Offer" | "Rejected" | "Archived";
+
+export type ApplicationPipelineMeta = {
+  jobTitle: string;
+  companyName?: string | null;
+  displayTitle: string;
+  status: ApplicationStatus;
+};
+
 export function inferJobMeta(jobPostText: string): {
   jobTitle?: string;
   companyName?: string;
@@ -7,8 +16,9 @@ export function inferJobMeta(jobPostText: string): {
     .map((line) => line.trim())
     .filter(Boolean);
 
-  const title = inferJobTitle(lines);
-  const companyName = inferCompanyName(lines);
+  const headingMeta = inferHeadingRoleCompany(lines);
+  const title = headingMeta.jobTitle ?? inferJobTitle(lines);
+  const companyName = headingMeta.companyName ?? inferCompanyName(lines);
 
   return {
     jobTitle: title ? title.slice(0, 90) : undefined,
@@ -20,9 +30,15 @@ export function buildApplicationTitle(meta: {
   jobTitle?: string;
   companyName?: string | null;
 }) {
-  if (meta.jobTitle && meta.companyName) return `${meta.jobTitle} - ${meta.companyName}`;
-  if (meta.jobTitle) return meta.jobTitle;
-  if (meta.companyName) return `${meta.companyName} Application`;
+  const jobTitle = meta.jobTitle && !isBadApplicationTitle(meta.jobTitle)
+    ? meta.jobTitle
+    : undefined;
+  const companyName = meta.companyName && isLikelyCompanyName(meta.companyName)
+    ? meta.companyName
+    : undefined;
+  if (jobTitle && companyName) return `${jobTitle} - ${companyName}`;
+  if (jobTitle) return jobTitle;
+  if (companyName) return `Application - ${companyName}`;
   return "Untitled application";
 }
 
@@ -31,13 +47,95 @@ export function normalizeSavedApplicationTitle(args: {
   companyName?: string | null;
   sourceJobDescription?: string | null;
 }) {
-  const cleaned = args.title?.replace(/\s+/g, " ").trim();
-  if (cleaned && !isBadApplicationTitle(cleaned)) return cleaned;
-  const meta = inferJobMeta(args.sourceJobDescription ?? "");
-  return buildApplicationTitle({
-    jobTitle: meta.jobTitle,
-    companyName: meta.companyName ?? args.companyName
-  });
+  return resolveApplicationPipelineMeta(args).displayTitle;
+}
+
+export function resolveApplicationPipelineMeta(args: {
+  title?: string | null;
+  companyName?: string | null;
+  sourceJobDescription?: string | null;
+  analysisSnapshot?: unknown;
+}): ApplicationPipelineMeta {
+  const sourceMeta = inferJobMeta(args.sourceJobDescription ?? "");
+  const titleMeta = inferTitleMeta(args.title ?? "");
+  const savedTitle = cleanSavedTitle(args.title ?? "");
+  const savedCompany = args.companyName && isLikelyCompanyName(args.companyName)
+    ? args.companyName
+    : undefined;
+  const jobTitle =
+    sourceMeta.jobTitle ??
+    titleMeta.jobTitle ??
+    (savedTitle && !looksLikeCompanyOnly(savedTitle) ? savedTitle : undefined) ??
+    "Untitled application";
+  const companyName = sourceMeta.companyName ?? savedCompany ?? titleMeta.companyName ?? null;
+
+  return {
+    jobTitle,
+    companyName,
+    displayTitle: buildApplicationTitle({ jobTitle, companyName }),
+    status: readApplicationStatus(args.analysisSnapshot)
+  };
+}
+
+export function readApplicationStatus(snapshot: unknown): ApplicationStatus {
+  if (!isRecord(snapshot)) return "Draft";
+  const raw = snapshot.applicationStatus;
+  if (typeof raw !== "string") return "Draft";
+  const normalized = raw.trim().toLowerCase();
+  if (normalized === "applied") return "Applied";
+  if (normalized === "interviewing") return "Interviewing";
+  if (normalized === "offer") return "Offer";
+  if (normalized === "rejected") return "Rejected";
+  if (normalized === "archived") return "Archived";
+  return "Draft";
+}
+
+export function buildInitialAnalysisSnapshot(analysis: unknown): unknown {
+  if (isRecord(analysis)) {
+    return {
+      ...analysis,
+      applicationStatus: readApplicationStatus(analysis)
+    };
+  }
+  return { applicationStatus: "Draft" };
+}
+
+function inferTitleMeta(value: string): {
+  jobTitle?: string;
+  companyName?: string;
+} {
+  const cleaned = cleanSavedTitle(value);
+  if (!cleaned) return {};
+  const parts = splitTitleParts(cleaned);
+  if (parts.length >= 2) {
+    const jobTitle = cleanJobTitle(parts[0]);
+    const companyName = cleanCompanyName(parts.slice(1).join(" "));
+    if (jobTitle || companyName) return { jobTitle, companyName };
+  }
+  return {
+    jobTitle: cleanJobTitle(cleaned),
+    companyName: cleanCompanyName(cleaned)
+  };
+}
+
+function inferHeadingRoleCompany(lines: string[]) {
+  for (const line of lines.slice(0, 8)) {
+    const parts = splitTitleParts(line);
+    if (parts.length < 2 || parts.length > 3) continue;
+
+    const firstTitle = cleanJobTitle(parts[0]);
+    const secondCompany = cleanCompanyName(parts[1]);
+    if (firstTitle && secondCompany) {
+      return { jobTitle: firstTitle, companyName: secondCompany };
+    }
+
+    const firstCompany = cleanCompanyName(parts[0]);
+    const secondTitle = cleanJobTitle(parts[1]);
+    if (firstCompany && secondTitle) {
+      return { jobTitle: secondTitle, companyName: firstCompany };
+    }
+  }
+  return {};
 }
 
 function inferJobTitle(lines: string[]) {
@@ -48,7 +146,7 @@ function inferJobTitle(lines: string[]) {
 
   const joinedHeading = lines.slice(0, 4).join(" ");
   const parentheticalTitle = joinedHeading.match(
-    /\b([A-Z][A-Za-z/&+\-\s]{2,70}?\b(?:Manager|Specialist|Coordinator|Director|Assistant|Lead|Analyst|Associate|Consultant|Representative|Advisor|Administrator|Executive|Strategist|Designer|Developer|Engineer)(?:\s*\([^)]+\))?)/,
+    /\b([A-Z][A-Za-z/&+\-\s]{2,70}?\b(?:Manager|Specialist|Coordinator|Director|Assistant|Lead|Analyst|Associate|Consultant|Representative|Advisor|Administrator|Executive|Strategist|Designer|Developer|Engineer)(?:\s*\([^)]+\))?)/
   );
   if (parentheticalTitle) {
     const cleaned = cleanJobTitle(parentheticalTitle[1]);
@@ -69,6 +167,7 @@ function inferCompanyName(lines: string[]) {
     const companyMatch = line.match(/^(?:company|employer|organization|organisation)\s*:\s*(.+)$/i);
     if (companyMatch) return cleanCompanyName(companyMatch[1]);
   }
+
   const companyIntro = lines
     .slice(0, 16)
     .map((line) => line.match(/^([A-Z][A-Za-z0-9&.'+\- ]{1,60})\s+is\s+(?:a|an|the)\b/)?.[1])
@@ -77,11 +176,24 @@ function inferCompanyName(lines: string[]) {
   return undefined;
 }
 
+function splitTitleParts(value: string) {
+  return value
+    .split(/\s+(?:-|[\u2013\u2014]|\|)\s+/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+}
+
+function cleanSavedTitle(value: string) {
+  const cleaned = value.replace(/\s+/g, " ").trim();
+  if (!cleaned || isBadApplicationTitle(cleaned)) return undefined;
+  return cleaned;
+}
+
 function cleanCompanyName(value: string) {
   const cleaned = value
     .replace(/\b(?:the\s+)?job\b/gi, "")
     .replace(/\s+team$/i, "")
-    .replace(/[.:\-–—|]+$/g, "")
+    .replace(/[.:\-\u2013\u2014|]+$/g, "")
     .replace(/\s+/g, " ")
     .trim();
   return isLikelyCompanyName(cleaned) ? cleaned : undefined;
@@ -90,10 +202,14 @@ function cleanCompanyName(value: string) {
 function cleanJobTitle(value: string) {
   const cleaned = value
     .replace(/\s+(?:at|with)\s+.+$/i, "")
-    .replace(/[.:\-â€“â€”|]+$/g, "")
+    .replace(/[.:\-\u2013\u2014|]+$/g, "")
     .replace(/\s+/g, " ")
     .trim();
   return isLikelyJobTitleLine(cleaned) ? cleaned : undefined;
+}
+
+function looksLikeCompanyOnly(value: string) {
+  return Boolean(cleanCompanyName(value)) && !cleanJobTitle(value);
 }
 
 function isLikelyJobTitleLine(line: string) {
@@ -108,7 +224,7 @@ function isLikelyJobTitleLine(line: string) {
     return false;
   }
   if (isGenericBadTitle(line)) return false;
-  return /\b(manager|specialist|coordinator|director|assistant|lead|analyst|associate|consultant|representative|success|marketing|operations|product|sales|designer|developer|engineer|advisor|administrator)\b/i.test(
+  return /\b(manager|specialist|coordinator|director|assistant|lead|analyst|associate|consultant|representative|success|marketing|operations|product|sales|designer|developer|engineer|advisor|administrator|coordinator)\b/i.test(
     line
   );
 }
@@ -141,7 +257,7 @@ function isLikelyCompanyName(value: string) {
   if (words.length === 0 || words.length > 6 || value.length > 80) return false;
   if (/^(?:the\s+)?job$/i.test(value)) return false;
   if (/^(?:role|position|opening|application|candidate|team|company)$/i.test(value)) return false;
-  return !isBodyOrMarketingLine(value);
+  return !isBodyOrMarketingLine(value) && !isCandidateTraitLine(value);
 }
 
 function isGenericBadTitle(line: string) {
@@ -156,4 +272,8 @@ function isBadApplicationTitle(title: string) {
     /\b(?:have a business|business\s*\+\s*marketing mindset|recently graduated|want a real career path|the job application)\b/i.test(title) ||
     (title.length > 90 && /\b(?:you will|you'll|we are|is a|helping|helps)\b/i.test(title))
   );
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }

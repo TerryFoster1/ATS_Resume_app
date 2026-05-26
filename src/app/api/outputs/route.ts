@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { inferJobMeta, normalizeSavedApplicationTitle } from "@/lib/applicationMeta";
+import {
+  buildInitialAnalysisSnapshot,
+  inferJobMeta,
+  normalizeSavedApplicationTitle,
+  resolveApplicationPipelineMeta
+} from "@/lib/applicationMeta";
 import { ensureUserProfile, saveGeneratedOutput } from "@/lib/accountStorage";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
@@ -46,16 +51,22 @@ export async function POST(request: Request) {
     companyName: meta.companyName,
     sourceJobDescription: parsed.data.sourceJobDescription
   });
+  const pipelineMeta = resolveApplicationPipelineMeta({
+    title: applicationTitle,
+    companyName: meta.companyName,
+    sourceJobDescription: parsed.data.sourceJobDescription,
+    analysisSnapshot: parsed.data.analysis
+  });
   const saved = await saveGeneratedOutput({
     userId: user.id,
-    jobTitle: applicationTitle,
-    companyName: meta.companyName,
+    jobTitle: pipelineMeta.jobTitle,
+    companyName: pipelineMeta.companyName ?? meta.companyName,
     resumeText: parsed.data.resumeText,
     coverLetterText: parsed.data.coverLetterText,
     sourceJobDescription: parsed.data.sourceJobDescription,
     analysisSummary: parsed.data.analysisSummary,
     clarificationAnswers: parsed.data.clarificationAnswers as never[],
-    analysis: parsed.data.analysis as never
+    analysis: buildInitialAnalysisSnapshot(parsed.data.analysis)
   });
 
   return NextResponse.json(saved);
