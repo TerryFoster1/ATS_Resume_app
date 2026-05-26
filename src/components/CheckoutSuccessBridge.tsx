@@ -59,7 +59,7 @@ export default function CheckoutSuccessBridge() {
   const checkoutInvalid = missingSession || checkoutStatus === "invalid";
 
   return (
-    <section className="app-screen-card space-y-5 text-center">
+    <section className="checkout-success-card space-y-5 text-center">
       <p className="app-kicker">{checkoutInvalid ? "Checkout" : checkoutVerified ? "Checkout complete" : "Verifying checkout"}</p>
       <h1 className="text-4xl app-heading">
         {checkoutInvalid
@@ -73,10 +73,17 @@ export default function CheckoutSuccessBridge() {
           ? "We did not receive a verified Stripe checkout session for this visit, so no payment has been confirmed."
           : checkoutVerified
             ? hasSavedResults
-              ? "Your credits are being added to your account. Sending you back to the generated output flow."
-              : "Your credits are being added to your account. Sending you back to your career workspace."
-            : "This only takes a moment. We will return you to your generated materials after Stripe confirms the session."}
+              ? "Your credits are attached to your account. Returning you to the application materials you were working on."
+              : "Your credits are attached to your account. Returning you to your career workspace."
+            : "This only takes a moment. We are confirming the Stripe session, refreshing your credit balance, and sending you back to the right place."}
       </p>
+      {!checkoutInvalid && (
+        <div className="checkout-success-steps">
+          <span className={checkoutStatus === "verifying" ? "is-active" : "is-done"}>Verify payment</span>
+          <span className={checkoutVerified ? "is-done" : ""}>Refresh credits</span>
+          <span className={checkoutVerified ? "is-done" : ""}>Return to materials</span>
+        </div>
+      )}
       <div className="flex flex-wrap justify-center gap-3">
         <Link
           href={checkoutInvalid ? "/pricing" : hasSavedResults ? continueHref : continueHref}

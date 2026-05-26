@@ -391,7 +391,9 @@ body {
     visibility: hidden;
   }
   .document-card,
-  .document-card * {
+  .document-card *,
+  .interview-prep-panel,
+  .interview-prep-panel * {
     visibility: visible;
   }
   .document-card {
@@ -402,6 +404,20 @@ body {
     max-width: none !important;
     margin: 0 !important;
     padding: 0 !important;
+  }
+  .interview-prep-panel {
+    position: absolute;
+    inset: 0;
+    box-shadow: none !important;
+    border: none !important;
+    background: #ffffff !important;
+    padding: 0 !important;
+  }
+  .interview-prep-feature,
+  .interview-prep-section,
+  .interview-prep-line {
+    break-inside: avoid;
+    box-shadow: none !important;
   }
 }
 
@@ -1089,50 +1105,106 @@ body {
 
   .interview-prep-display {
     display: grid;
-    gap: 12px;
-    border-radius: 24px;
-    border: 1px solid rgba(196, 213, 229, 0.7);
-    background: rgba(255, 255, 255, 0.88);
+    gap: 18px;
+  }
+
+  .interview-prep-feature {
+    display: grid;
+    gap: 18px;
+    border-radius: 28px;
+    border: 1px solid rgba(47, 128, 237, 0.18);
+    background:
+      linear-gradient(135deg, rgba(47, 128, 237, 0.12), transparent 42%),
+      linear-gradient(225deg, rgba(64, 179, 162, 0.12), transparent 44%),
+      #ffffff;
     padding: 20px;
+    box-shadow:
+      0 22px 58px rgba(17, 35, 63, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.88);
+  }
+
+  .interview-prep-feature h4,
+  .interview-prep-section h4 {
+    color: #11233f;
+    font-size: 19px;
+    line-height: 1.2;
+    font-weight: 950;
+  }
+
+  .interview-prep-section-grid {
+    display: grid;
+    gap: 14px;
+  }
+
+  .interview-prep-section {
+    border-radius: 24px;
+    border: 1px solid rgba(196, 213, 229, 0.72);
+    background: rgba(255, 255, 255, 0.9);
+    padding: 18px;
     box-shadow: var(--shadow-inset-soft);
   }
 
-  .interview-prep-heading {
-    margin-top: 8px;
-    border-top: 1px solid rgba(196, 213, 229, 0.7);
-    padding-top: 16px;
-    color: #173a62;
-    font-size: 12px;
+  .interview-prep-section.is-star {
+    background:
+      linear-gradient(135deg, rgba(98, 107, 230, 0.08), transparent 38%),
+      rgba(255, 255, 255, 0.94);
+  }
+
+  .interview-prep-lines {
+    display: grid;
+    gap: 10px;
+    margin-top: 14px;
+  }
+
+  .interview-prep-feature .interview-prep-lines {
+    margin-top: 0;
+  }
+
+  .interview-prep-line {
+    border-radius: 18px;
+    border: 1px solid rgba(196, 213, 229, 0.62);
+    background: rgba(255, 255, 255, 0.78);
+    padding: 13px 14px;
+  }
+
+  .interview-prep-line.is-question {
+    border-color: rgba(47, 128, 237, 0.2);
+    background: rgba(238, 246, 255, 0.72);
+  }
+
+  .interview-prep-line.is-featured {
+    background: rgba(255, 255, 255, 0.86);
+  }
+
+  .interview-prep-line.is-star-line {
+    border-left: 4px solid rgba(98, 107, 230, 0.46);
+  }
+
+  .interview-prep-line span {
+    display: block;
+    color: #245f9f;
+    font-size: 11px;
     font-weight: 950;
-    letter-spacing: 0.16em;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
   }
 
-  .interview-prep-heading:first-child {
-    margin-top: 0;
-    border-top: 0;
-    padding-top: 0;
-  }
-
-  .interview-prep-paragraph,
-  .interview-prep-bullet {
+  .interview-prep-line p {
+    margin-top: 4px;
     color: #334155;
     font-size: 14px;
-    line-height: 1.75;
+    line-height: 1.65;
+    font-weight: 650;
   }
 
-  .interview-prep-bullet {
-    display: flex;
-    gap: 10px;
+  .interview-prep-line:not(:has(span)) p {
+    margin-top: 0;
   }
 
-  .interview-prep-bullet span:first-child {
-    margin-top: 0.7em;
-    height: 6px;
-    width: 6px;
-    flex: 0 0 6px;
-    border-radius: 999px;
-    background: linear-gradient(135deg, #2f80ed, #40b3a2);
+  @media (min-width: 980px) {
+    .interview-prep-section-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
   }
 
   .pricing-trust-strip {
@@ -1179,6 +1251,48 @@ body {
     box-shadow: 0 30px 78px rgba(17, 35, 63, 0.12);
   }
 
+  .checkout-success-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 34px;
+    border: 1px solid rgba(196, 213, 229, 0.72);
+    background:
+      linear-gradient(135deg, rgba(47, 128, 237, 0.1), transparent 38%),
+      linear-gradient(225deg, rgba(64, 179, 162, 0.12), transparent 40%),
+      rgba(255, 255, 255, 0.96);
+    box-shadow: 0 30px 84px rgba(17, 35, 63, 0.12);
+    padding: 28px;
+  }
+
+  .checkout-success-steps {
+    margin: 0 auto;
+    display: grid;
+    max-width: 640px;
+    gap: 10px;
+  }
+
+  .checkout-success-steps span {
+    border-radius: 999px;
+    border: 1px solid rgba(196, 213, 229, 0.74);
+    background: rgba(255, 255, 255, 0.82);
+    padding: 10px 12px;
+    color: #65748a;
+    font-size: 12px;
+    font-weight: 900;
+  }
+
+  .checkout-success-steps span.is-active {
+    border-color: rgba(47, 128, 237, 0.32);
+    color: #245f9f;
+    box-shadow: 0 0 0 3px rgba(47, 128, 237, 0.08);
+  }
+
+  .checkout-success-steps span.is-done {
+    border-color: rgba(64, 179, 162, 0.32);
+    background: rgba(239, 251, 247, 0.9);
+    color: #22796f;
+  }
+
   @media (min-width: 768px) {
     .pricing-trust-strip {
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1188,6 +1302,14 @@ body {
     .pricing-usage-panel,
     .interview-prep-panel {
       padding: 30px;
+    }
+
+    .checkout-success-card {
+      padding: 42px;
+    }
+
+    .checkout-success-steps {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
   }
 

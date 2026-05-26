@@ -11,7 +11,7 @@ export type InterviewPrepInput = {
 export async function generateInterviewPrep(input: InterviewPrepInput) {
   const text = await callLlm({
     tag: "interview-prep",
-    maxTokens: 2200,
+    maxTokens: 3200,
     temperature: 0.35,
     timeoutMs: 90000,
     system: [
@@ -35,39 +35,63 @@ ${clip(input.coverLetter, 3500)}
 CLARIFICATION ANSWERS
 ${clip(formatAnswers(input.clarificationAnswers), 2500)}
 
-Create interview prep in this exact markdown structure:
+Create interview prep in this exact markdown structure. Keep it tactical, skimmable, and specific to this candidate and role:
 
 # Recruiter-Style Interview Prep
 
-## What to Prepare
-- 4 to 6 concise bullets about the strongest areas to prepare, including any honest gaps.
+## Most Likely to Appear
+1. Question:
+   Why likely:
+   What they are evaluating:
+   How to position your experience:
 
-## Likely Screening Questions
-1. Question
-   Guidance: 1 to 2 sentences on how to answer using the candidate's actual background.
+Include 3 to 5 high-probability questions.
 
-Include 4 questions.
+## Screening Questions
+1. Question:
+   What they are evaluating:
+   How to position your experience:
+
+Include 3 to 4 questions.
 
 ## Behavioural Questions
-1. Question
-   STAR guidance: Situation, Task, Action, Result guidance in 2 to 3 concise sentences.
+1. Question:
+   Situation:
+   Task:
+   Action:
+   Result:
 
-Include 4 questions.
+Include 3 to 4 questions. Each STAR line must be concise and based on real evidence from the resume, cover letter, or clarification answers.
 
 ## Role-Specific Questions
-1. Question
-   Guidance: 1 to 2 sentences tied to the job posting.
+1. Question:
+   What they are evaluating:
+   How to position your experience:
 
-Include 4 questions.
+Include 3 to 4 questions tied directly to the posting.
 
-## Questions About Gaps or Risk Areas
-1. Question
-   Guidance: explain how to answer honestly without overclaiming.
+## Technical or Operational Questions
+1. Question:
+   What they are evaluating:
+   How to position your experience:
 
-Include 3 questions.
+Include 2 to 3 questions if relevant. If the role has no technical or operational focus, write 2 practical process, tools, reporting, workflow, or collaboration questions.
+
+## Weak-Area Prep
+- 3 to 5 honest preparation notes. Name likely gaps or risk areas without sounding discouraging.
+
+## What to Prepare Before the Interview
+- 4 to 6 concrete prep actions, such as examples to choose, metrics to review, tools to clarify, or stories to rehearse.
 
 ## Strong Closing Points
-- 3 concise points the candidate can reinforce at the end of the interview.`
+- 3 concise points the candidate can reinforce at the end of the interview.
+
+Rules:
+- Do not include generic advice that could fit any candidate.
+- Do not overclaim missing tools, platforms, metrics, credentials, or dates.
+- If direct platform ownership is weak, recommend adjacent positioning clearly.
+- Keep every answer easy to read on mobile.
+- Avoid em dashes.`
   });
 
   return sanitizeGeneratedText(text);

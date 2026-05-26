@@ -2,7 +2,7 @@ import CheckoutSuccessBridge from "@/components/CheckoutSuccessBridge";
 
 export default function CheckoutSuccessPage() {
   return (
-    <main className="space-y-8">
+    <main className="checkout-success-page space-y-8">
       <CheckoutSuccessBridge />
     </main>
   );
