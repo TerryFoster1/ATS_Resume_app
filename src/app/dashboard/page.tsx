@@ -5,6 +5,7 @@ import DashboardApplications, { type DashboardApplication } from "@/components/D
 import { getCreditBalance } from "@/lib/accountStorage";
 import { resolveApplicationPipelineMeta } from "@/lib/applicationMeta";
 import { readMockInterview } from "@/lib/mockInterview";
+import { readPathwaySnapshot } from "@/lib/pathway";
 import { createAdminSupabaseClient, createServerSupabaseClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -33,6 +34,7 @@ export default async function DashboardPage({
 
   const applications: DashboardApplication[] = (data ?? []).map((item) => {
     const mockInterview = readMockInterview(item.analysis_snapshot);
+    const pathway = readPathwaySnapshot(item.analysis_snapshot);
     const pipelineMeta = resolveApplicationPipelineMeta({
       title: item.job_title,
       companyName: item.company_name,
@@ -49,7 +51,9 @@ export default async function DashboardPage({
       resumeUnlocked: Boolean(item.resume_unlocked),
       coverLetterUnlocked: Boolean(item.cover_letter_unlocked),
       interviewPrepReady: item.interview_prep_status === "completed",
-      mockInterviewStatus: mockInterview?.status ?? "not_started"
+      mockInterviewStatus: mockInterview?.status ?? "not_started",
+      pathwayReady: Boolean(pathway?.full),
+      pathwayPreview: Boolean(pathway && !pathway.full)
     };
   });
   const unlockedExports = applications.reduce(

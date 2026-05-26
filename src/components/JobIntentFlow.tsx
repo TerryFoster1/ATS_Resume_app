@@ -40,10 +40,9 @@ const INTENTS: Array<{
     description: "Practice one question at a time with AI feedback."
   },
   {
-    id: "skillGap",
-    title: "Skill Gap / Career Pathway",
-    description: "Coming soon. Explore gaps, learning paths, and role progression.",
-    disabled: true
+    id: "careerPathway",
+    title: "Career Pathway",
+    description: "Compare your current background against a target role and unlock a practical growth plan."
   }
 ];
 
@@ -55,6 +54,7 @@ export default function JobIntentFlow({
   const [targetRole, setTargetRole] = useState(initial.targetRole);
   const [companyName, setCompanyName] = useState(initial.companyName ?? "");
   const [jobPosting, setJobPosting] = useState(initial.jobPosting ?? "");
+  const [currentBackground, setCurrentBackground] = useState(initial.currentBackground ?? "");
   const [stage, setStage] = useState<"intake" | "intent">(
     initial.targetRole ? "intent" : "intake"
   );
@@ -65,9 +65,10 @@ export default function JobIntentFlow({
     () => ({
       targetRole,
       companyName,
-      jobPosting
+      jobPosting,
+      currentBackground
     }),
-    [companyName, jobPosting, targetRole]
+    [companyName, currentBackground, jobPosting, targetRole]
   );
   const contextText = composeJobContextText(context);
   const canContinue = targetRole.trim().length >= 2 || jobPosting.trim().length >= 20;
@@ -75,7 +76,6 @@ export default function JobIntentFlow({
   const handleIntent = useCallback(
     async (intent: JobIntent) => {
       setError(null);
-      if (intent === "skillGap") return;
       if (!canContinue) {
         setStage("intake");
         setError("Add a target role or paste enough of the job posting first.");
@@ -98,6 +98,7 @@ export default function JobIntentFlow({
             targetRole: targetRole.trim() || undefined,
             companyName: companyName.trim() || undefined,
             jobPosting: jobPosting.trim() || undefined,
+            currentBackground: currentBackground.trim() || undefined,
             intent
           })
         });
@@ -120,6 +121,10 @@ export default function JobIntentFlow({
           window.location.href = `/outputs/${data.id}/interview?start=1`;
           return;
         }
+        if (intent === "careerPathway") {
+          window.location.href = `/outputs/${data.id}?intent=pathway`;
+          return;
+        }
         window.location.href = `/outputs/${data.id}?intent=interview-prep`;
       } catch (err) {
         setError(err instanceof Error ? err.message : "Could not start this workflow.");
@@ -127,7 +132,7 @@ export default function JobIntentFlow({
         setBusyIntent(null);
       }
     },
-    [canContinue, companyName, context, contextText, jobPosting, onResumeIntent, targetRole]
+    [canContinue, companyName, context, contextText, currentBackground, jobPosting, onResumeIntent, targetRole]
   );
 
   useEffect(() => {
@@ -186,6 +191,15 @@ export default function JobIntentFlow({
             />
           </label>
         </div>
+        <label className="block text-sm font-black text-[var(--color-text-primary)]">
+          Current background optional
+          <textarea
+            value={currentBackground}
+            onChange={(event) => setCurrentBackground(event.target.value)}
+            className="app-input mt-3 min-h-[8rem] resize-y"
+            placeholder="Example: I currently work in retail, manage customer issues, train new hires, and want to move into customer success."
+          />
+        </label>
 
         {error && <p className="text-sm font-semibold text-rose-800">{error}</p>}
 
@@ -279,9 +293,11 @@ function readInitialContext(initialContextText: string): JobContext {
   const role = initialContextText.match(/^job\s*title\s*:\s*(.+)$/im)?.[1]?.trim() ?? "";
   const company = initialContextText.match(/^company\s*:\s*(.+)$/im)?.[1]?.trim() ?? "";
   const postingMatch = initialContextText.match(/(?:^|\n)job posting:\s*\n([\s\S]*)$/i);
+  const backgroundMatch = initialContextText.match(/(?:^|\n)current background:\s*\n([\s\S]*?)(?:\n\s*job posting:|$)/i);
   return {
     targetRole: role,
     companyName: company,
+    currentBackground: backgroundMatch?.[1]?.trim() || undefined,
     jobPosting: postingMatch?.[1]?.trim() || undefined
   };
 }

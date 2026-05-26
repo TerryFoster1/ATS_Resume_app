@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { seoPages } from "@/lib/seoContent";
 
 const siteUrl = "https://www.careerladder.ca";
 
@@ -13,8 +14,9 @@ const publicRoutes = [
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const lastModified = new Date();
+  const seoRoutes = seoPages.map((page) => page.canonicalPath);
 
-  return publicRoutes.map((route) => ({
+  return [...publicRoutes, ...seoRoutes].map((route) => ({
     url: route === "/" ? `${siteUrl}/` : `${siteUrl}${route}`,
     lastModified,
     changeFrequency: route === "/" ? "weekly" : "monthly",

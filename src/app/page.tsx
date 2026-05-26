@@ -7,10 +7,10 @@ type Step = "intro" | "intake" | "intent" | "resume" | "job" | "analysis" | "gen
 const VALID_STEPS: Step[] = ["intro", "intake", "intent", "resume", "job", "analysis", "generate", "results"];
 
 const FLOW = [
-  "Upload your resume",
-  "Paste the job description",
-  "Answer recruiter-style questions",
-  "Preview tailored materials"
+  "Paste the role or posting",
+  "Choose your preparation goal",
+  "Get recruiter-aware guidance",
+  "Save the opportunity workspace"
 ];
 
 const VALUE_PROPS = [
@@ -80,7 +80,7 @@ function LandingPage() {
             <div className="flex flex-wrap gap-2">
               <span className="app-chip">Recruiter-style positioning</span>
               <span className="app-chip">Transferable skill translation</span>
-              <span className="app-chip">ATS-safe output</span>
+              <span className="app-chip">Interview and pathway prep</span>
             </div>
 
             <h2 className="mt-7 max-w-3xl text-4xl font-black leading-tight text-[var(--color-text-primary)] sm:text-6xl">
@@ -89,7 +89,7 @@ function LandingPage() {
             <p className="mt-5 max-w-2xl text-base leading-8 text-[var(--color-text-primary)]/74 sm:text-lg">
               Paste a job posting, choose your goal, and Career Ladder helps you
               tailor your resume, write your cover letter, or prepare for the
-              interview with recruiter-style guidance.
+              interview and next career step with recruiter-style guidance.
             </p>
 
             <div className="mt-8 flex flex-wrap items-center gap-3">

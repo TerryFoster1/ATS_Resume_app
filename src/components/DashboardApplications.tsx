@@ -14,6 +14,8 @@ export type DashboardApplication = {
   coverLetterUnlocked: boolean;
   interviewPrepReady: boolean;
   mockInterviewStatus?: "not_started" | "in_progress" | "completed";
+  pathwayReady?: boolean;
+  pathwayPreview?: boolean;
 };
 
 export default function DashboardApplications({
@@ -86,6 +88,9 @@ export default function DashboardApplications({
                 </span>
                 <span className={item.mockInterviewStatus === "completed" ? "dashboard-badge is-ready" : item.mockInterviewStatus === "in_progress" ? "dashboard-badge is-pending" : "dashboard-badge"}>
                   Mock interview {item.mockInterviewStatus === "completed" ? "complete" : item.mockInterviewStatus === "in_progress" ? "in progress" : "not started"}
+                </span>
+                <span className={item.pathwayReady ? "dashboard-badge is-ready" : item.pathwayPreview ? "dashboard-badge is-pending" : "dashboard-badge"}>
+                  Pathway {item.pathwayReady ? "unlocked" : item.pathwayPreview ? "preview" : "not started"}
                 </span>
               </div>
             </div>

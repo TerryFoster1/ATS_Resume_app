@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import AccountCreditIndicator from "@/components/AccountCreditIndicator";
 import SavedOutputDocuments from "@/components/SavedOutputDocuments";
 import { normalizeSavedApplicationTitle } from "@/lib/applicationMeta";
+import { readPathwaySnapshot } from "@/lib/pathway";
 import { createAdminSupabaseClient, createServerSupabaseClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -90,6 +91,7 @@ export default async function SavedOutputPage({
         coverLetterUnlocked={Boolean(data.cover_letter_unlocked)}
         interviewPrepStatus={data.interview_prep_status ?? "pending"}
         interviewPrepText={readInterviewPrep(data.analysis_snapshot)}
+        pathway={readPathwaySnapshot(data.analysis_snapshot)}
       />
     </main>
   );

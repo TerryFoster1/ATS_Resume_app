@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { normalizeSavedApplicationTitle } from "@/lib/applicationMeta";
+import { readPathwaySnapshot } from "@/lib/pathway";
 import { createAdminSupabaseClient, createServerSupabaseClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -61,6 +62,7 @@ export async function GET(
       !Array.isArray(data.analysis_snapshot) &&
       typeof data.analysis_snapshot.interviewPrep === "string"
         ? data.analysis_snapshot.interviewPrep
-        : null
+        : null,
+    pathway: readPathwaySnapshot(data.analysis_snapshot)
   }, { headers: { "Cache-Control": "no-store, max-age=0" } });
 }

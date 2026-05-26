@@ -26,6 +26,25 @@ type SavedOutputDocumentsProps = {
   coverLetterUnlocked: boolean;
   interviewPrepStatus?: string;
   interviewPrepText?: string;
+  pathway?: PathwayPreview | null;
+};
+
+type PathwayFullAnalysis = {
+  typicalRequirements: string[];
+  transferableStrengths: string[];
+  likelySkillGaps: string[];
+  fastestPathRecommendations: string[];
+  lowestCostPathRecommendations: string[];
+  suggestedNextSteps: string[];
+};
+
+type PathwayPreview = {
+  status: "preview" | "completed";
+  roleOverview: string;
+  commonRequirements: string[];
+  transferableInsight: string;
+  generatedAt: string;
+  full?: PathwayFullAnalysis;
 };
 
 const PAGE_WIDTH = 612;
@@ -53,7 +72,8 @@ export default function SavedOutputDocuments({
   resumeUnlocked,
   coverLetterUnlocked,
   interviewPrepStatus = "pending",
-  interviewPrepText = ""
+  interviewPrepText = "",
+  pathway = null
 }: SavedOutputDocumentsProps) {
   const [credits, setCredits] = useState<number | null>(null);
   const [resumeIsUnlocked, setResumeIsUnlocked] = useState(resumeUnlocked);
@@ -63,6 +83,9 @@ export default function SavedOutputDocuments({
   const [interviewPrep, setInterviewPrep] = useState(interviewPrepText);
   const [interviewPrepBusy, setInterviewPrepBusy] = useState(false);
   const [interviewPrepError, setInterviewPrepError] = useState<string | null>(null);
+  const [pathwayState, setPathwayState] = useState<PathwayPreview | null>(pathway);
+  const [pathwayBusy, setPathwayBusy] = useState(false);
+  const [pathwayError, setPathwayError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const hasResume = resumeText.trim().length > 0;
   const hasCoverLetter = coverLetterText.trim().length > 0;
@@ -90,6 +113,16 @@ export default function SavedOutputDocuments({
       const next = `${window.location.pathname}${params.toString() ? `?${params}` : ""}`;
       window.history.replaceState(null, "", next);
       window.setTimeout(() => void generatePrep(), 700);
+    } else if (params.get("checkout") === "success" && params.get("pathway") === "1") {
+      params.delete("checkout");
+      params.delete("pathway");
+      const next = `${window.location.pathname}${params.toString() ? `?${params}` : ""}`;
+      window.history.replaceState(null, "", next);
+      window.setTimeout(() => void unlockPathway(), 700);
+    } else if (params.get("intent") === "pathway") {
+      params.delete("intent");
+      const next = `${window.location.pathname}${params.toString() ? `?${params}` : ""}`;
+      window.history.replaceState(null, "", next);
     }
     // This effect intentionally runs once on page entry.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -185,11 +218,45 @@ export default function SavedOutputDocuments({
     }
   }
 
+  async function unlockPathway() {
+    setPathwayError(null);
+    setPathwayBusy(true);
+    try {
+      const response = await fetch(`/api/outputs/${outputId}/pathway`, {
+        method: "POST"
+      });
+      const data = (await response.json().catch(() => ({}))) as {
+        pathway?: PathwayPreview;
+        error?: string;
+      };
+      if (response.status === 402) {
+        window.sessionStorage.setItem(
+          CHECKOUT_RETURN_PATH_KEY,
+          `/outputs/${outputId}?checkout=success&pathway=1`
+        );
+        window.location.href = "/pricing?pack=5&checkout=1";
+        return;
+      }
+      if (!response.ok || !data.pathway) {
+        throw new Error(data.error ?? "Could not unlock pathway analysis.");
+      }
+      setPathwayState(data.pathway);
+      trackEvent("pathway_unlocked", { outputId });
+      window.dispatchEvent(new Event(ACCOUNT_CREDITS_REFRESH_EVENT));
+      await refreshCredits();
+    } catch (err) {
+      setPathwayError(err instanceof Error ? err.message : "Could not unlock pathway analysis.");
+    } finally {
+      setPathwayBusy(false);
+    }
+  }
+
   const safeFilename = filenameFromTitle(title);
   const materialStatus = [
     { label: "Resume export", value: hasResume ? (resumeIsUnlocked ? "Unlocked" : "Locked preview") : "Not generated" },
     { label: "Cover letter", value: hasCoverLetter ? (coverLetterIsUnlocked ? "Unlocked" : "Locked preview") : "Not generated" },
-    { label: "Interview prep", value: interviewPrep.trim() ? "Ready" : interviewPrepStatus === "failed" ? "Retry needed" : "Not generated" }
+    { label: "Interview prep", value: interviewPrep.trim() ? "Ready" : interviewPrepStatus === "failed" ? "Retry needed" : "Not generated" },
+    { label: "Pathway", value: pathwayState?.full ? "Unlocked" : pathwayState ? "Preview" : "Not generated" }
   ];
 
   return (
@@ -262,6 +329,15 @@ export default function SavedOutputDocuments({
         fileBaseName={`${safeFilename}-interview-prep`}
         onGenerate={generatePrep}
       />
+
+      {pathwayState && (
+        <PathwaySection
+          pathway={pathwayState}
+          busy={pathwayBusy}
+          error={pathwayError}
+          onUnlock={unlockPathway}
+        />
+      )}
 
       {unlockTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(32,23,53,0.34)] px-4 py-8 backdrop-blur-sm">
@@ -406,6 +482,108 @@ function InterviewPrepSection({
       )}
       {hasPrep && <InterviewPrepDisplay text={interviewPrep} />}
     </section>
+  );
+}
+
+function PathwaySection({
+  pathway,
+  busy,
+  error,
+  onUnlock
+}: {
+  pathway: PathwayPreview;
+  busy: boolean;
+  error: string | null;
+  onUnlock: () => void;
+}) {
+  return (
+    <section className="interview-prep-panel space-y-5">
+      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+        <div>
+          <p className="app-kicker">Career pathway</p>
+          <h3 className="mt-2 text-xl app-heading">
+            Understand the shortest credible path toward this role.
+          </h3>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--color-text-muted)]">
+            This pathway compares the target role against your available context, then separates
+            common expectations from personalized gaps and practical next steps.
+          </p>
+        </div>
+        {!pathway.full && (
+          <button
+            type="button"
+            onClick={onUnlock}
+            disabled={busy}
+            className="app-button-primary shrink-0 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {busy ? "Unlocking..." : "Unlock pathway analysis - 1 credit"}
+          </button>
+        )}
+      </div>
+
+      {error && (
+        <p className="rounded-[18px] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-900">
+          {error}
+        </p>
+      )}
+
+      <div className="interview-prep-display">
+        <article className="interview-prep-feature">
+          <h4>Free preview</h4>
+          <div className="interview-prep-lines">
+            <div className="interview-prep-line is-featured">
+              <span>Role overview</span>
+              <p>{pathway.roleOverview}</p>
+            </div>
+            <div className="interview-prep-line is-featured">
+              <span>Transferable insight</span>
+              <p>{pathway.transferableInsight}</p>
+            </div>
+          </div>
+        </article>
+
+        <div className="interview-prep-section-grid">
+          <PathwayList title="Common requirements" items={pathway.commonRequirements} />
+          {pathway.full ? (
+            <>
+              <PathwayList title="Typical requirements" items={pathway.full.typicalRequirements} />
+              <PathwayList title="Transferable strengths" items={pathway.full.transferableStrengths} />
+              <PathwayList title="Likely skill gaps" items={pathway.full.likelySkillGaps} />
+              <PathwayList title="Fastest path recommendations" items={pathway.full.fastestPathRecommendations} />
+              <PathwayList title="Lowest-cost path recommendations" items={pathway.full.lowestCostPathRecommendations} />
+              <PathwayList title="Suggested next steps" items={pathway.full.suggestedNextSteps} />
+            </>
+          ) : (
+            <article className="interview-prep-section">
+              <h4>Personalized analysis locked</h4>
+              <div className="interview-prep-lines">
+                <div className="interview-prep-line">
+                  <p>
+                    Unlock the full pathway for personalized gaps, fastest path recommendations,
+                    lowest-cost next steps, and a practical role-positioning strategy.
+                  </p>
+                </div>
+              </div>
+            </article>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function PathwayList({ title, items }: { title: string; items: string[] }) {
+  return (
+    <article className="interview-prep-section">
+      <h4>{title}</h4>
+      <div className="interview-prep-lines">
+        {items.slice(0, 6).map((item) => (
+          <div key={item} className="interview-prep-line">
+            <p>{item}</p>
+          </div>
+        ))}
+      </div>
+    </article>
   );
 }
 

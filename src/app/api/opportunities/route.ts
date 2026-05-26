@@ -3,6 +3,7 @@ import { z } from "zod";
 import { ensureUserProfile, saveGeneratedOutput } from "@/lib/accountStorage";
 import { buildApplicationTitle, inferJobMeta } from "@/lib/applicationMeta";
 import { composeJobContextText } from "@/lib/intentWorkflow";
+import { buildPathwayPreview } from "@/lib/pathway";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 const Body = z
@@ -10,7 +11,8 @@ const Body = z
     targetRole: z.string().trim().min(2).max(120).optional(),
     companyName: z.string().trim().max(120).optional(),
     jobPosting: z.string().trim().max(20000).optional(),
-    intent: z.enum(["interviewPrep", "mockInterview"])
+    currentBackground: z.string().trim().max(12000).optional(),
+    intent: z.enum(["interviewPrep", "mockInterview", "careerPathway"])
   })
   .refine(
     (value) =>
@@ -46,6 +48,7 @@ export async function POST(request: Request) {
     composeJobContextText({
       targetRole: parsed.data.targetRole ?? "",
       companyName: parsed.data.companyName,
+      currentBackground: parsed.data.currentBackground,
       jobPosting: parsed.data.jobPosting
     })
   );
@@ -54,6 +57,7 @@ export async function POST(request: Request) {
   const contextText = composeJobContextText({
     targetRole: jobTitle === "Untitled application" ? "" : jobTitle,
     companyName,
+    currentBackground: parsed.data.currentBackground,
     jobPosting: parsed.data.jobPosting
   });
   const title = buildApplicationTitle({
@@ -78,8 +82,19 @@ export async function POST(request: Request) {
       jobContext: {
         targetRole: jobTitle === "Untitled application" ? null : jobTitle,
         companyName: companyName ?? null,
-        hasFullPosting: Boolean(parsed.data.jobPosting?.trim())
-      }
+        hasFullPosting: Boolean(parsed.data.jobPosting?.trim()),
+        hasCurrentBackground: Boolean(parsed.data.currentBackground?.trim()),
+        currentBackground: parsed.data.currentBackground?.trim() || null
+      },
+      pathway:
+        parsed.data.intent === "careerPathway"
+          ? buildPathwayPreview({
+              targetRole: jobTitle,
+              companyName,
+              jobPosting: parsed.data.jobPosting,
+              currentBackground: parsed.data.currentBackground
+            })
+          : undefined
     }
   });
 
