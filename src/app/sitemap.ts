@@ -5,6 +5,14 @@ const siteUrl = "https://www.careerladder.ca";
 
 const publicRoutes = [
   "/",
+  "/career-discovery",
+  "/career-transition",
+  "/career-pathways",
+  "/resume-builder",
+  "/interview-prep",
+  "/mock-interviews",
+  "/master-career-profile",
+  "/application-tracking",
   "/pricing",
   "/privacy",
   "/terms",

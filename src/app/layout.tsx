@@ -4,9 +4,9 @@ import AppFooter from "@/components/AppFooter";
 import "./globals.css";
 
 const siteUrl = "https://www.careerladder.ca";
-const siteTitle = "Career Ladder | AI Resume, Cover Letter & Interview Prep";
+const siteTitle = "Career Ladder | Career Intelligence for Resumes, Interviews & Pathways";
 const siteDescription =
-  "Career Ladder helps you tailor your resume, cover letter, and interview prep to specific job postings so you can position your experience with more confidence.";
+  "Career Ladder helps you discover direction, translate transferable skills, tailor career materials, prepare for interviews, and build a living career profile.";
 const socialImage = "/career-ladder-recruiter-interview.jpg";
 
 export const metadata: Metadata = {
