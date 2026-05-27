@@ -7,6 +7,8 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { analyze } from "@/lib/analysis";
+import { resolveProfileFirstResumeText } from "@/lib/careerProfileStorage";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { elapsedMs, logDevTiming, nowMs } from "@/lib/utils/perf";
 import type { AnalyzeResponse } from "@/lib/types";
 
@@ -45,8 +47,12 @@ export async function POST(req: Request) {
   }
 
   try {
+    const { resumeText, usedProfile } = await resolveProfileFirstResumeText({
+      userId: await currentUserId(),
+      uploadedResumeText: parsed.resumeText
+    });
     const analysis = await analyze({
-      resumeText: parsed.resumeText,
+      resumeText,
       jobPostText: parsed.jobPostText
     });
     const body: AnalyzeResponse = { analysis };
@@ -54,7 +60,8 @@ export async function POST(req: Request) {
       ms: elapsedMs(started),
       score: analysis.score,
       reqs: analysis.requirements.length,
-      followUps: analysis.followUps.length
+      followUps: analysis.followUps.length,
+      usedProfile
     });
     return NextResponse.json(body);
   } catch (err) {
@@ -63,6 +70,18 @@ export async function POST(req: Request) {
       { error: "Analysis failed.", detail: errMsg(err) },
       { status: 500 }
     );
+  }
+}
+
+async function currentUserId(): Promise<string | null> {
+  try {
+    const supabase = createServerSupabaseClient();
+    const {
+      data: { user }
+    } = supabase ? await supabase.auth.getUser() : { data: { user: null } };
+    return user && user.is_anonymous !== true && user.email ? user.id : null;
+  } catch {
+    return null;
   }
 }
 

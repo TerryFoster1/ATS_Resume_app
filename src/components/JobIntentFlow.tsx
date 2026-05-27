@@ -16,11 +16,13 @@ type Props = {
 type ParseResumeResult = {
   text?: string;
   warning?: string;
+  profileEnriched?: boolean;
+  profileImportWarning?: string;
   error?: string;
 };
 
-type GoalId = JobIntent | "tracking";
-type Stage = "goal" | "context" | "experience";
+type GoalId = JobIntent | "tracking" | "firstResume" | "careerDiscovery";
+type Stage = "goal" | "context" | "experience" | "firstResume" | "careerDiscovery";
 
 type GoalConfig = {
   id: GoalId;
@@ -34,6 +36,26 @@ type GoalConfig = {
 };
 
 const GOALS: GoalConfig[] = [
+  {
+    id: "firstResume",
+    title: "Build My First Resume",
+    description: "Find useful experience even if you have never written a resume.",
+    eyebrow: "Guided discovery",
+    contextCopy:
+      "Career Ladder will help you identify responsibility, service, school, community, and achievement evidence before structuring it professionally.",
+    experienceMode: "none",
+    startLabel: "Build First Resume"
+  },
+  {
+    id: "careerDiscovery",
+    title: "Discover Career Direction",
+    description: "Explore strengths, preferences, and realistic adjacent paths.",
+    eyebrow: "Career discovery",
+    contextCopy:
+      "Career Ladder can explore your interests, strengths, and work preferences without pretending a quiz can predict your future.",
+    experienceMode: "none",
+    startLabel: "Explore Direction"
+  },
   {
     id: "resume",
     title: "Tailor My Resume",
@@ -139,6 +161,7 @@ export default function JobIntentFlow({
     try {
       const form = new FormData();
       form.append("file", file);
+      form.append("enrichProfile", "1");
       const response = await fetch("/api/parse-resume", {
         method: "POST",
         body: form
@@ -149,7 +172,7 @@ export default function JobIntentFlow({
       }
       setResumeText(data.text);
       setResumeFileName(file.name);
-      setResumeWarning(data.warning ?? null);
+      setResumeWarning(data.profileImportWarning ?? data.warning ?? null);
     } catch (err) {
       setResumeText("");
       setResumeFileName("");
@@ -257,6 +280,14 @@ export default function JobIntentFlow({
       window.location.href = "/dashboard";
       return;
     }
+    if (goal === "firstResume") {
+      setStage("firstResume");
+      return;
+    }
+    if (goal === "careerDiscovery") {
+      setStage("careerDiscovery");
+      return;
+    }
     setStage("context");
     window.history.replaceState(null, "", "/?step=intake");
   }
@@ -273,7 +304,7 @@ export default function JobIntentFlow({
     }
     persistContext(context);
     if (selectedConfig.experienceMode === "none") {
-      void handleIntent(selectedConfig.id);
+      if (isJobIntent(selectedConfig.id)) void handleIntent(selectedConfig.id);
       return;
     }
     setStage("experience");
@@ -282,7 +313,7 @@ export default function JobIntentFlow({
   function startSelectedGoal() {
     if (!selectedConfig || selectedConfig.id === "tracking") return;
     persistContext(context);
-    void handleIntent(selectedConfig.id);
+    if (isJobIntent(selectedConfig.id)) void handleIntent(selectedConfig.id);
   }
 
   if (stage === "goal") {
@@ -381,6 +412,42 @@ export default function JobIntentFlow({
           </button>
         </div>
       </section>
+    );
+  }
+
+  if (stage === "firstResume") {
+    return (
+      <FirstResumeDiscovery
+        onBack={() => setStage("goal")}
+        onComplete={(resumeDraft, profileContext) => {
+          persistContext({
+            ...context,
+            currentBackground: [currentBackground, profileContext].filter(Boolean).join("\n\n"),
+            resumeText: resumeDraft,
+            resumeFileName: "Career Ladder first resume draft"
+          });
+          onResumeIntent(
+            composeJobContextText({
+              ...context,
+              currentBackground: [currentBackground, profileContext].filter(Boolean).join("\n\n")
+            }),
+            resumeDraft
+          );
+        }}
+      />
+    );
+  }
+
+  if (stage === "careerDiscovery") {
+    return (
+      <CareerDiscoveryFoundation
+        onBack={() => setStage("goal")}
+        onContinue={(discoveryContext) => {
+          setCurrentBackground(discoveryContext);
+          setSelectedGoal("careerPathway");
+          setStage("context");
+        }}
+      />
     );
   }
 
@@ -483,6 +550,214 @@ export default function JobIntentFlow({
   );
 }
 
+function FirstResumeDiscovery({
+  onBack,
+  onComplete
+}: {
+  onBack: () => void;
+  onComplete: (resumeDraft: string, profileContext: string) => void;
+}) {
+  const [responsibility, setResponsibility] = useState("");
+  const [helping, setHelping] = useState("");
+  const [recognition, setRecognition] = useState("");
+  const [community, setCommunity] = useState("");
+  const [goals, setGoals] = useState("");
+  const canContinue = [responsibility, helping, recognition, community, goals].some(
+    (value) => value.trim().length >= 12
+  );
+
+  function complete() {
+    if (!canContinue) return;
+    const profileContext = [
+      responsibility && `Responsibility or leadership: ${responsibility}`,
+      helping && `People, service, or teamwork: ${helping}`,
+      recognition && `Recognition or achievements: ${recognition}`,
+      community && `School, club, community, or activity experience: ${community}`,
+      goals && `Career direction: ${goals}`
+    ].filter(Boolean).join("\n");
+    const skills = inferFirstResumeSkills(profileContext);
+    const resumeDraft = [
+      "Candidate",
+      "",
+      "PROFESSIONAL SUMMARY",
+      "Emerging professional with experience that can be framed through responsibility, service, teamwork, learning agility, and follow-through.",
+      "",
+      "KEY SKILLS",
+      skills.join(", "),
+      "",
+      "EXPERIENCE AND ACTIVITIES",
+      responsibility && `- ${responsibility}`,
+      helping && `- ${helping}`,
+      community && `- ${community}`,
+      recognition && `- ${recognition}`,
+      "",
+      goals && "CAREER GOALS",
+      goals && `- ${goals}`
+    ].filter(Boolean).join("\n");
+    onComplete(resumeDraft, profileContext);
+  }
+
+  return (
+    <section className="app-screen-card space-y-7">
+      <FlowHeader
+        eyebrow="My first resume"
+        title="Let’s find experience worth translating."
+        body="You do not need polished resume bullets yet. Answer in plain language and Career Ladder will turn responsibility, service, activities, and recognition into a professional starting point."
+        onBack={onBack}
+        backLabel="Change goal"
+      />
+      <div className="grid gap-4 md:grid-cols-2">
+        <DiscoveryPrompt
+          label="Responsibility or leadership"
+          value={responsibility}
+          onChange={setResponsibility}
+          prompt="Have you ever been trusted with responsibility, leadership, opening or closing, training, organizing, or keeping something on track?"
+        />
+        <DiscoveryPrompt
+          label="People, service, or teamwork"
+          value={helping}
+          onChange={setHelping}
+          prompt="Have you helped customers, classmates, teammates, coworkers, family members, or community groups solve problems or get things done?"
+        />
+        <DiscoveryPrompt
+          label="Recognition or achievement"
+          value={recognition}
+          onChange={setRecognition}
+          prompt="Have you received recognition, awards, scholarships, honors, good feedback, promotions, or trusted responsibilities?"
+        />
+        <DiscoveryPrompt
+          label="Activities and community"
+          value={community}
+          onChange={setCommunity}
+          prompt="Have you helped organize clubs, teams, school events, sports, volunteering, community activities, or informal projects?"
+        />
+      </div>
+      <DiscoveryPrompt
+        label="Career direction"
+        value={goals}
+        onChange={setGoals}
+        prompt="What kind of role, work environment, or future step are you curious about right now?"
+      />
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="max-w-2xl text-xs font-semibold leading-5 text-[var(--color-text-muted)]">
+          The first draft is a starting point. You can upload a resume later and keep enriching your Master Career Profile over time.
+        </p>
+        <button type="button" disabled={!canContinue} onClick={complete} className="app-button-primary disabled:cursor-not-allowed disabled:opacity-50">
+          Create first resume draft
+        </button>
+      </div>
+    </section>
+  );
+}
+
+function CareerDiscoveryFoundation({
+  onBack,
+  onContinue
+}: {
+  onBack: () => void;
+  onContinue: (context: string) => void;
+}) {
+  const [interests, setInterests] = useState("");
+  const [strengths, setStrengths] = useState("");
+  const [preferences, setPreferences] = useState("");
+  const [energy, setEnergy] = useState("");
+  const canContinue = [interests, strengths, preferences, energy].some((value) => value.trim().length >= 12);
+
+  function complete() {
+    if (!canContinue) return;
+    onContinue([
+      interests && `Interests: ${interests}`,
+      strengths && `Strengths: ${strengths}`,
+      preferences && `Work preferences: ${preferences}`,
+      energy && `Energy patterns and environment: ${energy}`
+    ].filter(Boolean).join("\n"));
+  }
+
+  return (
+    <section className="app-screen-card space-y-7">
+      <FlowHeader
+        eyebrow="Career discovery"
+        title="Explore direction without forcing a career quiz."
+        body="Career Ladder looks for patterns in what gives you energy, where you already show strength, and what kinds of work environments may be worth exploring."
+        onBack={onBack}
+        backLabel="Change goal"
+      />
+      <div className="grid gap-4 md:grid-cols-2">
+        <DiscoveryPrompt
+          label="Interests"
+          value={interests}
+          onChange={setInterests}
+          prompt="What topics, industries, problems, or types of work are you naturally curious about?"
+        />
+        <DiscoveryPrompt
+          label="Strengths"
+          value={strengths}
+          onChange={setStrengths}
+          prompt="What do people tend to trust you with? Think communication, organizing, fixing, explaining, planning, selling, analyzing, or helping."
+        />
+        <DiscoveryPrompt
+          label="Work preferences"
+          value={preferences}
+          onChange={setPreferences}
+          prompt="Do you prefer structure or variety, people-facing work or focused work, steady routines or ambiguous problems?"
+        />
+        <DiscoveryPrompt
+          label="Energy and lifestyle"
+          value={energy}
+          onChange={setEnergy}
+          prompt="What kinds of work leave you energized, and what kinds tend to drain you?"
+        />
+      </div>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="max-w-2xl text-xs font-semibold leading-5 text-[var(--color-text-muted)]">
+          This is not a personality test. It is a starting context for realistic pathway exploration.
+        </p>
+        <button type="button" disabled={!canContinue} onClick={complete} className="app-button-primary disabled:cursor-not-allowed disabled:opacity-50">
+          Explore possible paths
+        </button>
+      </div>
+    </section>
+  );
+}
+
+function DiscoveryPrompt({
+  label,
+  prompt,
+  value,
+  onChange
+}: {
+  label: string;
+  prompt: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <label className="app-mini-card block text-sm font-black text-[var(--color-text-primary)]">
+      {label}
+      <span className="mt-2 block text-sm font-normal leading-6 text-[var(--color-text-muted)]">
+        {prompt}
+      </span>
+      <textarea
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className="app-input mt-4 min-h-[8rem] resize-y"
+        placeholder="Plain language is fine. Career Ladder will help structure it."
+      />
+    </label>
+  );
+}
+
+function inferFirstResumeSkills(text: string): string[] {
+  const lower = text.toLowerCase();
+  const skills = new Set(["Communication", "Reliability", "Teamwork"]);
+  if (/lead|trusted|responsib|train|organize|captain/.test(lower)) skills.add("Leadership");
+  if (/customer|help|service|community|classmate|teammate/.test(lower)) skills.add("Service orientation");
+  if (/event|schedule|club|team|project/.test(lower)) skills.add("Coordination");
+  if (/award|honou?r|scholarship|recognition|promot/.test(lower)) skills.add("Achievement focus");
+  if (/busy|pressure|conflict|solve|fix/.test(lower)) skills.add("Problem solving");
+  return [...skills];
+}
+
 function FlowHeader({
   eyebrow,
   title,
@@ -564,4 +839,8 @@ function persistContext(context: JobContext) {
   } catch {
     // Session storage is a convenience only.
   }
+}
+
+function isJobIntent(value: GoalId): value is JobIntent {
+  return value === "resume" || value === "resumeCoverLetter" || value === "interviewPrep" || value === "mockInterview" || value === "careerPathway";
 }

@@ -85,6 +85,9 @@ export default async function DashboardPage({
               <Link href="/?step=resume" className="app-button-primary dashboard-primary-cta">
                 Start a new application
               </Link>
+              <Link href="/profile" className="dashboard-secondary-cta">
+                Update profile
+              </Link>
               <Link href="/pricing?pack=5&checkout=1" className="dashboard-secondary-cta">
                 Buy credits
               </Link>

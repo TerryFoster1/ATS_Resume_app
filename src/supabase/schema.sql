@@ -143,6 +143,17 @@ create table if not exists public.profile_memory (
   user_id uuid primary key references public.profiles(id) on delete cascade,
   education jsonb not null default '[]'::jsonb,
   work_history jsonb not null default '[]'::jsonb,
+  volunteer_experience jsonb not null default '[]'::jsonb,
+  certifications jsonb not null default '[]'::jsonb,
+  awards jsonb not null default '[]'::jsonb,
+  projects jsonb not null default '[]'::jsonb,
+  extracurriculars jsonb not null default '[]'::jsonb,
+  achievements jsonb not null default '[]'::jsonb,
+  interests jsonb not null default '[]'::jsonb,
+  career_goals jsonb not null default '[]'::jsonb,
+  resume_imports jsonb not null default '[]'::jsonb,
+  discovery_notes jsonb not null default '[]'::jsonb,
+  master_profile_version integer not null default 1,
   star_examples jsonb not null default '[]'::jsonb,
   skills jsonb not null default '[]'::jsonb,
   tools_platforms jsonb not null default '[]'::jsonb,
@@ -151,6 +162,19 @@ create table if not exists public.profile_memory (
   interview_answers jsonb not null default '[]'::jsonb,
   updated_at timestamptz not null default now()
 );
+
+alter table public.profile_memory
+  add column if not exists volunteer_experience jsonb not null default '[]'::jsonb,
+  add column if not exists certifications jsonb not null default '[]'::jsonb,
+  add column if not exists awards jsonb not null default '[]'::jsonb,
+  add column if not exists projects jsonb not null default '[]'::jsonb,
+  add column if not exists extracurriculars jsonb not null default '[]'::jsonb,
+  add column if not exists achievements jsonb not null default '[]'::jsonb,
+  add column if not exists interests jsonb not null default '[]'::jsonb,
+  add column if not exists career_goals jsonb not null default '[]'::jsonb,
+  add column if not exists resume_imports jsonb not null default '[]'::jsonb,
+  add column if not exists discovery_notes jsonb not null default '[]'::jsonb,
+  add column if not exists master_profile_version integer not null default 1;
 
 alter table public.profiles enable row level security;
 alter table public.generated_outputs enable row level security;

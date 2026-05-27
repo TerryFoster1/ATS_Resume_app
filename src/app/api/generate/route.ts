@@ -9,8 +9,10 @@
 
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { resolveProfileFirstResumeText } from "@/lib/careerProfileStorage";
 import { rewriteResume, rewriteCoverLetter } from "@/lib/rewrite";
 import { sanitizeGeneratedText } from "@/lib/sanitizeGeneratedText";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { inferWritingLocaleFromJob } from "@/lib/writingLocale";
 import type {
   AnalysisResult,
@@ -69,16 +71,20 @@ export async function POST(req: Request) {
     inferWritingLocaleFromJob(parsed.jobPostText);
 
   try {
+    const { resumeText, usedProfile } = await resolveProfileFirstResumeText({
+      userId: await currentUserId(),
+      uploadedResumeText: parsed.resumeText
+    });
     const [resumeOut, coverLetter] = await Promise.all([
       rewriteResume({
-        resumeText: parsed.resumeText,
+        resumeText,
         jobPostText: parsed.jobPostText,
         analysis,
         followUps,
         writingLocale
       }),
       rewriteCoverLetter({
-        resumeText: parsed.resumeText,
+        resumeText,
         jobPostText: parsed.jobPostText,
         analysis,
         followUps,
@@ -92,7 +98,7 @@ export async function POST(req: Request) {
       strategy: resumeOut.strategy
     };
     console.info(
-      `[generate] ms=${Date.now() - tStart} resumeLen=${resumeOut.resume.length} coverLen=${coverLetter.length}`
+      `[generate] ms=${Date.now() - tStart} resumeLen=${resumeOut.resume.length} coverLen=${coverLetter.length} usedProfile=${usedProfile}`
     );
     return NextResponse.json(body);
   } catch (err) {
@@ -101,6 +107,18 @@ export async function POST(req: Request) {
       { error: "Generation failed.", detail: errMsg(err) },
       { status: isTemporaryProviderIssue(err) ? 503 : 500 }
     );
+  }
+}
+
+async function currentUserId(): Promise<string | null> {
+  try {
+    const supabase = createServerSupabaseClient();
+    const {
+      data: { user }
+    } = supabase ? await supabase.auth.getUser() : { data: { user: null } };
+    return user && user.is_anonymous !== true && user.email ? user.id : null;
+  } catch {
+    return null;
   }
 }
 

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { ensureUserProfile, saveGeneratedOutput } from "@/lib/accountStorage";
 import { buildApplicationTitle, inferJobMeta } from "@/lib/applicationMeta";
+import { resolveProfileFirstResumeText } from "@/lib/careerProfileStorage";
 import { composeJobContextText } from "@/lib/intentWorkflow";
 import { buildPathwayPreview } from "@/lib/pathway";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
@@ -58,12 +59,17 @@ export async function POST(request: Request) {
   );
   const jobTitle = parsed.data.targetRole?.trim() || inferredMeta.jobTitle || "Untitled application";
   const companyName = parsed.data.companyName?.trim() || inferredMeta.companyName;
+  const profileResume = await resolveProfileFirstResumeText({
+    userId: user.id,
+    uploadedResumeText: parsed.data.resumeText?.trim() || ""
+  });
+  const resumeContextText = profileResume.resumeText.trim() || parsed.data.resumeText?.trim() || "";
   const contextText = composeJobContextText({
     targetRole: jobTitle === "Untitled application" ? "" : jobTitle,
     companyName,
     currentBackground: parsed.data.currentBackground,
     jobPosting: parsed.data.jobPosting,
-    resumeText: parsed.data.resumeText,
+    resumeText: resumeContextText,
     resumeFileName: parsed.data.resumeFileName
   });
   const title = buildApplicationTitle({
@@ -90,9 +96,10 @@ export async function POST(request: Request) {
         companyName: companyName ?? null,
         hasFullPosting: Boolean(parsed.data.jobPosting?.trim()),
         hasCurrentBackground: Boolean(parsed.data.currentBackground?.trim()),
-        hasResumeContext: Boolean(parsed.data.resumeText?.trim()),
+        hasResumeContext: Boolean(resumeContextText),
         resumeFileName: parsed.data.resumeFileName?.trim() || null,
-        resumeText: parsed.data.resumeText?.trim() || null,
+        resumeText: resumeContextText || null,
+        usedMasterCareerProfile: profileResume.usedProfile,
         currentBackground: parsed.data.currentBackground?.trim() || null
       },
       pathway:
@@ -102,7 +109,7 @@ export async function POST(request: Request) {
               companyName,
               jobPosting: parsed.data.jobPosting,
               currentBackground: parsed.data.currentBackground,
-              resumeText: parsed.data.resumeText
+              resumeText: resumeContextText
             })
           : undefined
     }

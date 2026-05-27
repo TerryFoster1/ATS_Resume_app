@@ -129,6 +129,13 @@ export default function AccountCreditIndicator() {
                 <small>Open saved applications</small>
               </Link>
               <Link
+                href="/profile"
+                className="app-account-menu-item"
+              >
+                <span>Master profile</span>
+                <small>Update reusable career evidence</small>
+              </Link>
+              <Link
                 href="/pricing?pack=5&checkout=1"
                 className="app-account-menu-item"
               >

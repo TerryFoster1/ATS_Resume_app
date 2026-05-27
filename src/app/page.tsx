@@ -282,6 +282,9 @@ function ProductHeader() {
           <Link href="/dashboard" className="app-header-pill">
             Dashboard
           </Link>
+          <Link href="/profile" className="app-header-pill">
+            Profile
+          </Link>
           <Link href="/pricing" className="app-header-pill">
             Credits
           </Link>

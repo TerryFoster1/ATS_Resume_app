@@ -3,8 +3,10 @@
 // Returns { text, warning? }.
 
 import { NextResponse } from "next/server";
+import { importResumeIntoMasterProfile } from "@/lib/careerProfileStorage";
 import { extractDocx, extractPdf, extractTextFile } from "@/lib/extractText";
 import { inspectResumeStructure } from "@/lib/resumeStructure";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type { ParseResumeResponse } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -54,6 +56,30 @@ export async function POST(req: Request) {
     }
 
     const structure = inspectResumeStructure(result.text);
+    let profileEnriched = false;
+    let profileImportWarning: string | undefined;
+    if (form.get("enrichProfile") === "1") {
+      try {
+        const supabase = createServerSupabaseClient();
+        const {
+          data: { user }
+        } = supabase ? await supabase.auth.getUser() : { data: { user: null } };
+        if (user && user.is_anonymous !== true && user.email) {
+          const profile = await importResumeIntoMasterProfile(user.id, {
+            fileName: file.name,
+            resumeText: result.text,
+            structured: structure.structured
+          });
+          profileEnriched = Boolean(profile);
+        }
+      } catch (err) {
+        profileImportWarning =
+          "Resume text was extracted, but Career Ladder could not update your Master Career Profile yet.";
+        console.warn("[parse-resume] Master Career Profile import skipped", {
+          message: err instanceof Error ? err.message : String(err)
+        });
+      }
+    }
     if (process.env.NODE_ENV !== "production") {
       console.info("[parse-resume-debug]", {
         fileName: file.name,
@@ -76,6 +102,8 @@ export async function POST(req: Request) {
     }
     return NextResponse.json({
       ...result,
+      profileEnriched,
+      profileImportWarning,
       structured: {
         roles: structure.roles.map((role) => ({
           title: role.title,

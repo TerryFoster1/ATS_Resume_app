@@ -53,11 +53,17 @@ export default function StepResume({ value, onChange, onNext }: Props) {
     try {
       const fd = new FormData();
       fd.append("file", file);
+      fd.append("enrichProfile", "1");
 
       const res = await fetch("/api/parse-resume", { method: "POST", body: fd });
       if (!res.ok) throw new Error("Parse failed");
 
-      const data = (await res.json()) as { text?: string; warning?: string };
+      const data = (await res.json()) as {
+        text?: string;
+        warning?: string;
+        profileEnriched?: boolean;
+        profileImportWarning?: string;
+      };
       const text = typeof data.text === "string" ? data.text : "";
       if (!text.trim()) throw new Error("No text extracted");
 
@@ -66,7 +72,8 @@ export default function StepResume({ value, onChange, onNext }: Props) {
       setExtractedFileName(file.name);
       setHasUploadedResume(true);
       setTooShort(false);
-      if (data.warning) setWarning(data.warning);
+      if (data.profileImportWarning) setWarning(data.profileImportWarning);
+      else if (data.warning) setWarning(data.warning);
     } catch {
       setWarning(UPLOAD_ERROR);
     } finally {
@@ -147,7 +154,7 @@ export default function StepResume({ value, onChange, onNext }: Props) {
                 <span className="mt-1 block text-xs text-[var(--color-text-muted)]">
                   {selectedFile
                     ? "Ready to upload and extract."
-                    : "Resume upload is required for this first version."}
+                    : "Resume upload imports your current experience and can enrich your Master Career Profile when signed in."}
                 </span>
               </div>
 
