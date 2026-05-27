@@ -460,3 +460,50 @@ Known limitations from this QA pass:
 - Full signed-in pathway unlock, refresh/reopen, and dashboard reopen were code-path reviewed but not executed with a live authenticated credit balance in this local pass.
 - Resume generation, cover letter generation, interview prep generation, and mock interview generation were not rerun end-to-end because no generation prompts or engines changed.
 - Mobile layout was reviewed by responsive class structure and route smoke checks, but not with a visual browser screenshot tool in this pass.
+
+## Production deployment smoke - 2026-05-26
+
+Deployment:
+
+- Commit: `69c71ad48bad94a2f726bae87b4798b9de67392e`
+- Production URL: `https://www.careerladder.ca`
+- Vercel deployment: `https://ats-resume-ger35s7bn-terryfoster1s-projects.vercel.app`
+- Status: Ready
+- Migration dependency: `20260526_master_career_profile_mvp.sql` confirmed applied before deploy.
+
+Public route smoke:
+
+- `/`: loaded.
+- `/?step=intake`: loaded goal-first service selection.
+- `/?step=resume`: loaded old resume-first path.
+- `/pricing`: loaded.
+- `/sitemap.xml`: loaded.
+- `/robots.txt`: loaded.
+- `/interview-prep/account-manager-interview-questions`: loaded.
+
+Auth and workspace smoke:
+
+- Anonymous `/dashboard` redirected to `/auth?next=/dashboard`.
+- Anonymous `/profile` redirected to `/auth?next=/profile`.
+- Signed-in dashboard loaded and displayed saved opportunities.
+- Signed-in `/profile` loaded the Master Career Profile workspace.
+
+Workflow smoke:
+
+- Manual profile entry create/edit persisted.
+- My First Resume persisted answers into the profile.
+- Career Discovery persisted context through the authenticated production API.
+- Resume upload parsing still returned extracted text.
+- Resume upload enrichment returned no profile import warning.
+- Resume analysis and resume plus cover-letter generation returned `200`.
+- Pathway opportunity creation succeeded.
+- Saved pathway opportunity reopened without blank resume or cover-letter document panels.
+- Pathway unlock consumed exactly 1 credit.
+- Re-running the pathway unlock returned the existing generated pathway without another credit deduction.
+- Existing interview prep reopened without consuming a credit.
+- Mock interview correctly returned an insufficient-credit response after the pathway smoke used the QA account's last credit.
+
+Known smoke limitations:
+
+- Full mock interview generation was not re-run because the QA account had 0 credits after the pathway unlock test and no live Stripe purchase was run.
+- Some signed-in form-entry checks were completed via authenticated production API calls because the browser automation surface stopped accepting typed text during the smoke pass.

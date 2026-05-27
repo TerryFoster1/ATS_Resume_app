@@ -234,3 +234,66 @@ npm.cmd run typecheck
 ```
 
 Results are recorded in the task summary.
+
+## Production Deployment - 2026-05-26
+
+Deployment target:
+
+- Commit: `69c71ad48bad94a2f726bae87b4798b9de67392e`
+- Vercel deployment: `https://ats-resume-ger35s7bn-terryfoster1s-projects.vercel.app`
+- Production URL: `https://www.careerladder.ca`
+- Deployment status: Ready
+- Build log timestamp: `2026-05-27T02:46:53Z`
+- Production alias confirmed on the new deployment.
+
+Migration confirmation:
+
+- `20260526_master_career_profile_mvp.sql` was applied in production before deploy.
+- Supabase column check confirmed all 11 new `profile_memory` columns exist with expected JSONB empty-array defaults or version default.
+
+Pre-deploy validation:
+
+- `npm.cmd run build`: PASS
+- `npm.cmd run typecheck`: PASS
+- Worktree clean before push.
+- No staged files, untracked files, `.env` files, secrets, local artifacts, or debug files were staged.
+
+Production smoke results:
+
+- `/`: loaded.
+- `/?step=intake`: loaded goal-first service selection.
+- `/?step=resume`: loaded legacy resume-first flow.
+- `/pricing`: loaded signed-in pricing with current credit count.
+- `/sitemap.xml`: loaded canonical sitemap.
+- `/robots.txt`: loaded crawler rules.
+- `/interview-prep/account-manager-interview-questions`: loaded public SEO page.
+- `/dashboard`: anonymous redirected to `/auth?next=/dashboard`; signed-in dashboard loaded.
+- `/profile`: anonymous redirected to `/auth?next=/profile`; signed-in profile loaded.
+
+Master Career Profile smoke results:
+
+- Manual profile entry creation: PASS.
+- Manual profile entry edit: PASS.
+- Reload persistence after edit: PASS.
+- My First Resume persistence: PASS; answers appeared in `/profile`.
+- Career Discovery persistence: PASS via authenticated production API.
+- Resume upload parsing: PASS; uploaded TXT returned extracted text.
+- Resume upload profile enrichment: PASS; no profile import warning returned.
+- Resume generation compatibility: PASS; `/api/analyze` returned `200`, `/api/generate` returned `200`, and resume/cover letter text was produced.
+
+Pathway and interview smoke results:
+
+- Career pathway opportunity creation: PASS.
+- Saved pathway output reopen: PASS.
+- Pathway unlock: PASS.
+- Credit deduction: PASS; account went from 1 credit to 0 credits.
+- Duplicate protection: PASS; second pathway unlock call returned existing generated pathway and did not consume another credit.
+- Opportunity-only saved output: PASS; showed "resume not generated" and "cover letter not generated" instead of blank document panels.
+- Existing interview prep reopen: PASS; existing prep returned `alreadyGenerated`.
+- Mock interview insufficient-credit state: PASS; returned a clear `402` message when credits were 0.
+
+Known issues from production smoke:
+
+- Full mock interview generation was not re-run because the pathway smoke consumed the QA account's only remaining credit, and no live Stripe purchase was run.
+- Browser text entry became unavailable in the in-app browser during part of the smoke pass, so some signed-in checks were completed through authenticated production API calls using the app's normal Supabase SSR cookie format.
+- Vercel logs showed successful route/API traffic and no Stripe webhook or checkout errors during the smoke window. Existing npm audit output still reports dependency vulnerabilities from the install step; this was not changed in the deploy pass.
