@@ -74,6 +74,34 @@ The AI prompt is structured and constrained to avoid:
 - hallucinated experience
 - giant motivational text dumps
 
+### Future learning recommendation layer
+
+Pathway analysis is the natural future home for contextual learning recommendations.
+
+Recommendations should only appear when they are tied to:
+
+- a target role
+- recruiter expectations
+- transferable strengths
+- likely skill gaps
+- fastest-path or lowest-cost-path logic
+- Master Career Profile evidence
+
+The pathway should distinguish whether a learning step is:
+
+- required
+- helpful
+- optional
+- probably unnecessary
+
+Example:
+
+```text
+You may benefit from a lightweight project management certification because recruiters often expect familiarity with Agile workflows and stakeholder terminology for this role.
+```
+
+This should not become a random course list. See `docs/contextual-learning-recommendation-strategy.md`.
+
 ## Free vs Locked Sections
 
 Free preview:
@@ -148,8 +176,8 @@ Dashboard cards now surface pathway status:
   - `/career-transitions/journalism-to-marketing`
 - Add lightweight role templates for common jobs.
 - Let users add a resume later for stronger personalized gap comparison.
-- Add optional course/certification recommendations.
-- Add clear affiliate disclosure if course recommendations are monetized later.
+- Add contextual course/certification recommendations tied to recruiter-visible gaps.
+- Add clear affiliate disclosure if contextual recommendations are monetized later.
 
 ## Intentionally Deferred
 
@@ -159,6 +187,7 @@ Dashboard cards now surface pathway status:
 - live salary data
 - affiliate links
 - course marketplace
+- generic course catalogs disconnected from pathway gaps
 - complex progression analytics
 - new Stripe pricing or products
 

@@ -238,6 +238,52 @@ Future affiliate opportunities:
 
 Do not implement affiliate links yet. If affiliate monetization is added later, it should be clearly marked, trust-preserving, and secondary to the user's preparation goal.
 
+## Contextual Learning Recommendations
+
+Career Ladder's long-term Career Coach ecosystem should include contextual learning and certification recommendations, but only as recruiter-aware pathway accelerators.
+
+Recommendations should emerge from:
+
+- career discovery
+- target role expectations
+- pathway analysis
+- transferable skills
+- likely skill gaps
+- hiring-manager concerns
+- Master Career Profile evidence
+
+Career Ladder should recommend learning when it answers:
+
+```text
+What is the shortest realistic path forward for this user?
+```
+
+It should not become a generic course marketplace or affiliate catalog.
+
+Recommendation examples may include:
+
+- Salesforce Trailhead for practical CRM familiarity
+- HubSpot Academy for marketing, sales, or customer success terminology
+- Google Project Management Certificate for project coordination and operations paths
+- PMI CAPM when project-management credentialing is genuinely helpful
+- Microsoft Learn for practical platform fluency
+- Coursera or LinkedIn Learning when a low-cost course closes a real evidence gap
+
+Each recommendation should eventually be classified as:
+
+- required
+- helpful
+- optional
+- probably unnecessary
+
+Example:
+
+```text
+Most hiring managers for this role value practical CRM familiarity more than advanced academic credentials.
+```
+
+See `docs/contextual-learning-recommendation-strategy.md` for the trust model, future inputs, workflow integration, and monetization philosophy.
+
 ## Implementation Guardrails
 
 - Do not break existing resume, cover letter, credit, Stripe, auth, dashboard, saved-output, or unlock flows.
@@ -273,5 +319,6 @@ Do not implement affiliate links yet. If affiliate monetization is added later, 
 
 ### Phase 5
 
-- Add course/certification recommendation layer.
-- Keep affiliate monetization optional and clearly marked.
+- Add contextual learning and certification recommendation layer.
+- Keep recommendations recruiter-aware, profile-informed, and clearly marked if monetized.
+- Avoid generic course marketplace behavior.

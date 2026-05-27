@@ -18,6 +18,8 @@ persistent career identity -> generated career outputs
 
 The Master Career Profile is the long-term source of truth. Tailored resumes, cover letters, interview prep, mock interviews, and pathway analyses should increasingly become generated views of a persistent career memory rather than isolated transformations of one uploaded file.
 
+The same profile should eventually support contextual learning recommendations. Career Ladder can only recommend credible upskilling when it understands what the user has already done, what evidence is missing, what credentials or projects they have completed, and what target roles they are pursuing.
+
 ## Phase 1 implementation
 
 This phase added a safe, additive profile layer without rewriting the existing resume, auth, Stripe, credit, dashboard, saved-output, interview prep, pathway, mock interview, or SEO systems.
@@ -121,6 +123,31 @@ The profile merge strategy is cumulative:
 - generated tailored outputs are not treated as the core profile
 
 Future UX should make profile changes reviewable rather than silently destructive.
+
+## Learning Recommendation Alignment
+
+The Master Career Profile is the foundation for future learning and certification recommendations because it can track:
+
+- existing skills
+- inferred transferable strengths
+- completed certifications
+- projects and portfolio evidence
+- career goals
+- pathway decisions
+- discovery notes
+- resume imports over time
+
+Learning recommendations should use this profile context to avoid generic advice.
+
+Example:
+
+```text
+If the profile already shows customer service leadership, Career Ladder should not recommend broad communication courses first. It may instead recommend practical CRM familiarity or a customer-success portfolio example if that is the recruiter-visible gap.
+```
+
+Generated resumes are outputs. The profile is the source of truth. Future recommendation logic should update or reference the profile so learning progress becomes reusable across resumes, interview prep, pathways, and mock interviews.
+
+See `docs/contextual-learning-recommendation-strategy.md` for the broader trust and monetization strategy.
 
 ## Student and education ecosystem strategy
 
