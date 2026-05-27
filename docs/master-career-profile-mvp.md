@@ -115,7 +115,9 @@ The UI is intentionally lightweight and guided. It should not become enterprise 
 
 ## Migration Strategy
 
-The schema change is additive in `src/supabase/schema.sql`.
+The schema change is additive in `src/supabase/schema.sql` and packaged as:
+
+`src/supabase/migrations/20260526_master_career_profile_mvp.sql`
 
 Production migration should be applied before relying on persistent profile writes. Until then:
 
@@ -124,6 +126,78 @@ Production migration should be applied before relying on persistent profile writ
 - profile API may return errors if columns are missing
 
 No existing generated output records are rewritten.
+
+## Production Migration Readiness
+
+Production migration required: yes.
+
+The Master Career Profile MVP reads and writes new `profile_memory` columns. Production Supabase should receive the migration before the app version is promoted so `/profile`, first-resume discovery, career discovery, and signed-in resume-upload enrichment can persist reliably.
+
+Required additive columns:
+
+- `volunteer_experience jsonb not null default '[]'::jsonb`
+- `certifications jsonb not null default '[]'::jsonb`
+- `awards jsonb not null default '[]'::jsonb`
+- `projects jsonb not null default '[]'::jsonb`
+- `extracurriculars jsonb not null default '[]'::jsonb`
+- `achievements jsonb not null default '[]'::jsonb`
+- `interests jsonb not null default '[]'::jsonb`
+- `career_goals jsonb not null default '[]'::jsonb`
+- `resume_imports jsonb not null default '[]'::jsonb`
+- `discovery_notes jsonb not null default '[]'::jsonb`
+- `master_profile_version integer not null default 1`
+
+Safety notes:
+
+- The migration uses `add column if not exists`.
+- No existing columns are renamed or dropped.
+- No rows in `generated_outputs` are modified.
+- No dashboard, credit, purchase, Stripe, auth, or saved-output tables are modified.
+- Existing `profile_memory` rows receive empty arrays and version `1` as defaults.
+- Existing dashboard and saved-output records continue to read from their current tables and should not break.
+
+## Production Deploy Order
+
+1. Confirm the app build and typecheck pass locally.
+2. Apply `src/supabase/migrations/20260526_master_career_profile_mvp.sql` to production Supabase.
+3. Confirm the production `profile_memory` table has the new columns.
+4. Deploy the app commit.
+5. Smoke test the profile, onboarding, resume upload, and existing paid workflows.
+
+If production does not yet have `public.profile_memory`, apply the existing base schema first or create the existing `profile_memory` table from `src/supabase/schema.sql` before running the additive migration.
+
+## Rollback Notes
+
+Preferred rollback is app-only: revert the deployment while leaving the additive database columns in place.
+
+The new columns are safe to keep because older app versions ignore them. Avoid dropping the columns unless there is a confirmed database-level problem. If a database rollback is unavoidable, export any profile MVP data first, then drop only the columns added by `20260526_master_career_profile_mvp.sql`.
+
+No `generated_outputs` rollback is required because the MVP does not rewrite saved application records.
+
+## Smoke Test Checklist
+
+After migration and deploy:
+
+- Open `/profile` signed out and confirm redirect to `/auth?next=/profile`.
+- Sign in and confirm `/profile` loads.
+- Add a work, project, certification, or volunteer entry.
+- Edit a saved profile entry.
+- Run My First Resume and confirm signed-in answers persist.
+- Run Career Discovery and confirm signed-in answers persist.
+- Upload a resume while signed in and confirm the existing upload flow still returns extracted text.
+- Upload a resume anonymously and confirm the session-only flow still works.
+- Open `/?step=resume` and confirm the legacy resume-first path still works.
+- Generate resume and cover letter outputs.
+- Reopen dashboard and saved outputs.
+- Verify interview prep, mock interview, pathway preview/unlock, pricing, credits, and unlock/export flows still behave normally.
+
+## Known Production Limitations
+
+- Signed-in profile enrichment is best-effort; resume upload remains the primary fallback if profile storage is unavailable.
+- Manual profile editing is intentionally lightweight and does not yet provide full version history or conflict resolution.
+- Skills are imported and displayed as profile context, but fine-grained skill editing remains a future enhancement.
+- Profile-first generation is a compatibility layer, not a full generator rewrite.
+- Live signed-in profile write QA should be repeated against production after the migration is applied.
 
 ## Student Ecosystem Foundations
 
