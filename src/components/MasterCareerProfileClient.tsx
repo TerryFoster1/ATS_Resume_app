@@ -201,6 +201,11 @@ export default function MasterCareerProfileClient() {
               <ProfileStat label="Skills" value={stats.skills} />
               <ProfileStat label="Imports" value={stats.imports} />
             </div>
+            <div className="mt-5 space-y-2 text-sm leading-6 text-[var(--color-text-muted)]">
+              <p><strong className="text-[var(--color-text-primary)]">Resumes</strong> become tailored views of this evidence.</p>
+              <p><strong className="text-[var(--color-text-primary)]">Pathways</strong> compare this profile against role expectations.</p>
+              <p><strong className="text-[var(--color-text-primary)]">Interviews</strong> can practice the proof recruiters will ask for.</p>
+            </div>
           </div>
         </div>
       </section>

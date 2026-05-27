@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import {
   APPLICATION_STATUSES,
   summarizeOfferReadiness,
+  summarizeOfferTradeoffs,
   type ApplicationStatus,
   type InterviewRound,
   type InterviewerInfo,
@@ -35,6 +36,7 @@ export default function OpportunityTrackingPanel({ outputId, initialTracking }: 
   const [message, setMessage] = useState<string | null>(null);
 
   const offerReadiness = useMemo(() => summarizeOfferReadiness(offer), [offer]);
+  const offerTradeoffs = useMemo(() => summarizeOfferTradeoffs(offer), [offer]);
 
   async function saveTracking() {
     setSaving(true);
@@ -218,6 +220,13 @@ export default function OpportunityTrackingPanel({ outputId, initialTracking }: 
             <OfferText label="Benefits" value={offer.benefits} onChange={(value) => updateOffer("benefits", value)} />
             <OfferText label="Growth opportunity" value={offer.growthOpportunity} onChange={(value) => updateOffer("growthOpportunity", value)} />
             <OfferText label="Career fit notes" value={offer.careerGrowthPotential ?? offer.notes} onChange={(value) => updateOffer("careerGrowthPotential", value)} />
+          </div>
+          <div className="mt-4 grid gap-3 md:grid-cols-2">
+            {offerTradeoffs.map((item) => (
+              <p key={item} className="rounded-[18px] bg-white px-4 py-3 text-sm font-semibold leading-6 text-[var(--color-text-muted)] shadow-[var(--shadow-inset-soft)]">
+                {item}
+              </p>
+            ))}
           </div>
         </div>
 

@@ -7,6 +7,10 @@ import {
   type JobContext,
   type JobIntent
 } from "@/lib/intentWorkflow";
+import {
+  inferDiscoveryInsights,
+  inferTransferableSkillSignals
+} from "@/lib/careerIntelligence";
 
 type Props = {
   initialContextText?: string;
@@ -563,6 +567,10 @@ function FirstResumeDiscovery({
   const [community, setCommunity] = useState("");
   const [goals, setGoals] = useState("");
   const [savingProfile, setSavingProfile] = useState(false);
+  const signals = inferTransferableSkillSignals(
+    [responsibility, helping, recognition, community, goals].join("\n"),
+    goals
+  );
   const canContinue = [responsibility, helping, recognition, community, goals].some(
     (value) => value.trim().length >= 12
   );
@@ -657,6 +665,22 @@ function FirstResumeDiscovery({
           prompt="Have you helped organize clubs, teams, school events, sports, volunteering, community activities, or informal projects?"
         />
       </div>
+      <section className="app-mini-card bg-gradient-to-br from-white to-[#eef6ff]">
+        <p className="app-kicker">What this can prove</p>
+        <h3 className="mt-2 text-2xl app-heading">Career Ladder looks for professional evidence, not perfect resume language.</h3>
+        <div className="mt-4 grid gap-3 md:grid-cols-3">
+          {signals.slice(0, 3).map((signal) => (
+            <article key={signal.mapsTo} className="rounded-[18px] bg-white px-4 py-3 shadow-[var(--shadow-inset-soft)]">
+              <strong className="block text-sm font-black text-[var(--color-text-primary)]">
+                {signal.source}
+              </strong>
+              <span className="mt-2 block text-sm leading-6 text-[var(--color-text-muted)]">
+                Can support {signal.mapsTo}.
+              </span>
+            </article>
+          ))}
+        </div>
+      </section>
       <DiscoveryPrompt
         label="Career direction"
         value={goals}
@@ -686,8 +710,10 @@ function CareerDiscoveryFoundation({
   const [strengths, setStrengths] = useState("");
   const [preferences, setPreferences] = useState("");
   const [energy, setEnergy] = useState("");
+  const [ambition, setAmbition] = useState("");
   const [savingProfile, setSavingProfile] = useState(false);
-  const canContinue = [interests, strengths, preferences, energy].some((value) => value.trim().length >= 12);
+  const insights = inferDiscoveryInsights({ interests, strengths, preferences, energy, ambition });
+  const canContinue = [interests, strengths, preferences, energy, ambition].some((value) => value.trim().length >= 12);
 
   async function complete() {
     if (!canContinue) return;
@@ -695,7 +721,8 @@ function CareerDiscoveryFoundation({
       interests && `Interests: ${interests}`,
       strengths && `Strengths: ${strengths}`,
       preferences && `Work preferences: ${preferences}`,
-      energy && `Energy patterns and environment: ${energy}`
+      energy && `Energy patterns and environment: ${energy}`,
+      ambition && `Ambition, income, and learning tolerance: ${ambition}`
     ].filter(Boolean).join("\n");
     setSavingProfile(true);
     try {
@@ -707,7 +734,8 @@ function CareerDiscoveryFoundation({
           interests: interests || undefined,
           strengths: strengths || undefined,
           workPreferences: preferences || undefined,
-          energyPatterns: energy || undefined
+          energyPatterns: energy || undefined,
+          goals: ambition || undefined
         })
       });
     } catch {
@@ -750,9 +778,40 @@ function CareerDiscoveryFoundation({
           label="Energy and lifestyle"
           value={energy}
           onChange={setEnergy}
-          prompt="What kinds of work leave you energized, and what kinds tend to drain you?"
+          prompt="What kinds of work leave you energized, and what kinds tend to drain you? Include stress, remote work, structure, or balance needs."
+        />
+        <DiscoveryPrompt
+          label="Ambition and constraints"
+          value={ambition}
+          onChange={setAmbition}
+          prompt="What matters right now: better pay, lower stress, faster growth, remote work, stability, learning something new, or a realistic pivot?"
         />
       </div>
+      <section className="app-mini-card bg-gradient-to-br from-white to-[#eef6ff]">
+        <p className="app-kicker">Early pattern read</p>
+        <h3 className="mt-2 text-2xl app-heading">Possible directions Career Ladder is noticing.</h3>
+        <div className="mt-4 grid gap-3 md:grid-cols-2">
+          {(insights.length ? insights : [
+            {
+              theme: "Career signal",
+              interpretation: "Add a little more detail and Career Ladder will look for realistic career patterns, not personality labels.",
+              possibleDirections: ["career pathway exploration"]
+            }
+          ]).map((insight) => (
+            <article key={insight.theme} className="rounded-[18px] bg-white px-4 py-3 shadow-[var(--shadow-inset-soft)]">
+              <strong className="block text-sm font-black text-[var(--color-text-primary)]">
+                {insight.theme}
+              </strong>
+              <span className="mt-2 block text-sm leading-6 text-[var(--color-text-muted)]">
+                {insight.interpretation}
+              </span>
+              <span className="mt-2 block text-xs font-bold uppercase tracking-[0.12em] text-[#245f9f]">
+                {insight.possibleDirections.join(" / ")}
+              </span>
+            </article>
+          ))}
+        </div>
+      </section>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="max-w-2xl text-xs font-semibold leading-5 text-[var(--color-text-muted)]">
           This is not a personality test. It is a starting context for realistic pathway exploration.

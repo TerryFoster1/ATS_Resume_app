@@ -12,8 +12,15 @@ The current goal-first onboarding includes a career discovery path that asks abo
 - Strengths
 - Work preferences
 - Energy and environment
+- Ambition, income, lifestyle, learning, and transition constraints
 
 The result becomes context for pathway exploration and can be saved to the Master Career Profile for authenticated users.
+
+## Current Refinements
+
+- Added live, lightweight pattern reads to the discovery flow.
+- The flow now looks for relational, operational, analytical communication, work-environment, and progression motives.
+- The experience stays framed as practical guidance rather than a personality test.
 
 ## Refinement Principles
 
@@ -29,3 +36,11 @@ The result becomes context for pathway exploration and can be saved to the Maste
 - Explainable transferable skill maps
 - Pathway comparisons grounded in the Master Career Profile
 - Contextual learning recommendations when real gaps are identified
+
+## Validation
+
+- `npm.cmd run build`: passed.
+- `npm.cmd run typecheck`: passed.
+- `npm.cmd audit`: passed with 0 vulnerabilities.
+- Local smoke covered homepage, intake, resume-first, pricing, career discovery, career transition, application tracking, dashboard redirect, profile redirect, and anonymous tracking API access.
+- `npm.cmd run lint` is not configured for this project and prompts for interactive ESLint setup, so it was not completed in this pass.

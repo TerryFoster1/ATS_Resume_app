@@ -168,6 +168,30 @@ export function summarizeOfferReadiness(offer: OfferComparison) {
   return "Add offer details when they arrive. Career Ladder will keep the decision tied to this opportunity.";
 }
 
+export function summarizeOfferTradeoffs(offer: OfferComparison): string[] {
+  const items: string[] = [];
+  if (offer.salary || offer.bonus) {
+    items.push("Compensation is captured. Compare it against flexibility, growth, stability, and the cost of accepting the role.");
+  }
+  if (offer.workModel || offer.commute) {
+    items.push("Work model and commute can materially affect sustainability, energy, and long-term performance.");
+  }
+  if (offer.growthOpportunity || offer.careerGrowthPotential) {
+    items.push("Growth notes are important because the best offer is not always the highest immediate salary.");
+  }
+  if (offer.title) {
+    items.push("Title can matter when it changes how future recruiters understand your level and trajectory.");
+  }
+  if (offer.benefits || offer.pto) {
+    items.push("Benefits and PTO are part of total value, especially when comparing stress, recovery, and family needs.");
+  }
+  return items.length
+    ? items.slice(0, 4)
+    : [
+        "Capture the details you know now, then revisit the offer when salary, flexibility, growth, stability, and lifestyle tradeoffs are clearer."
+      ];
+}
+
 function readNotes(value: unknown): OpportunityNote[] {
   if (!Array.isArray(value)) return [];
   return value

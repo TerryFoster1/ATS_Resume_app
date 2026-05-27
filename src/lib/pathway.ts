@@ -1,4 +1,8 @@
 import { callLlmStructured } from "@/lib/llm";
+import {
+  inferTransferableSkillSignals,
+  recommendLowCostLearning
+} from "@/lib/careerIntelligence";
 
 export type PathwayPreview = {
   status: "preview" | "completed";
@@ -67,6 +71,7 @@ export async function generatePathwayAnalysis(input: PathwayInput): Promise<Path
         input.resumeText ? `Resume evidence:\n${input.resumeText.slice(0, 12000)}` : "",
         input.currentBackground ? `Current background: ${input.currentBackground}` : "",
         input.jobPosting ? `Job posting:\n${input.jobPosting}` : "",
+        `Low-cost learning options to consider only if relevant: ${recommendLowCostLearning(role).join("; ")}`,
         "",
         "Return a practical career pathway analysis. Use short, specific bullets. If candidate background is limited, say what to prepare or prove rather than inventing experience.",
         "For fastestPathRecommendations, prioritize sequencing: what to reframe first, what proof to gather next, and what to practice for recruiter conversations.",
@@ -188,6 +193,13 @@ function buildTransferableInsight(input: PathwayInput): string {
   }
   if (/\b(teacher|education|training|coach)\b/.test(background)) {
     return "Your teaching or coaching background may translate into onboarding, stakeholder communication, needs assessment, and structured explanation.";
+  }
+  const signal = inferTransferableSkillSignals(
+    `${input.resumeText ?? ""}\n${input.currentBackground ?? ""}`,
+    input.targetRole
+  )[0];
+  if (signal) {
+    return `${signal.source} may support ${signal.mapsTo}. ${signal.why} ${signal.recruiterConcern ?? ""}`.trim();
   }
   return "Your most useful transferable strengths will come from concrete examples of communication, ownership, problem solving, follow-through, and measurable impact related to the target role.";
 }
