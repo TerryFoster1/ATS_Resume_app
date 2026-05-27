@@ -73,6 +73,7 @@ The profile-first model enables:
 - interview prep that remembers prior strengths
 - future learning recommendations
 - career transition intelligence
+- transferable skill translation from undervalued experience into recruiter-readable language
 - long-term retention
 
 The user should increasingly feel:
@@ -86,11 +87,40 @@ Career Ladder understands my professional identity.
 Future phases should:
 
 - add profile review before using newly imported resume items
+- extract transferable skill mappings from uploaded resumes and first-resume answers
+- explain why inferred skills map to a target role
+- ask the user to confirm important inferred mappings before relying on them heavily
 - let users mark evidence as active, archived, sensitive, or role-specific
 - connect pathway gaps back into profile goals
 - track completed certifications and learning progress
 - allow generated outputs to suggest profile additions without silently saving them
 - eventually move from text-composed profile context to structured generator inputs
+
+## Transferable Skill Translation
+
+Profile-first generation should not merely repeat the user's original resume language. It should use the Master Career Profile to identify the professional function behind the evidence.
+
+Example:
+
+```text
+Chef evidence -> daily kitchen operations, inventory planning, vendor communication, scheduling, quality control, safety compliance, team training.
+```
+
+When relevant to a target role, a tailored resume may frame this as:
+
+```text
+Coordinated daily kitchen operations, inventory planning, team scheduling, vendor communication, and quality control in high-pressure service environments.
+```
+
+Guardrails:
+
+- do not invent responsibilities
+- do not inflate job titles
+- do not claim formal operations experience if the user only had exposure
+- use cautious phrasing when evidence is partial
+- preserve the user's original facts as the evidence layer
+
+See `docs/transferable-skill-translation-strategy.md`.
 
 ## What Was Intentionally Deferred
 

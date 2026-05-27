@@ -74,6 +74,15 @@ The AI prompt is structured and constrained to avoid:
 - hallucinated experience
 - giant motivational text dumps
 
+Pathway logic should increasingly treat transferable skill overlap as the core intelligence layer. The goal is not to tell every user they can do every job. The goal is to identify where real evidence plausibly maps to adjacent work, where the recruiter-visible gaps are, and what proof would make the transition more credible.
+
+Examples:
+
+- chef -> operations coordinator through scheduling, inventory, vendor coordination, team leadership, safety, and quality control
+- retail manager -> customer success through customer retention, escalation handling, coaching, prioritization, and follow-through
+- journalism -> marketing/content strategy through audience insight, research, writing, interviewing, editing, and deadline management
+- trades -> project coordination through job planning, site communication, sequencing, materials, safety, and client updates
+
 ### Future learning recommendation layer
 
 Pathway analysis is the natural future home for contextual learning recommendations.
@@ -178,6 +187,8 @@ Dashboard cards now surface pathway status:
 - Let users add a resume later for stronger personalized gap comparison.
 - Add contextual course/certification recommendations tied to recruiter-visible gaps.
 - Add clear affiliate disclosure if contextual recommendations are monetized later.
+- Add inferred transferable skill maps with "why this maps" explanations.
+- Let users confirm or reject inferred skill mappings before using them in resumes or pathway recommendations.
 
 ## Intentionally Deferred
 

@@ -20,6 +20,8 @@ The Master Career Profile is the long-term source of truth. Tailored resumes, co
 
 The same profile should eventually support contextual learning recommendations. Career Ladder can only recommend credible upskilling when it understands what the user has already done, what evidence is missing, what credentials or projects they have completed, and what target roles they are pursuing.
 
+The profile should also become the home for transferable skill translation. Career Ladder should store the user's factual evidence separately from inferred recruiter-readable mappings. For example, a chef's real evidence may support inferred mappings such as operations coordination, inventory planning, vendor communication, team leadership, safety compliance, and quality control. Those mappings should remain explainable and grounded in the user's actual history.
+
 ## Phase 1 implementation
 
 This phase added a safe, additive profile layer without rewriting the existing resume, auth, Stripe, credit, dashboard, saved-output, interview prep, pathway, mock interview, or SEO systems.
@@ -123,6 +125,27 @@ The profile merge strategy is cumulative:
 - generated tailored outputs are not treated as the core profile
 
 Future UX should make profile changes reviewable rather than silently destructive.
+
+## Transferable Skill Intelligence
+
+The Master Career Profile should eventually store:
+
+- user-provided facts
+- inferred transferable skill mappings
+- notes explaining why each mapping is plausible
+- confidence or confirmation state for important inferences
+
+Inferred mappings should never replace the user's facts. They are interpretation layers that help downstream workflows translate experience into language recruiters recognize.
+
+Example:
+
+```text
+Fact: supervised busy dinner service and ordered kitchen supplies.
+Mappings: workflow coordination, inventory control, team leadership, quality control.
+Why it maps: the evidence shows coordination of people, materials, timing, and standards under operational pressure.
+```
+
+See `docs/transferable-skill-translation-strategy.md` for the broader strategy and guardrails.
 
 ## Learning Recommendation Alignment
 

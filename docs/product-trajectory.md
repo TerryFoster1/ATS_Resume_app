@@ -12,6 +12,24 @@ The emotional promise is:
 
 > You may already have relevant experience. Career Ladder helps you understand, position, and communicate it for the roles you actually want.
 
+## Transferable Skill Translation
+
+Transferable skill translation is now a core product principle.
+
+Career Ladder should infer the professional functions behind a user's real experience and translate them into recruiter-readable language. It should not merely repeat the user's resume wording or expect the user to already know hiring-market terminology.
+
+Example:
+
+```text
+Chef experience may include operations management, inventory control, vendor coordination, team leadership, scheduling, quality control, cost management, workflow optimization, training, compliance, and high-pressure decision-making.
+```
+
+This is especially important for laid-off workers, career changers, students, service industry workers, trades workers, retail workers, hospitality workers, and people whose experience has been undervalued by traditional resumes.
+
+The guardrail is truthfulness. Career Ladder can say "your experience may support" or "this likely overlaps with" when evidence is partial, but it must not fabricate experience, inflate titles, or claim formal ownership the user did not have.
+
+See `docs/transferable-skill-translation-strategy.md`.
+
 ## Goal-First Service Model
 
 The product should start with the user's goal, then collect the opportunity context needed to support that service.
