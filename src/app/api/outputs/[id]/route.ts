@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { normalizeSavedApplicationTitle } from "@/lib/applicationMeta";
+import { readOpportunityTracking } from "@/lib/opportunityTracking";
 import { readPathwaySnapshot } from "@/lib/pathway";
 import { createAdminSupabaseClient, createServerSupabaseClient } from "@/lib/supabase/server";
 
@@ -54,6 +55,7 @@ export async function GET(
     analysisSummary: data.analysis_summary,
     clarificationAnswers: data.clarification_answers,
     analysis: data.analysis_snapshot,
+    opportunityTracking: readOpportunityTracking(data.analysis_snapshot),
     resumeUnlocked: Boolean(data.resume_unlocked),
     coverLetterUnlocked: Boolean(data.cover_letter_unlocked),
     interviewPrepStatus: data.interview_prep_status,

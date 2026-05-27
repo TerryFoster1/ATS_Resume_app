@@ -626,7 +626,7 @@ function FirstResumeDiscovery({
     <section className="app-screen-card space-y-7">
       <FlowHeader
         eyebrow="My first resume"
-        title="Let’s find experience worth translating."
+        title="Let's find experience worth translating."
         body="You do not need polished resume bullets yet. Answer in plain language and Career Ladder will turn responsibility, service, activities, and recognition into a professional starting point."
         onBack={onBack}
         backLabel="Change goal"

@@ -1908,9 +1908,7 @@ function ResumePanel({
   allowCopy = true,
   allowDownloads = true,
   upgradeLabel,
-  onRequestUnlock,
-  variationLabel,
-  variationOptions = []
+  onRequestUnlock
 }: {
   title: string;
   text: string;
@@ -1923,13 +1921,10 @@ function ResumePanel({
   allowDownloads?: boolean;
   upgradeLabel?: string;
   onRequestUnlock?: () => void;
-  variationLabel?: string;
-  variationOptions?: string[];
 }) {
   const [editedText, setEditedText] = useState(text);
   const [copied, setCopied] = useState(false);
   const [pdfBusy, setPdfBusy] = useState(false);
-  const [variationOpen, setVariationOpen] = useState(false);
 
   useEffect(() => {
     setEditedText(text);
@@ -2051,70 +2046,6 @@ function ResumePanel({
           >
             {upgradeLabel}
           </button>
-        </div>
-      )}
-      {!locked && variationLabel && variationOptions.length > 0 && (
-        <VariationShell
-          label={variationLabel}
-          options={variationOptions}
-          open={variationOpen}
-          onToggle={() => setVariationOpen((current) => !current)}
-        />
-      )}
-    </div>
-  );
-}
-
-function VariationShell({
-  label,
-  options,
-  open,
-  onToggle
-}: {
-  label: string;
-  options: string[];
-  open: boolean;
-  onToggle: () => void;
-}) {
-  return (
-    <div className="rounded-[18px] border border-[var(--color-border-light)] bg-white/72 p-4 shadow-[var(--shadow-inset-soft)]">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <p className="text-sm font-black text-[var(--color-text-primary)]">
-            Variation preview
-          </p>
-          <p className="mt-1 text-xs leading-5 text-[var(--color-text-muted)]">
-            Preview variations are free during beta. Credit rules will apply
-            after account storage is enabled.
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={onToggle}
-          onMouseDown={() => trackEvent("regenerate_clicked", { label })}
-          className="app-button-ghost px-5 py-2.5 text-sm"
-        >
-          {label}
-        </button>
-      </div>
-      {open && (
-        <div className="mt-4 space-y-3">
-          <div className="flex flex-wrap gap-2">
-            {options.map((option) => (
-              <button
-                key={option}
-                type="button"
-                disabled
-                className="rounded-full border border-[var(--color-border-light)] bg-[#f9f4ee] px-3 py-1.5 text-xs font-bold text-[var(--color-text-muted)]"
-              >
-                {option}
-              </button>
-            ))}
-          </div>
-          <p className="text-xs leading-5 text-[var(--color-text-muted)]">
-            Variation generation is coming soon. Your current output will stay
-            visible until a new variation successfully generates.
-          </p>
         </div>
       )}
     </div>

@@ -1,4 +1,10 @@
-export type ApplicationStatus = "Draft" | "Applied" | "Interviewing" | "Offer" | "Rejected" | "Archived";
+import {
+  normalizeApplicationStatus,
+  readOpportunityTracking,
+  type ApplicationStatus
+} from "@/lib/opportunityTracking";
+
+export type { ApplicationStatus };
 
 export type ApplicationPipelineMeta = {
   jobTitle: string;
@@ -78,26 +84,26 @@ export function resolveApplicationPipelineMeta(args: {
 }
 
 export function readApplicationStatus(snapshot: unknown): ApplicationStatus {
-  if (!isRecord(snapshot)) return "Draft";
-  const raw = snapshot.applicationStatus;
-  if (typeof raw !== "string") return "Draft";
-  const normalized = raw.trim().toLowerCase();
-  if (normalized === "applied") return "Applied";
-  if (normalized === "interviewing") return "Interviewing";
-  if (normalized === "offer") return "Offer";
-  if (normalized === "rejected") return "Rejected";
-  if (normalized === "archived") return "Archived";
-  return "Draft";
+  if (!isRecord(snapshot)) return "Interested";
+  return readOpportunityTracking(snapshot).status;
 }
 
 export function buildInitialAnalysisSnapshot(analysis: unknown): unknown {
   if (isRecord(analysis)) {
+    const status = normalizeApplicationStatus(analysis.applicationStatus);
     return {
       ...analysis,
-      applicationStatus: readApplicationStatus(analysis)
+      applicationStatus: status,
+      opportunityTracking: readOpportunityTracking({
+        ...analysis,
+        applicationStatus: status
+      })
     };
   }
-  return { applicationStatus: "Draft" };
+  return {
+    applicationStatus: "Interested",
+    opportunityTracking: readOpportunityTracking({ applicationStatus: "Interested" })
+  };
 }
 
 function inferTitleMeta(value: string): {

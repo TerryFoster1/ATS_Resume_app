@@ -188,6 +188,11 @@ export default function MasterCareerProfileClient() {
               projects, certifications, and career goals enrich it over time. Tailored resumes become
               generated views of this profile, not the profile itself.
             </p>
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--color-text-muted)]">
+              Add plain evidence. Career Ladder can translate it into recruiter-readable functions
+              such as operations, client communication, coordination, quality control, or stakeholder
+              follow-through when the target role makes that framing relevant.
+            </p>
           </div>
           <div className="app-mini-card">
             <p className="app-kicker">Profile memory</p>

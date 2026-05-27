@@ -5,6 +5,7 @@ import DashboardApplications, { type DashboardApplication } from "@/components/D
 import { getCreditBalance } from "@/lib/accountStorage";
 import { resolveApplicationPipelineMeta } from "@/lib/applicationMeta";
 import { readMockInterview } from "@/lib/mockInterview";
+import { readOpportunityTracking } from "@/lib/opportunityTracking";
 import { readPathwaySnapshot } from "@/lib/pathway";
 import { createAdminSupabaseClient, createServerSupabaseClient } from "@/lib/supabase/server";
 
@@ -36,6 +37,7 @@ export default async function DashboardPage({
   const applications: DashboardApplication[] = (data ?? []).map((item) => {
     const mockInterview = readMockInterview(item.analysis_snapshot);
     const pathway = readPathwaySnapshot(item.analysis_snapshot);
+    const tracking = readOpportunityTracking(item.analysis_snapshot);
     const pipelineMeta = resolveApplicationPipelineMeta({
       title: item.job_title,
       companyName: item.company_name,
@@ -47,8 +49,12 @@ export default async function DashboardPage({
       jobTitle: pipelineMeta.jobTitle,
       companyName: pipelineMeta.companyName,
       displayTitle: pipelineMeta.displayTitle,
-      applicationStatus: pipelineMeta.status,
+      applicationStatus: tracking.status,
       createdAt: item.created_at,
+      followUpDate: tracking.followUpDate,
+      hasOffer: Object.values(tracking.offer).some(
+        (value) => typeof value === "string" && value.trim()
+      ),
       resumeUnlocked: Boolean(item.resume_unlocked),
       coverLetterUnlocked: Boolean(item.cover_letter_unlocked),
       interviewPrepReady: item.interview_prep_status === "completed",
@@ -76,15 +82,15 @@ export default async function DashboardPage({
           <div className="max-w-3xl">
             <p className="dashboard-eyebrow">Career workspace</p>
             <h1 className="mt-3 text-3xl app-heading sm:text-4xl">
-              Welcome back. Build the next application with clarity.
+              Welcome back. Keep each opportunity moving with clarity.
             </h1>
             <p className="mt-4 max-w-2xl text-sm leading-6 text-[var(--color-text-primary)]/72 sm:text-base">
-              Keep tailored resumes, cover letters, and future interview prep
-              organized around each role you are pursuing.
+              Keep tailored materials, recruiter prep, pathway notes, and hiring-stage details
+              organized around the roles you are actively pursuing.
             </p>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
-              <Link href="/?step=resume" className="app-button-primary dashboard-primary-cta">
-                Start a new application
+              <Link href="/?step=intake" className="app-button-primary dashboard-primary-cta">
+                Add a new opportunity
               </Link>
               <Link href="/profile" className="dashboard-secondary-cta">
                 Update profile
@@ -124,7 +130,7 @@ export default async function DashboardPage({
         <article className="dashboard-metric-card">
           <span>Saved roles</span>
           <strong>{applications.length}</strong>
-          <p>Application workspaces tied to real postings.</p>
+          <p>Role workspaces tied to real postings and career goals.</p>
         </article>
         <article className="dashboard-metric-card">
           <span>Unlocked materials</span>
@@ -145,15 +151,14 @@ export default async function DashboardPage({
           <div className="mx-auto max-w-3xl text-center">
             <p className="dashboard-eyebrow">No saved applications yet</p>
             <h2 className="mt-3 text-3xl app-heading sm:text-4xl">
-              Your first tailored application starts here.
+              Your first opportunity workspace starts here.
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-sm leading-6 text-[#5d6f85] sm:text-base">
-              Generate a resume and cover letter for a specific job posting.
-              Saved applications will appear here so you can reopen, export,
-              and improve them later.
+              Start with a target role, then choose whether to tailor materials,
+              prepare for interviews, compare pathways, or track the hiring process.
             </p>
-            <Link href="/?step=resume" className="app-button-primary dashboard-primary-cta mt-7">
-              Start a new application
+            <Link href="/?step=intake" className="app-button-primary dashboard-primary-cta mt-7">
+              Add a new opportunity
             </Link>
           </div>
 

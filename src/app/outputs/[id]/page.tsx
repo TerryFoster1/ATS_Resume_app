@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import AccountCreditIndicator from "@/components/AccountCreditIndicator";
+import OpportunityTrackingPanel from "@/components/OpportunityTrackingPanel";
 import SavedOutputDocuments from "@/components/SavedOutputDocuments";
 import { normalizeSavedApplicationTitle } from "@/lib/applicationMeta";
+import { readOpportunityTracking } from "@/lib/opportunityTracking";
 import { readPathwaySnapshot } from "@/lib/pathway";
 import { createAdminSupabaseClient, createServerSupabaseClient } from "@/lib/supabase/server";
 
@@ -49,6 +51,7 @@ export default async function SavedOutputPage({
   });
   const hasResume = Boolean(data.resume_text?.trim());
   const hasCoverLetter = Boolean(data.cover_letter_text?.trim());
+  const tracking = readOpportunityTracking(data.analysis_snapshot);
 
   return (
     <main className="space-y-8">
@@ -61,6 +64,9 @@ export default async function SavedOutputPage({
               {data.company_name ?? "Company not detected"}
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
+              <span className="dashboard-badge is-pending">
+                {tracking.status}
+              </span>
               <span className={data.resume_unlocked ? "dashboard-badge is-ready" : "dashboard-badge"}>
                 Resume {hasResume ? (data.resume_unlocked ? "unlocked" : "locked") : "not generated"}
               </span>
@@ -80,6 +86,8 @@ export default async function SavedOutputPage({
           </div>
         </div>
       </header>
+
+      <OpportunityTrackingPanel outputId={data.id} initialTracking={tracking} />
 
       <SavedOutputDocuments
         outputId={data.id}

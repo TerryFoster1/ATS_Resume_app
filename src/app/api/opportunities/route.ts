@@ -87,7 +87,7 @@ export async function POST(request: Request) {
     analysisSummary: `Job-context opportunity created for ${parsed.data.intent}.`,
     clarificationAnswers: [],
     analysis: {
-      applicationStatus: "Draft",
+      applicationStatus: "Interested",
       workflowIntent: parsed.data.intent,
       opportunityOnly: true,
       applicationTitle: title,

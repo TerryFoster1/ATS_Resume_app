@@ -324,10 +324,10 @@ export const marketingPages: Record<MarketingPageKey, MarketingPage> = {
     eyebrow: "Application tracking",
     title: "Application Tracking",
     description:
-      "Track opportunities, generated materials, interview prep, status, and future next steps in a career workspace.",
+      "Track opportunities, generated materials, interview prep, recruiter notes, interview rounds, and offer details in one career workspace.",
     headline: "Keep each opportunity connected from application to offer.",
     intro:
-      "Application tracking is the workspace layer: saved opportunities, materials, interview prep, status, and next steps should live together instead of scattering across files.",
+      "Application tracking is the workspace layer: saved opportunities, materials, interview prep, status, recruiter details, follow-ups, and offer context live together instead of scattering across files.",
     primaryCta: { label: "View dashboard", href: "/dashboard" },
     secondaryCta: { label: "Start a new opportunity", href: "/?step=intake" },
     proof: [
@@ -337,15 +337,15 @@ export const marketingPages: Record<MarketingPageKey, MarketingPage> = {
         body: "Saved records should represent hiring opportunities with materials, preparation, status, and future follow-up."
       },
       {
-        label: "Beta direction",
-        title: "Pipeline foundations",
-        body: "Future tracking can support stages, interviews, reminders, offers, and application analytics without changing today's core workflows."
+        label: "Offer context",
+        title: "Compare more than compensation",
+        body: "Capture salary, work model, growth potential, commute, benefits, and career fit so the decision stays strategic."
       }
     ],
     story: [
       {
         title: "Useful now, extensible later",
-        body: "The dashboard already reopens saved work. The long-term direction is a recruiter-aware opportunity pipeline."
+        body: "Each saved role can now carry status, notes, interview rounds, recruiter information, follow-up timing, and offer details."
       },
       {
         title: "Connected to every service",

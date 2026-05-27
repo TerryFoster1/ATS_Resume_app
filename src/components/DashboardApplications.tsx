@@ -2,14 +2,17 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import type { ApplicationStatus } from "@/lib/opportunityTracking";
 
 export type DashboardApplication = {
   id: string;
   jobTitle: string;
   displayTitle: string;
   companyName?: string | null;
-  applicationStatus: "Draft" | "Applied" | "Interviewing" | "Offer" | "Rejected" | "Archived";
+  applicationStatus: ApplicationStatus;
   createdAt: string;
+  followUpDate?: string | null;
+  hasOffer?: boolean;
   resumeUnlocked: boolean;
   coverLetterUnlocked: boolean;
   interviewPrepReady: boolean;
@@ -74,8 +77,20 @@ export default function DashboardApplications({
                 {item.companyName ?? "Company not detected"}
               </p>
               <p className="mt-2 text-sm leading-6 text-[#65748a]">
-                Application workspace with generated materials and interview preparation.
+                Role workspace with generated materials, interview preparation, notes, and offer context.
               </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {item.followUpDate && (
+                  <span className="dashboard-date-pill">
+                    Follow up {item.followUpDate}
+                  </span>
+                )}
+                {item.hasOffer && (
+                  <span className="dashboard-badge is-ready">
+                    Offer details captured
+                  </span>
+                )}
+              </div>
               <div className="mt-4 flex flex-wrap gap-2">
                 <span className={item.resumeUnlocked ? "dashboard-badge is-ready" : "dashboard-badge"}>
                   Resume {item.resumeUnlocked ? "unlocked" : "locked"}
@@ -111,9 +126,13 @@ export default function DashboardApplications({
 }
 
 function statusClassName(status: DashboardApplication["applicationStatus"]) {
+  if (status === "Interested") return "is-draft";
   if (status === "Applied") return "is-applied";
+  if (status === "Screening") return "is-interviewing";
   if (status === "Interviewing") return "is-interviewing";
+  if (status === "Final Interview") return "is-interviewing";
   if (status === "Offer") return "is-offer";
+  if (status === "Accepted") return "is-offer";
   if (status === "Rejected") return "is-rejected";
   if (status === "Archived") return "is-archived";
   return "is-draft";
