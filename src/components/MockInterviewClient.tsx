@@ -12,11 +12,11 @@ import type {
 } from "@/lib/mockInterview";
 
 const GENERATION_STAGES = [
-  "Reading the job description...",
+  "Reading the role through a recruiter lens...",
   "Identifying what the hiring manager will likely test...",
-  "Comparing the role against your tailored resume...",
-  "Finding weak spots and follow-up risks...",
-  "Building recruiter-style questions...",
+  "Comparing the role against your saved experience...",
+  "Finding proof gaps and follow-up risks...",
+  "Building recruiter-style practice questions...",
   "Preparing answer-evaluation criteria..."
 ];
 
@@ -579,7 +579,8 @@ function StartPanel({
         <h2 className="mt-3 app-heading text-2xl">Generate a guided mock interview for 1 credit.</h2>
         <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--color-text-muted)]">
           The practice set uses your saved resume, cover letter, job posting, and clarification
-          answers. You will answer one question at a time, then receive hiring-manager style feedback.
+          answers when available. You will answer one question at a time, then receive feedback on
+          proof, relevance, transferable framing, and recruiter confidence.
         </p>
       </div>
       <div className="mock-start-features" aria-label="Mock interview features">

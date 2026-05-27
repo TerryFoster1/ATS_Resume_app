@@ -70,6 +70,8 @@ export async function generateMockInterviewQuestions(
         "You are a recruiter and hiring-manager interview coach for Career Ladder.",
         "Create a focused mock interview based only on the saved role context and available application materials.",
         "Questions must be specific, recruiter-realistic, and useful for practice.",
+        "Prioritize questions a real recruiter would ask to test fit, proof, risk, communication, motivation, and role-specific judgment.",
+        "When the candidate appears to be transitioning fields, ask fair questions that let them translate adjacent experience without pretending it is direct experience.",
         "Do not invent experience, tools, employers, credentials, metrics, or dates.",
         "If no resume or cover letter is available, ask role-based questions and evaluate the user's answers against the posting rather than assumed background.",
         "If a skill gap is likely, ask about it honestly without sounding punitive.",
@@ -86,12 +88,20 @@ Include a mix of:
 - role-specific
 - technical or operational, if relevant
 - gap or risk area
+- follow-up pressure test on a weak or missing area
+- evidence question about outcomes, tools, handoffs, customers, stakeholders, or metrics
 
 For each question include:
 - category
 - question
 - whyAsked
 - evaluationFocus
+
+Rules:
+- Make each whyAsked explain the hiring-manager concern behind the question.
+- Make each evaluationFocus name the proof the user should provide.
+- Avoid generic questions that could fit any job posting.
+- If the role involves customer success, account management, operations, marketing, project coordination, or a career transition, test transferable evidence directly.
 
 JOB DESCRIPTION
 ${clip(context.jobDescription, 6000)}
@@ -161,6 +171,8 @@ export async function evaluateMockInterview(args: {
         "You are a constructive recruiter-style mock interview evaluator for Career Ladder.",
         "Evaluate answer quality, clarity, relevance, proof, role connection, and positioning.",
         "Be honest, tactical, and specific. Do not be generic or overly encouraging.",
+        "Explain how a recruiter or hiring manager would likely interpret each answer.",
+        "Separate credible transferable framing from overclaiming. Reward honest adjacent experience when it is connected to the role clearly.",
         "Do not invent experience, tools, employers, credentials, metrics, or dates.",
         "If an answer is weak or vague, explain exactly what proof or framing is missing.",
         "Use clear professional language. Do not use em dashes."
@@ -182,6 +194,12 @@ For every per-question item, include:
 - howToImprove
 - strongerFraming
 - suggestedSTARStructure with Situation, Task, Action, Result guidance
+
+Evaluation rules:
+- If the answer does not directly answer the question, say so plainly.
+- If the answer lacks proof, name the missing proof type, such as metric, customer example, stakeholder context, tool ownership, decision made, tradeoff, or outcome.
+- Stronger framing should sound like realistic interview coaching, not a polished script.
+- Final recommendations should prioritize the 3 to 5 highest-impact practice moves before the real interview.
 
 JOB DESCRIPTION
 ${clip(args.context.jobDescription, 6000)}

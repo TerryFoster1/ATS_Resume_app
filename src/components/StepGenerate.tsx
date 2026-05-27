@@ -37,11 +37,11 @@ const CHECK_TIMEOUT_MS = 110_000;
 const RESCORE_TIMEOUT_MS = 110_000;
 
 const PHASES = [
-  "Reading the analysis and confirmed details",
+  "Reading recruiter expectations and confirmed details",
+  "Translating your experience into role-specific evidence",
   "Drafting a tailored resume in your voice",
   "Writing a cover letter grounded in your real experience",
-  "Running document structure checks",
-  "Checking the tailored resume against the posting"
+  "Checking structure, proof, and role alignment"
 ];
 
 export default function StepGenerate({ state, onBack, onDone }: Props) {
@@ -91,8 +91,8 @@ export default function StepGenerate({ state, onBack, onDone }: Props) {
               Tailoring your resume and cover letter
             </h2>
             <p className="max-w-xl text-sm leading-6 text-white/72">
-              We are rewriting the materials around your real experience, then
-              checking the result before showing the final documents.
+              Career Ladder is translating your real experience into recruiter-readable
+              evidence, then checking the result before showing the final documents.
             </p>
             {!error && (
               <LoadingIndicator

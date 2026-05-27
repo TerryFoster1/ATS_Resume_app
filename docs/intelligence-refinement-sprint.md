@@ -1,0 +1,166 @@
+# Intelligence refinement sprint
+
+Date: 2026-05-26
+
+## Goal
+
+This sprint refined Career Ladder from a functional career workflow platform toward a more recruiter-aware career intelligence system.
+
+The work intentionally avoided new major workflows, Stripe changes, auth changes, credit changes, middleware changes, dashboard persistence changes, SEO route changes, and generation architecture rewrites.
+
+## Intelligence improvements
+
+### Interview prep
+
+The interview prep prompt now asks the model to reason more like a recruiter preparing a screening conversation:
+
+- identify what the hiring team is trying to prove
+- name likely doubts or risk areas
+- explain what evidence would reduce those concerns
+- include likely follow-up questions
+- frame platform or hard-skill gaps honestly
+- translate adjacent experience only when credible
+
+The prompt now explicitly supports common career transitions:
+
+- retail to customer success
+- hospitality to operations
+- journalism to marketing
+- service industry to account management
+- trades to project coordination
+
+The output strategy still uses the existing markdown structure and saved-output display. No storage or endpoint schema changed.
+
+### Mock interview
+
+Mock interview question generation now prioritizes recruiter-realistic pressure points:
+
+- fit
+- proof
+- risk
+- communication
+- motivation
+- role-specific judgment
+- follow-up pressure on weak or missing areas
+
+Mock interview feedback now asks the evaluator to explain how a recruiter or hiring manager would likely interpret each answer. It separates credible transferable framing from overclaiming and asks for missing proof types such as metrics, customer examples, tool ownership, decisions, tradeoffs, or outcomes.
+
+The stored mock interview structure did not change.
+
+### Career pathway
+
+Pathway analysis now has stronger guidance around:
+
+- how hiring teams evaluate the transition
+- true skill gaps versus communication or evidence gaps
+- practical sequencing for fastest-path recommendations
+- free or low-cost ways to build proof before recommending expensive programs
+- realistic role positioning without salary promises or instant-transition claims
+
+The deterministic free preview now frames roles around hiring-team concerns, not generic skill lists.
+
+Transferable-skill preview logic was expanded for:
+
+- retail or customer service into customer success or account management
+- hospitality into operations or coordination
+- journalism or communications into marketing
+- service work into account-facing roles
+- trades or field work into project coordination
+
+## UX polish decisions
+
+Loading and transition copy was refined to make the system feel analytical rather than mechanical:
+
+- job-post analysis now says it is reading the posting like a recruiter
+- document generation now says it is translating experience into role-specific evidence
+- mock interview generation now references saved experience, proof gaps, and recruiter-style practice questions
+
+Homepage and onboarding copy was tightened around Career Ladder as a recruiter-aware career preparation system rather than a resume utility. The language now emphasizes the recruiter lens, proof, role alignment, transferable framing, and credible next steps.
+
+Saved pathway presentation copy now emphasizes recruiter interpretation, transferable strengths, proof gaps, practical sequencing, and realistic role-positioning strategy.
+
+## Cohesion strategy
+
+The refinement keeps Career Ladder's workflows connected through the same shared context:
+
+- role and posting context drive resume, interview, mock interview, and pathway workflows
+- uploaded resume evidence can personalize interview and pathway records without creating fake resume panels
+- pathway outputs are framed as guidance that can naturally inform interview prep and resume positioning
+- mock interview feedback evaluates answers against the same saved application context
+
+This keeps the product moving toward one evolving career intelligence layer without introducing a new architecture.
+
+## What was intentionally not changed
+
+- No Stripe products, prices, checkout routes, or webhook behavior changed.
+- No auth, Supabase, or middleware behavior changed.
+- No credit consumption logic changed.
+- No database migration was added.
+- No resume or cover letter generation endpoint was rewritten.
+- No saved-output or dashboard persistence model changed.
+- No SEO route architecture changed.
+- No major visual redesign was performed.
+
+## Future refinement
+
+Recommended next refinements:
+
+- add structured recruiter-concern fields to saved analysis snapshots
+- make pathway outputs directly seed interview prep themes
+- add more deterministic transferable-skill detection for common transitions
+- add regression prompts for high-value transitions such as retail to customer success and hospitality to operations
+- add authenticated QA coverage for credit-backed pathway and mock interview flows
+- add visual QA for the refined loading and saved-output states on mobile
+
+## Validation
+
+Commands to run from:
+
+```text
+C:\Users\kathr\Documents\Claude CoWork Files\Projects\Apps\ats-resume-app\src
+```
+
+```powershell
+npm.cmd run build
+npm.cmd run typecheck
+```
+
+### Results
+
+```powershell
+npm.cmd run build
+```
+
+Result: PASS
+
+Evidence:
+
+```text
+Compiled successfully
+Generating static pages (29/29)
+```
+
+```powershell
+npm.cmd run typecheck
+```
+
+Result: PASS
+
+### Local production smoke check
+
+Started the local production server:
+
+```powershell
+npm.cmd run start -- -p 3028
+```
+
+Checked:
+
+```text
+/             200
+/?step=intake 200
+/?step=resume 200
+/pricing      200
+```
+
+These checks confirm the homepage, goal-first entry, old resume-first entry, and pricing page still render after the refinement pass.

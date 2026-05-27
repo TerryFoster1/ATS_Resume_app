@@ -505,8 +505,8 @@ function PathwaySection({
             Understand the shortest credible path toward this role.
           </h3>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--color-text-muted)]">
-            This pathway compares the target role against your available context, then separates
-            common expectations from personalized gaps and practical next steps.
+            This pathway interprets the role through a recruiter lens, then separates
+            common expectations from transferable strengths, proof gaps, and practical next steps.
           </p>
         </div>
         {!pathway.full && (
@@ -559,8 +559,8 @@ function PathwaySection({
               <div className="interview-prep-lines">
                 <div className="interview-prep-line">
                   <p>
-                    Unlock the full pathway for personalized gaps, fastest path recommendations,
-                    lowest-cost next steps, and a practical role-positioning strategy.
+                    Unlock the full pathway for personalized proof gaps, practical sequencing,
+                    low-cost next steps, and a realistic role-positioning strategy.
                   </p>
                 </div>
               </div>

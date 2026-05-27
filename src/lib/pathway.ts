@@ -38,7 +38,7 @@ export function buildPathwayPreview(input: PathwayInput): PathwayPreview {
   const requirements = inferCommonRequirements(input).slice(0, 5);
   return {
     status: "preview",
-    roleOverview: `${role} roles usually reward candidates who can show relevant context, practical judgment, and credible examples that map to the work rather than just listing generic skills.`,
+    roleOverview: `${role} roles usually reward candidates who can connect their past work to the hiring team's real concerns: ownership, judgment, communication, follow-through, and credible examples that map to the role.`,
     commonRequirements: requirements.length ? requirements : DEFAULT_REQUIREMENTS,
     transferableInsight: buildTransferableInsight(input),
     generatedAt: new Date().toISOString()
@@ -53,8 +53,14 @@ export async function generatePathwayAnalysis(input: PathwayInput): Promise<Path
       timeoutMs: 100_000,
       temperature: 0.35,
       maxTokens: 1800,
-      system:
-        "You are a recruiter-aware career strategist. Create realistic, practical pathway guidance. Do not promise jobs, salaries, instant transitions, or fake experience. Emphasize transferable skills, gaps, low-cost next steps, and honest positioning.",
+      system: [
+        "You are a recruiter-aware career strategist for Career Ladder.",
+        "Create realistic, practical pathway guidance that explains how hiring teams would evaluate the transition.",
+        "Do not promise jobs, salaries, instant transitions, or fake experience.",
+        "Emphasize transferable skills, proof gaps, practical sequencing, low-cost next steps, and honest positioning.",
+        "Translate adjacent experience when credible: retail to customer success, hospitality to operations, journalism to marketing, service industry to account management, trades to project coordination.",
+        "Avoid generic certification lists unless a certification is genuinely useful for the role context."
+      ].join("\n"),
       user: [
         `Target role: ${role}`,
         input.companyName ? `Company: ${input.companyName}` : "",
@@ -62,7 +68,10 @@ export async function generatePathwayAnalysis(input: PathwayInput): Promise<Path
         input.currentBackground ? `Current background: ${input.currentBackground}` : "",
         input.jobPosting ? `Job posting:\n${input.jobPosting}` : "",
         "",
-        "Return a practical career pathway analysis. Use short, specific bullets. If candidate background is limited, say what to prepare or prove rather than inventing experience."
+        "Return a practical career pathway analysis. Use short, specific bullets. If candidate background is limited, say what to prepare or prove rather than inventing experience.",
+        "For fastestPathRecommendations, prioritize sequencing: what to reframe first, what proof to gather next, and what to practice for recruiter conversations.",
+        "For lowestCostPathRecommendations, prefer free or low-cost practice, terminology building, portfolio examples, informational interviews, tool sandboxes, and proof-gathering steps over expensive programs.",
+        "For likelySkillGaps, distinguish true skill gaps from communication or evidence gaps when possible."
       ]
         .filter(Boolean)
         .join("\n\n")
@@ -148,11 +157,34 @@ function inferCommonRequirements(input: PathwayInput): string[] {
 
 function buildTransferableInsight(input: PathwayInput): string {
   const background = `${input.resumeText ?? ""}\n${input.currentBackground ?? ""}`.toLowerCase();
-  if (/\b(retail|restaurant|hospitality|server|chef|barista)\b/.test(background)) {
+  const roleText = `${input.targetRole} ${input.jobPosting ?? ""}`.toLowerCase();
+  if (/\b(retail|store|cashier|sales associate|customer service)\b/.test(background)) {
+    if (/\b(customer success|client success|account manager|account management)\b/.test(roleText)) {
+      return "Your retail or customer-service background may already show customer retention, objection handling, service recovery, and relationship follow-through. The pathway is to frame those examples as account ownership and customer momentum rather than front-line tasks.";
+    }
     return "Your customer-facing background may already support relationship management, prioritization under pressure, conflict resolution, and service recovery examples if you frame them in the language of the target role.";
   }
+  if (/\b(restaurant|hospitality|server|chef|barista|hotel|front desk|guest experience)\b/.test(background)) {
+    if (/\b(operations|coordinator|project|program|office manager)\b/.test(roleText)) {
+      return "Your hospitality background may translate into operations through shift coordination, handoffs, service standards, prioritization, and problem solving under time pressure. The key is to show repeatable process ownership, not just busy-service resilience.";
+    }
+    return "Your hospitality background may already support stakeholder communication, service recovery, prioritization, and operational follow-through if you connect those examples to the target role's outcomes.";
+  }
   if (/\b(journalism|writer|editor|content|communications)\b/.test(background)) {
+    if (/\b(marketing|campaign|content|brand|social|communications)\b/.test(roleText)) {
+      return "Your journalism or communications background may translate into marketing through audience understanding, research, message clarity, editorial judgment, and deadline-driven production. Hiring teams will still want proof of business goals, channel performance, or campaign context.";
+    }
     return "Your communication background may translate into stakeholder messaging, research, audience understanding, and clear documentation if you connect it to the role's business outcomes.";
+  }
+  if (/\b(server|service|call center|support|customer support|client service)\b/.test(background)) {
+    if (/\b(account|client|customer success|sales)\b/.test(roleText)) {
+      return "Your service background may translate into account-facing work when you show relationship continuity, issue resolution, follow-up discipline, and the ability to protect trust over time.";
+    }
+  }
+  if (/\b(trade|trades|construction|electrician|plumber|carpenter|mechanic|technician|foreman)\b/.test(background)) {
+    if (/\b(project|coordinator|operations|scheduler|field|site)\b/.test(roleText)) {
+      return "Your trades or field background may support project coordination through sequencing work, managing constraints, communicating with stakeholders, and keeping timelines moving. The gap is often translating hands-on execution into coordination language.";
+    }
   }
   if (/\b(teacher|education|training|coach)\b/.test(background)) {
     return "Your teaching or coaching background may translate into onboarding, stakeholder communication, needs assessment, and structured explanation.";

@@ -57,7 +57,7 @@ const GOALS: GoalConfig[] = [
   {
     id: "interviewPrep",
     title: "Prepare for an Interview",
-    description: "Practice recruiter-style interview questions and prep.",
+    description: "Prepare for the questions a recruiter is most likely to test.",
     eyebrow: "Interview readiness",
     contextCopy:
       "Paste the posting to generate more realistic recruiter-style interview questions and sharper prep notes.",
@@ -67,7 +67,7 @@ const GOALS: GoalConfig[] = [
   {
     id: "mockInterview",
     title: "Practice a Mock Interview",
-    description: "Answer one question at a time and get feedback.",
+    description: "Answer one question at a time and tighten your framing.",
     eyebrow: "Practice room",
     contextCopy:
       "The role context helps the mock interview ask questions that feel closer to a real recruiter screen.",
@@ -77,7 +77,7 @@ const GOALS: GoalConfig[] = [
   {
     id: "careerPathway",
     title: "Explore a Career Path",
-    description: "Identify transferable skills, likely gaps, and next steps.",
+    description: "Map transferable strengths, likely gaps, and next steps.",
     eyebrow: "Pathway analysis",
     contextCopy:
       "Paste the posting to compare your current experience against real hiring expectations for this path.",
@@ -293,7 +293,8 @@ export default function JobIntentFlow({
           <h2 className="mt-3 text-4xl app-heading">What would you like help with?</h2>
           <p className="mt-4 text-base leading-7 text-[var(--color-text-muted)]">
             Choose the outcome first. Career Ladder will ask for only the role
-            and experience context that helps that service work intelligently.
+            and experience context needed to interpret the opportunity with a
+            recruiter lens.
           </p>
         </div>
 
@@ -372,7 +373,8 @@ export default function JobIntentFlow({
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="max-w-2xl text-xs font-semibold leading-5 text-[var(--color-text-muted)]">
             Job-title-only mode works for interview and pathway exploration. The full
-            posting makes recruiter expectations, themes, and gaps more specific.
+            posting makes recruiter expectations, likely concerns, and transferable
+            skill gaps more specific.
           </p>
           <button type="button" onClick={continueFromContext} className="app-button-primary">
             Continue
@@ -409,8 +411,8 @@ export default function JobIntentFlow({
           </div>
           <p className="mt-3 text-sm leading-6 text-[var(--color-text-muted)]">
             Career Ladder can extract your existing evidence, translate transferable
-            strengths, and compare your background against the role without turning
-            this into a manual questionnaire.
+            strengths, and compare your background against the role through a
+            recruiter-aware lens.
           </p>
 
           <label className="mt-5 flex cursor-pointer flex-col items-start gap-3 rounded-[22px] border border-dashed border-[#9dc4e8] bg-white/78 p-5 transition hover:-translate-y-0.5 hover:border-[#2f80ed] hover:shadow-[0_18px_38px_rgba(47,128,237,0.14)]">

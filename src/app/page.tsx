@@ -9,22 +9,22 @@ const VALID_STEPS: Step[] = ["intro", "intake", "intent", "resume", "job", "anal
 const FLOW = [
   "Paste the role or posting",
   "Choose your preparation goal",
-  "Get recruiter-aware guidance",
+  "Understand the recruiter lens",
   "Save the opportunity workspace"
 ];
 
 const VALUE_PROPS = [
   {
     title: "Finds the real hiring intent",
-    body: "The analysis separates role requirements from company fluff, then looks for meaningful transferable overlap."
+    body: "The analysis separates role requirements from company background copy, then looks for proof a hiring team would actually care about."
   },
   {
     title: "Asks like a recruiter",
-    body: "Follow-up questions focus on proof: tools, workflows, client work, reporting, outcomes, and missing hard skills."
+    body: "Questions focus on proof: tools, workflows, client ownership, reporting, outcomes, and the gaps a recruiter may test."
   },
   {
-    title: "Rewrites with restraint",
-    body: "The final materials stay ATS-safe, human, and grounded in experience you actually have."
+    title: "Positions without overclaiming",
+    body: "Career Ladder helps translate real experience into stronger hiring language without inventing credentials, metrics, or tools."
   }
 ];
 
@@ -88,8 +88,8 @@ function LandingPage() {
             </h2>
             <p className="mt-5 max-w-2xl text-base leading-8 text-[var(--color-text-primary)]/74 sm:text-lg">
               Paste a job posting, choose your goal, and Career Ladder helps you
-              tailor your resume, write your cover letter, or prepare for the
-              interview and next career step with recruiter-style guidance.
+              understand the recruiter lens, tailor your materials, prepare for
+              interviews, and plan the next credible step.
             </p>
 
             <div className="mt-8 flex flex-wrap items-center gap-3">

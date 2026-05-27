@@ -12,9 +12,9 @@ import type { AnalyzeResponse } from "@/lib/types";
 // call, but rotating these gives the user the sense that work is
 // happening rather than the screen having frozen.
 const ANALYZE_SUBTEXTS = [
-  "Identifying real qualifications",
-  "Separating duties from requirements",
-  "Finding transferable experience signals"
+  "Reading the posting like a recruiter",
+  "Separating real requirements from company background copy",
+  "Identifying likely proof, gap, and transferability signals"
 ];
 
 interface Props {
@@ -97,8 +97,9 @@ export default function StepJobPost({
             <p className="app-kicker">Step two</p>
             <h2 className="mt-2 text-3xl app-heading">Add the role you want</h2>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--color-text-primary)]/72">
-              Add the full posting so we can compare your resume against the
-              real requirements, responsibilities, and language of the role.
+              Add the full posting so Career Ladder can identify what the hiring
+              team is likely trying to prove, where your experience already maps,
+              and what may need clearer framing.
             </p>
             <div className="mt-5 grid gap-3 sm:grid-cols-3">
               {["Requirements", "Responsibilities", "Keywords"].map((label) => (
@@ -107,7 +108,7 @@ export default function StepJobPost({
                     {label}
                   </p>
                   <p className="mt-1 text-[11px] leading-4 text-[var(--color-text-muted)]">
-                    Read for evidence, not just exact wording.
+                    Read for evidence, not just matching words.
                   </p>
                 </div>
               ))}
