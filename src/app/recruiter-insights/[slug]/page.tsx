@@ -4,10 +4,12 @@ export function generateStaticParams() {
   return staticParamsForHub("recruiter-insights");
 }
 
-export function generateMetadata({ params }: { params: { slug: string } }) {
-  return metadataForHub("recruiter-insights", params.slug);
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  return metadataForHub("recruiter-insights", slug);
 }
 
-export default function Page({ params }: { params: { slug: string } }) {
-  return <SeoHubPage hub="recruiter-insights" slug={params.slug} />;
+export default async function Page({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  return <SeoHubPage hub="recruiter-insights" slug={slug} />;
 }

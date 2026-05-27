@@ -8,8 +8,9 @@ export const maxDuration = 120;
 
 export async function POST(
   _request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const supabase = createServerSupabaseClient();
   if (!supabase) {
     return NextResponse.json({ error: "Auth is not configured." }, { status: 503 });
@@ -29,7 +30,7 @@ export async function POST(
   const { data: output, error: outputError } = await admin
     .from("generated_outputs")
     .select("*")
-    .eq("id", params.id)
+    .eq("id", id)
     .eq("user_id", user.id)
     .single();
 
@@ -79,20 +80,20 @@ export async function POST(
         analysis_snapshot: nextSnapshot,
         interview_prep_status: "completed"
       })
-      .eq("id", params.id)
+      .eq("id", id)
       .eq("user_id", user.id);
     if (updateError) throw updateError;
     return NextResponse.json({ interviewPrep });
   } catch (error) {
     console.error("[interview-prep] Generation failed", {
-      outputId: params.id,
+      outputId: id,
       userId: user.id,
       error
     });
     await admin
       .from("generated_outputs")
       .update({ interview_prep_status: "failed" })
-      .eq("id", params.id)
+      .eq("id", id)
       .eq("user_id", user.id);
     return NextResponse.json(
       { error: "Interview prep generation failed. Please contact support if a credit was used." },

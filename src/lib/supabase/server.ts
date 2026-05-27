@@ -3,10 +3,15 @@ import { createClient } from "@supabase/supabase-js";
 import { createServerClient } from "@supabase/ssr";
 import { getSupabaseAdminConfig, getSupabaseBrowserConfig } from "./config";
 
+type SyncCookieStore = {
+  get(name: string): { value?: string } | undefined;
+  set(options: { name: string; value: string } & Record<string, unknown>): void;
+};
+
 export function createServerSupabaseClient() {
   const config = getSupabaseBrowserConfig();
   if (!config) return null;
-  const cookieStore = cookies();
+  const cookieStore = cookies() as unknown as SyncCookieStore;
   return createServerClient(config.url, config.anonKey, {
     cookies: {
       get(name: string) {

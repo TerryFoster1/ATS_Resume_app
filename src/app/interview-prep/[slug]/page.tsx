@@ -4,10 +4,12 @@ export function generateStaticParams() {
   return staticParamsForHub("interview-prep");
 }
 
-export function generateMetadata({ params }: { params: { slug: string } }) {
-  return metadataForHub("interview-prep", params.slug);
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  return metadataForHub("interview-prep", slug);
 }
 
-export default function Page({ params }: { params: { slug: string } }) {
-  return <SeoHubPage hub="interview-prep" slug={params.slug} />;
+export default async function Page({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  return <SeoHubPage hub="interview-prep" slug={slug} />;
 }

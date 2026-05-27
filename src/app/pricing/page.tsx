@@ -26,15 +26,17 @@ const PACKS = [
   }
 ];
 
-export default function PricingPage({
+export default async function PricingPage({
   searchParams
 }: {
-  searchParams?: { canceled?: string; pack?: string; checkout?: string };
+  searchParams?: Promise<{ canceled?: string; pack?: string; checkout?: string }>;
 }) {
-  const canceled = searchParams?.canceled === "1";
+  const resolvedSearchParams = await searchParams;
+  const canceled = resolvedSearchParams?.canceled === "1";
   const autoCheckoutPack =
-    searchParams?.checkout === "1" && (searchParams.pack === "5" || searchParams.pack === "10")
-      ? searchParams.pack
+    resolvedSearchParams?.checkout === "1" &&
+    (resolvedSearchParams.pack === "5" || resolvedSearchParams.pack === "10")
+      ? resolvedSearchParams.pack
       : null;
 
   return (

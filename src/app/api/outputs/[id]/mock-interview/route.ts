@@ -14,9 +14,10 @@ export const maxDuration = 120;
 
 export async function GET(
   _request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const access = await getOutputForUser(params.id);
+  const { id } = await params;
+  const access = await getOutputForUser(id);
   if ("response" in access) return access.response;
   return NextResponse.json({
     mockInterview: readMockInterview(access.output.analysis_snapshot)
@@ -25,9 +26,10 @@ export async function GET(
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const access = await getOutputForUser(params.id);
+  const { id } = await params;
+  const access = await getOutputForUser(id);
   if ("response" in access) return access.response;
 
   let body: unknown;

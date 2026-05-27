@@ -69,12 +69,13 @@ const TRANSFERABLE_EXAMPLES = [
   }
 ];
 
-export default function Home({
+export default async function Home({
   searchParams
 }: {
-  searchParams?: { step?: string };
+  searchParams?: Promise<{ step?: string }>;
 }) {
-  const requestedStep = searchParams?.step as Step | undefined;
+  const resolvedSearchParams = await searchParams;
+  const requestedStep = resolvedSearchParams?.step as Step | undefined;
   const initialStep = VALID_STEPS.includes(requestedStep as Step)
     ? (requestedStep as Step)
     : undefined;

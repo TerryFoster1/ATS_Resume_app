@@ -4,10 +4,12 @@ export function generateStaticParams() {
   return staticParamsForHub("career-transitions");
 }
 
-export function generateMetadata({ params }: { params: { slug: string } }) {
-  return metadataForHub("career-transitions", params.slug);
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  return metadataForHub("career-transitions", slug);
 }
 
-export default function Page({ params }: { params: { slug: string } }) {
-  return <SeoHubPage hub="career-transitions" slug={params.slug} />;
+export default async function Page({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  return <SeoHubPage hub="career-transitions" slug={slug} />;
 }
