@@ -53,6 +53,8 @@ This stores first-resume discovery answers as profile memory for signed-in users
 
 The current client flow keeps the first-resume draft inside the existing resume workflow so the production resume pipeline is preserved.
 
+In the MVP implementation, signed-in users also send the discovery answers to `/api/career-profile` before continuing. If the user is anonymous or the profile API is unavailable, the workflow still continues with a session-only starter resume draft.
+
 ## Recruiter-aware interpretation
 
 The workflow treats informal or early experience as possible evidence of:
@@ -79,7 +81,6 @@ It does not invent jobs, dates, employers, metrics, or credentials.
 
 ## Future improvements
 
-- save first-resume discovery to the profile automatically after sign-in
 - allow users to review and approve each extracted profile item
 - add examples for students, new workers, career returners, and people with informal experience
 - support teacher/counselor invitation workflows

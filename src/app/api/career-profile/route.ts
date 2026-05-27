@@ -3,7 +3,8 @@ import { z } from "zod";
 import {
   addManualProfileEntry,
   getMasterCareerProfile,
-  mergeIntoMasterCareerProfile
+  mergeIntoMasterCareerProfile,
+  updateManualProfileEntry
 } from "@/lib/careerProfileStorage";
 import {
   buildCareerDiscoveryProfile,
@@ -13,6 +14,27 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 const ManualEntryBody = z.object({
   action: z.literal("addEntry"),
+  kind: z.enum([
+    "work",
+    "volunteer",
+    "project",
+    "education",
+    "certification",
+    "award",
+    "achievement",
+    "interest",
+    "careerGoal",
+    "discoveryNote"
+  ]),
+  title: z.string().trim().max(120).optional(),
+  organization: z.string().trim().max(120).optional(),
+  dateRange: z.string().trim().max(80).optional(),
+  detail: z.string().trim().min(2).max(2500)
+});
+
+const UpdateEntryBody = z.object({
+  action: z.literal("updateEntry"),
+  entryId: z.string().trim().min(1).max(120),
   kind: z.enum([
     "work",
     "volunteer",
@@ -49,7 +71,7 @@ const DiscoveryBody = z.object({
   goals: z.string().trim().max(1500).optional()
 });
 
-const Body = z.discriminatedUnion("action", [ManualEntryBody, FirstResumeBody, DiscoveryBody]);
+const Body = z.discriminatedUnion("action", [ManualEntryBody, UpdateEntryBody, FirstResumeBody, DiscoveryBody]);
 
 export async function GET() {
   const access = await requireUser();
@@ -70,6 +92,14 @@ export async function POST(request: Request) {
     const profile = await addManualProfileEntry(access.userId, parsed.data);
     if (!profile) {
       return NextResponse.json({ error: "Could not update profile." }, { status: 500 });
+    }
+    return NextResponse.json({ profile });
+  }
+
+  if (parsed.data.action === "updateEntry") {
+    const profile = await updateManualProfileEntry(access.userId, parsed.data);
+    if (!profile) {
+      return NextResponse.json({ error: "Could not update profile entry." }, { status: 500 });
     }
     return NextResponse.json({ profile });
   }

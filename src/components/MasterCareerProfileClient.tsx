@@ -28,6 +28,15 @@ const ENTRY_OPTIONS: Array<{ value: EntryKind; label: string }> = [
   { value: "discoveryNote", label: "Career discovery note" }
 ];
 
+type EditableProfileItem = {
+  id: string;
+  kind: EntryKind;
+  label?: string;
+  organization?: string;
+  dateRange?: string;
+  detail: string;
+};
+
 export default function MasterCareerProfileClient() {
   const [profile, setProfile] = useState<MasterCareerProfile | null>(null);
   const [kind, setKind] = useState<EntryKind>("work");
@@ -38,6 +47,7 @@ export default function MasterCareerProfileClient() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [editing, setEditing] = useState<EditableProfileItem | null>(null);
 
   useEffect(() => {
     void fetchProfile();
@@ -100,16 +110,68 @@ export default function MasterCareerProfileClient() {
       };
       if (!response.ok || !data.profile) throw new Error(data.error ?? "Could not save entry.");
       setProfile(data.profile);
-      setTitle("");
-      setOrganization("");
-      setDateRange("");
-      setDetail("");
+      resetForm();
       setMessage("Profile updated. Future career outputs can use this evidence.");
     } catch (err) {
       setMessage(err instanceof Error ? err.message : "Could not save entry.");
     } finally {
       setSaving(false);
     }
+  }
+
+  async function updateEntry() {
+    if (!editing) return;
+    if (!detail.trim()) {
+      setMessage("Add a little detail before saving this profile entry.");
+      return;
+    }
+    setSaving(true);
+    setMessage(null);
+    try {
+      const response = await fetch("/api/career-profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "updateEntry",
+          entryId: editing.id,
+          kind,
+          title: title.trim() || undefined,
+          organization: organization.trim() || undefined,
+          dateRange: dateRange.trim() || undefined,
+          detail
+        })
+      });
+      const data = (await response.json().catch(() => ({}))) as {
+        profile?: MasterCareerProfile;
+        error?: string;
+      };
+      if (!response.ok || !data.profile) throw new Error(data.error ?? "Could not update entry.");
+      setProfile(data.profile);
+      resetForm();
+      setMessage("Profile entry updated.");
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : "Could not update entry.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  function startEditing(item: EditableProfileItem) {
+    setEditing(item);
+    setKind(item.kind);
+    setTitle(item.label ?? "");
+    setOrganization(item.organization ?? "");
+    setDateRange(item.dateRange ?? "");
+    setDetail(item.detail);
+    setMessage(null);
+  }
+
+  function resetForm() {
+    setEditing(null);
+    setTitle("");
+    setOrganization("");
+    setDateRange("");
+    setDetail("");
   }
 
   return (
@@ -141,7 +203,9 @@ export default function MasterCareerProfileClient() {
       <section className="grid gap-5 lg:grid-cols-[0.9fr_1.1fr]">
         <article className="app-mini-card">
           <p className="app-kicker">Add career evidence</p>
-          <h2 className="mt-2 text-2xl app-heading">Add one useful detail.</h2>
+          <h2 className="mt-2 text-2xl app-heading">
+            {editing ? "Edit career evidence." : "Add one useful detail."}
+          </h2>
           <p className="mt-2 text-sm leading-6 text-[var(--color-text-muted)]">
             Keep it lightweight. Add work, projects, awards, certifications, goals, or notes that
             future resume, pathway, and interview prep outputs should remember.
@@ -176,9 +240,21 @@ export default function MasterCareerProfileClient() {
               What should Career Ladder remember?
               <textarea value={detail} onChange={(event) => setDetail(event.target.value)} className="app-input mt-2 min-h-[9rem] resize-y" placeholder="Describe what you did, what you learned, who you helped, or what proof this gives a recruiter." />
             </label>
-            <button type="button" disabled={saving} onClick={saveEntry} className="app-button-primary disabled:cursor-not-allowed disabled:opacity-60">
-              {saving ? "Saving..." : "Save to profile"}
-            </button>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                disabled={saving}
+                onClick={editing ? updateEntry : saveEntry}
+                className="app-button-primary disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {saving ? "Saving..." : editing ? "Save edit" : "Save to profile"}
+              </button>
+              {editing && (
+                <button type="button" onClick={resetForm} className="app-button-ghost">
+                  Cancel edit
+                </button>
+              )}
+            </div>
             {message && (
               <p className="rounded-[16px] bg-white px-4 py-3 text-xs font-semibold leading-5 text-[var(--color-text-muted)] shadow-[var(--shadow-inset-soft)]">
                 {message}
@@ -195,19 +271,29 @@ export default function MasterCareerProfileClient() {
           ) : profile ? (
             <div className="mt-5 space-y-5">
               <ProfileSection title="Work and projects" items={[
-                ...profile.workExperience.map(formatExperience),
-                ...profile.projects.map(formatExperience),
-                ...profile.volunteerExperience.map(formatExperience)
-              ]} />
+                ...profile.workExperience.map((item) => editableExperience(item, "work")),
+                ...profile.projects.map((item) => editableExperience(item, "project")),
+                ...profile.volunteerExperience.map((item) => editableExperience(item, "volunteer"))
+              ]} onEdit={startEditing} />
               <ProfileSection title="Education and credentials" items={[
-                ...profile.education.map((item) => item.detail),
-                ...profile.certifications.map((item) => item.detail)
-              ]} />
-              <ProfileSection title="Skills" items={profile.skills} />
+                ...profile.education.map((item) => editableNote(item, "education")),
+                ...profile.certifications.map((item) => editableNote(item, "certification"))
+              ]} onEdit={startEditing} />
+              <ProfileSection title="Skills" items={profile.skills.map((item, index) => ({
+                id: `skill-${index}`,
+                kind: "achievement" as const,
+                label: "Skill",
+                detail: item
+              }))} />
               <ProfileSection title="Goals and discovery notes" items={[
-                ...profile.careerGoals,
-                ...profile.discoveryNotes.map((item) => item.detail)
-              ]} />
+                ...profile.careerGoals.map((item, index) => ({
+                  id: `careerGoal-${index}`,
+                  kind: "careerGoal" as const,
+                  label: "Career goal",
+                  detail: item
+                })),
+                ...profile.discoveryNotes.map((item) => editableNote(item, "discoveryNote"))
+              ]} onEdit={startEditing} />
             </div>
           ) : (
             <p className="mt-4 text-sm leading-6 text-[var(--color-text-muted)]">
@@ -232,16 +318,35 @@ function ProfileStat({ label, value }: { label: string; value: number }) {
   );
 }
 
-function ProfileSection({ title, items }: { title: string; items: string[] }) {
-  const clean = items.filter(Boolean).slice(0, 8);
+function ProfileSection({
+  title,
+  items,
+  onEdit
+}: {
+  title: string;
+  items: EditableProfileItem[];
+  onEdit?: (item: EditableProfileItem) => void;
+}) {
+  const clean = items.filter((item) => item.detail).slice(0, 8);
   return (
     <section>
       <h3 className="text-sm font-black text-[var(--color-text-primary)]">{title}</h3>
       {clean.length ? (
         <ul className="mt-3 space-y-2">
           {clean.map((item) => (
-            <li key={item} className="rounded-[16px] bg-white px-4 py-3 text-sm leading-6 text-[var(--color-text-muted)] shadow-[var(--shadow-inset-soft)]">
-              {item}
+            <li key={item.id} className="rounded-[16px] bg-white px-4 py-3 text-sm leading-6 text-[var(--color-text-muted)] shadow-[var(--shadow-inset-soft)]">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <span>{formatEditableItem(item)}</span>
+                {onEdit && (
+                  <button
+                    type="button"
+                    onClick={() => onEdit(item)}
+                    className="shrink-0 text-xs font-black uppercase tracking-[0.12em] text-[#245f9f]"
+                  >
+                    Edit
+                  </button>
+                )}
+              </div>
             </li>
           ))}
         </ul>
@@ -252,8 +357,33 @@ function ProfileSection({ title, items }: { title: string; items: string[] }) {
   );
 }
 
-function formatExperience(item: MasterCareerProfile["workExperience"][number]) {
-  const heading = [item.title, item.organization, item.dateRange].filter(Boolean).join(" | ");
-  const bullets = item.bullets.slice(0, 2).join(" ");
-  return [heading, bullets].filter(Boolean).join(": ");
+function editableExperience(
+  item: MasterCareerProfile["workExperience"][number],
+  kind: EntryKind
+): EditableProfileItem {
+  return {
+    id: item.id,
+    kind,
+    label: item.title,
+    organization: item.organization,
+    dateRange: item.dateRange,
+    detail: item.bullets.join(" ")
+  };
+}
+
+function editableNote(
+  item: MasterCareerProfile["education"][number],
+  kind: EntryKind
+): EditableProfileItem {
+  return {
+    id: item.id,
+    kind,
+    label: item.label,
+    detail: item.detail
+  };
+}
+
+function formatEditableItem(item: EditableProfileItem) {
+  const heading = [item.label, item.organization, item.dateRange].filter(Boolean).join(" | ");
+  return [heading, item.detail].filter(Boolean).join(": ");
 }

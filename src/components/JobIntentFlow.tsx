@@ -562,11 +562,12 @@ function FirstResumeDiscovery({
   const [recognition, setRecognition] = useState("");
   const [community, setCommunity] = useState("");
   const [goals, setGoals] = useState("");
+  const [savingProfile, setSavingProfile] = useState(false);
   const canContinue = [responsibility, helping, recognition, community, goals].some(
     (value) => value.trim().length >= 12
   );
 
-  function complete() {
+  async function complete() {
     if (!canContinue) return;
     const profileContext = [
       responsibility && `Responsibility or leadership: ${responsibility}`,
@@ -594,6 +595,30 @@ function FirstResumeDiscovery({
       goals && "CAREER GOALS",
       goals && `- ${goals}`
     ].filter(Boolean).join("\n");
+    setSavingProfile(true);
+    try {
+      const response = await fetch("/api/career-profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "firstResumeDiscovery",
+          responsibilities: responsibility || undefined,
+          helpingExperience: helping || undefined,
+          recognition: recognition || undefined,
+          schoolCommunity: community || undefined,
+          goals: goals || undefined
+        })
+      });
+      const data = (await response.json().catch(() => ({}))) as { resumeText?: string };
+      if (response.ok && data.resumeText) {
+        onComplete(data.resumeText, profileContext);
+        return;
+      }
+    } catch {
+      // Signed-out users can still continue with a session-only first resume draft.
+    } finally {
+      setSavingProfile(false);
+    }
     onComplete(resumeDraft, profileContext);
   }
 
@@ -642,8 +667,8 @@ function FirstResumeDiscovery({
         <p className="max-w-2xl text-xs font-semibold leading-5 text-[var(--color-text-muted)]">
           The first draft is a starting point. You can upload a resume later and keep enriching your Master Career Profile over time.
         </p>
-        <button type="button" disabled={!canContinue} onClick={complete} className="app-button-primary disabled:cursor-not-allowed disabled:opacity-50">
-          Create first resume draft
+        <button type="button" disabled={!canContinue || savingProfile} onClick={() => void complete()} className="app-button-primary disabled:cursor-not-allowed disabled:opacity-50">
+          {savingProfile ? "Building profile..." : "Create first resume draft"}
         </button>
       </div>
     </section>
@@ -661,16 +686,36 @@ function CareerDiscoveryFoundation({
   const [strengths, setStrengths] = useState("");
   const [preferences, setPreferences] = useState("");
   const [energy, setEnergy] = useState("");
+  const [savingProfile, setSavingProfile] = useState(false);
   const canContinue = [interests, strengths, preferences, energy].some((value) => value.trim().length >= 12);
 
-  function complete() {
+  async function complete() {
     if (!canContinue) return;
-    onContinue([
+    const context = [
       interests && `Interests: ${interests}`,
       strengths && `Strengths: ${strengths}`,
       preferences && `Work preferences: ${preferences}`,
       energy && `Energy patterns and environment: ${energy}`
-    ].filter(Boolean).join("\n"));
+    ].filter(Boolean).join("\n");
+    setSavingProfile(true);
+    try {
+      await fetch("/api/career-profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "careerDiscovery",
+          interests: interests || undefined,
+          strengths: strengths || undefined,
+          workPreferences: preferences || undefined,
+          energyPatterns: energy || undefined
+        })
+      });
+    } catch {
+      // Signed-out users can still continue with session-only discovery context.
+    } finally {
+      setSavingProfile(false);
+    }
+    onContinue(context);
   }
 
   return (
@@ -712,8 +757,8 @@ function CareerDiscoveryFoundation({
         <p className="max-w-2xl text-xs font-semibold leading-5 text-[var(--color-text-muted)]">
           This is not a personality test. It is a starting context for realistic pathway exploration.
         </p>
-        <button type="button" disabled={!canContinue} onClick={complete} className="app-button-primary disabled:cursor-not-allowed disabled:opacity-50">
-          Explore possible paths
+        <button type="button" disabled={!canContinue || savingProfile} onClick={() => void complete()} className="app-button-primary disabled:cursor-not-allowed disabled:opacity-50">
+          {savingProfile ? "Saving direction..." : "Explore possible paths"}
         </button>
       </div>
     </section>

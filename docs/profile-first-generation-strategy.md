@@ -1,0 +1,103 @@
+# Profile-First Generation Strategy
+
+Created: 2026-05-26
+
+## Direction
+
+Career Ladder should increasingly generate career outputs from the Master Career Profile.
+
+Long-term model:
+
+```text
+Master Career Profile + target opportunity -> tailored output
+```
+
+The uploaded resume remains important, but it is an import source and fallback. It should not be treated as the user's permanent career identity.
+
+## Phase 1 Compatibility Layer
+
+The current generators are preserved.
+
+The compatibility layer keeps the existing API shapes while resolving source material differently:
+
+Authenticated user:
+
+1. Try Master Career Profile.
+2. Merge profile context with the uploaded/session resume.
+3. Use uploaded/session resume as fallback if profile is empty or unavailable.
+
+Anonymous user:
+
+1. Use uploaded/session resume only.
+
+This preserves the production resume flow while beginning the architecture transition.
+
+## Current Integration Points
+
+Profile-first source resolution is used by:
+
+- `/api/analyze`
+- `/api/generate`
+- `/api/opportunities`
+
+Resume upload enrichment is handled by:
+
+- `/api/parse-resume`
+
+Profile management is handled by:
+
+- `/api/career-profile`
+- `/profile`
+
+## Generator Guardrails
+
+Profile-first generation must continue to obey:
+
+- no invented experience
+- no fake credentials
+- no fake metrics
+- no fake employers
+- no destructive profile overwrites
+- uploaded resume fallback for anonymous users
+- existing entitlement and credit behavior
+
+The Master Career Profile can expand context, but it does not grant permission to overclaim.
+
+## Why This Matters
+
+The profile-first model enables:
+
+- better tailored resumes over time
+- less repeated data entry
+- stronger pathway analysis
+- interview prep that remembers prior strengths
+- future learning recommendations
+- career transition intelligence
+- long-term retention
+
+The user should increasingly feel:
+
+```text
+Career Ladder understands my professional identity.
+```
+
+## Future Evolution
+
+Future phases should:
+
+- add profile review before using newly imported resume items
+- let users mark evidence as active, archived, sensitive, or role-specific
+- connect pathway gaps back into profile goals
+- track completed certifications and learning progress
+- allow generated outputs to suggest profile additions without silently saving them
+- eventually move from text-composed profile context to structured generator inputs
+
+## What Was Intentionally Deferred
+
+- complete generator rewrite
+- structured prompt redesign for every output
+- profile conflict resolution UI
+- versioned master resume snapshots
+- full career ontology
+- labor-market intelligence engine
+- school or teacher account system
