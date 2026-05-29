@@ -112,6 +112,63 @@ Recommended next refinements:
 - add authenticated QA coverage for credit-backed pathway and mock interview flows
 - add visual QA for the refined loading and saved-output states on mobile
 
+## Intelligence quality sprint - 2026-05-29
+
+This follow-up pass focused on the product's strongest differentiator: helping users understand how real experience translates into recruiter-readable professional functions.
+
+### Shared transferable-skill engine
+
+`src/lib/careerIntelligence.ts` now carries richer deterministic signals:
+
+- mapped professional functions
+- recruiter-readable language
+- evidence examples to look for
+- adjacent career directions
+- confidence level
+- recruiter concerns
+
+The helper now covers more grounded transition patterns:
+
+- chef or kitchen work -> operations management, inventory, scheduling, vendor coordination, staff training, quality control
+- hospitality -> client management, service delivery, stakeholder communication, account support
+- retail -> customer success, onboarding, conflict resolution, account management, coaching, KPI awareness
+- journalism -> content strategy, communications, research, stakeholder interviewing
+- trades -> project coordination, vendor management, safety, quality assurance
+- school, sports, clubs, volunteering, side hustles, and family-business work -> first-resume evidence
+
+### Career Coach
+
+Career Coach now presents recommendations with more strategic sections:
+
+- why this could be realistic
+- day in the life
+- salary expectations with cautious language
+- AI disruption risk
+- what recruiters will want proof of
+- fastest path
+- lowest-cost path
+- likely challenges
+- recruiter concerns
+
+This keeps the experience from feeling like a personality quiz and makes it closer to a career counselor plus recruiter plus transition strategist.
+
+### Pathway intelligence
+
+Pathway generation now receives detected transferable-skill signals, recruiter language, evidence examples, recruiter concerns, and adjacent transition logic. New pathway outputs can include recruiter concerns, suggested credentials, expected timeline, broad salary context, and day-in-the-life notes.
+
+Existing saved pathway records remain backward compatible because these added fields are optional when reopening old snapshots.
+
+### First resume and discovery
+
+The first-resume flow now surfaces overlooked evidence sources such as clubs, sports, volunteering, community work, family-business work, side hustles, and creative projects. The discovery flow can now show early transition ideas with the first move needed to test that path.
+
+### What was intentionally not changed
+
+- No new product modules were added.
+- No teacher accounts, affiliate systems, tracking, offer comparison, or new monetization were added.
+- No Stripe, auth, middleware, credit, dashboard, SEO, or database behavior changed.
+- No extra generation pass was added; the richer deterministic context is reused by existing workflows.
+
 ## Validation
 
 Commands to run from:

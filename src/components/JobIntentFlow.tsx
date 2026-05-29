@@ -9,6 +9,7 @@ import {
 } from "@/lib/intentWorkflow";
 import {
   inferDiscoveryInsights,
+  inferTransitionRecommendations,
   inferTransferableSkillSignals
 } from "@/lib/careerIntelligence";
 
@@ -120,6 +121,25 @@ const GOALS: GoalConfig[] = [
     experienceMode: "none",
     startLabel: "Open Dashboard",
     beta: true
+  }
+];
+
+const FIRST_RESUME_EXAMPLES = [
+  {
+    label: "Clubs, teams, or sports",
+    signal: "coordination, discipline, teamwork, leadership, and commitment"
+  },
+  {
+    label: "Family business or caregiving",
+    signal: "reliability, service, responsibility, scheduling, and practical judgment"
+  },
+  {
+    label: "Side hustles or creative projects",
+    signal: "initiative, customer awareness, follow-through, and learning agility"
+  },
+  {
+    label: "Volunteering or community help",
+    signal: "service orientation, communication, organization, and trust"
   }
 ];
 
@@ -675,7 +695,24 @@ function FirstResumeDiscovery({
                 {signal.source}
               </strong>
               <span className="mt-2 block text-sm leading-6 text-[var(--color-text-muted)]">
-                Can support {signal.mapsTo}.
+                Can support {signal.mapsTo}. In resume language: {signal.recruiterLanguage}
+              </span>
+              <span className="mt-2 block text-xs font-semibold leading-5 text-[var(--color-text-muted)]">
+                Evidence to look for: {signal.evidenceExamples.slice(0, 2).join("; ")}.
+              </span>
+            </article>
+          ))}
+        </div>
+      </section>
+      <section className="app-mini-card">
+        <p className="app-kicker">Experience people overlook</p>
+        <h3 className="mt-2 text-2xl app-heading">Your first resume can start from real responsibility, not job titles.</h3>
+        <div className="mt-4 grid gap-3 md:grid-cols-4">
+          {FIRST_RESUME_EXAMPLES.map((item) => (
+            <article key={item.label} className="rounded-[18px] bg-white px-4 py-3 shadow-[var(--shadow-inset-soft)]">
+              <strong className="block text-sm font-black text-[var(--color-text-primary)]">{item.label}</strong>
+              <span className="mt-2 block text-xs font-semibold leading-5 text-[var(--color-text-muted)]">
+                May show {item.signal}.
               </span>
             </article>
           ))}
@@ -713,6 +750,7 @@ function CareerDiscoveryFoundation({
   const [ambition, setAmbition] = useState("");
   const [savingProfile, setSavingProfile] = useState(false);
   const insights = inferDiscoveryInsights({ interests, strengths, preferences, energy, ambition });
+  const transitionIdeas = inferTransitionRecommendations([interests, strengths, preferences, energy, ambition].join("\n"));
   const canContinue = [interests, strengths, preferences, energy, ambition].some((value) => value.trim().length >= 12);
 
   async function complete() {
@@ -812,6 +850,27 @@ function CareerDiscoveryFoundation({
           ))}
         </div>
       </section>
+      {transitionIdeas.length ? (
+        <section className="app-mini-card">
+          <p className="app-kicker">Possible transition logic</p>
+          <h3 className="mt-2 text-2xl app-heading">Early paths that may be worth testing.</h3>
+          <div className="mt-4 grid gap-3 md:grid-cols-2">
+            {transitionIdeas.slice(0, 4).map((idea) => (
+              <article key={`${idea.title}-${idea.category}`} className="rounded-[18px] bg-white px-4 py-3 shadow-[var(--shadow-inset-soft)]">
+                <strong className="block text-sm font-black text-[var(--color-text-primary)]">
+                  {idea.title}
+                </strong>
+                <span className="mt-2 block text-sm leading-6 text-[var(--color-text-muted)]">
+                  {idea.whyRealistic}
+                </span>
+                <span className="mt-2 block text-xs font-bold uppercase tracking-[0.12em] text-[#245f9f]">
+                  First move: {idea.firstMove}
+                </span>
+              </article>
+            ))}
+          </div>
+        </section>
+      ) : null}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="max-w-2xl text-xs font-semibold leading-5 text-[var(--color-text-muted)]">
           This is not a personality test. It is a starting context for realistic pathway exploration.

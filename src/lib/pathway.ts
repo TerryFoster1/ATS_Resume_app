@@ -1,6 +1,8 @@
 import { callLlmStructured } from "@/lib/llm";
 import {
+  buildRecruiterConcernNotes,
   inferTransferableSkillSignals,
+  inferTransitionRecommendations,
   recommendLowCostLearning
 } from "@/lib/careerIntelligence";
 
@@ -17,9 +19,14 @@ export type PathwayFullAnalysis = {
   typicalRequirements: string[];
   transferableStrengths: string[];
   likelySkillGaps: string[];
+  recruiterConcerns?: string[];
   fastestPathRecommendations: string[];
   lowestCostPathRecommendations: string[];
+  suggestedCredentials?: string[];
   learningRecommendations?: string[];
+  expectedTimeline?: string[];
+  salaryRange?: string[];
+  dayInTheLife?: string[];
   suggestedNextSteps: string[];
 };
 
@@ -41,17 +48,27 @@ const DEFAULT_REQUIREMENTS = [
 export function buildPathwayPreview(input: PathwayInput): PathwayPreview {
   const role = cleanRole(input.targetRole);
   const requirements = inferCommonRequirements(input).slice(0, 5);
+  const signals = inferTransferableSkillSignals(
+    `${input.resumeText ?? ""}\n${input.currentBackground ?? ""}`,
+    role
+  );
   return {
     status: "preview",
     roleOverview: `${role} roles usually reward candidates who can connect their past work to the hiring team's real concerns: ownership, judgment, communication, follow-through, and credible examples that map to the role.`,
     commonRequirements: requirements.length ? requirements : DEFAULT_REQUIREMENTS,
-    transferableInsight: buildTransferableInsight(input),
+    transferableInsight: buildTransferableInsight(input, signals),
     generatedAt: new Date().toISOString()
   };
 }
 
 export async function generatePathwayAnalysis(input: PathwayInput): Promise<PathwayFullAnalysis> {
   const role = cleanRole(input.targetRole);
+  const sourceText = `${input.resumeText ?? ""}\n${input.currentBackground ?? ""}`;
+  const signals = inferTransferableSkillSignals(sourceText, role);
+  const recruiterConcerns = buildRecruiterConcernNotes(signals, role);
+  const transitionRecommendations = inferTransitionRecommendations(sourceText)
+    .map((item) => `${item.title} (${item.category}): ${item.whyRealistic} First move: ${item.firstMove}`)
+    .join("\n");
   return callLlmStructured<PathwayFullAnalysis>(
     {
       tag: "career-pathway",
@@ -63,6 +80,9 @@ export async function generatePathwayAnalysis(input: PathwayInput): Promise<Path
         "Create realistic, practical pathway guidance that explains how hiring teams would evaluate the transition.",
         "Do not promise jobs, salaries, instant transitions, or fake experience.",
         "Emphasize transferable skills, proof gaps, practical sequencing, low-cost next steps, and honest positioning.",
+        "Think in this order: current experience -> transferable functions -> adjacent careers -> proof gaps -> practical upskilling.",
+        "Separate true skill gaps from evidence gaps and language gaps.",
+        "Explain why the transition is realistic without inflating titles or inventing responsibilities.",
         "Translate adjacent experience when credible: retail to customer success, hospitality to operations, journalism to marketing, service industry to account management, trades to project coordination.",
         "Avoid generic certification lists unless a certification is genuinely useful for the role context."
       ].join("\n"),
@@ -72,12 +92,18 @@ export async function generatePathwayAnalysis(input: PathwayInput): Promise<Path
         input.resumeText ? `Resume evidence:\n${input.resumeText.slice(0, 12000)}` : "",
         input.currentBackground ? `Current background: ${input.currentBackground}` : "",
         input.jobPosting ? `Job posting:\n${input.jobPosting}` : "",
+        `Detected transferable skill signals:\n${signals.map((signal) => `- ${signal.source} -> ${signal.mapsTo}. Recruiter language: ${signal.recruiterLanguage}. Evidence examples: ${signal.evidenceExamples.join("; ")}`).join("\n")}`,
+        recruiterConcerns.length ? `Likely recruiter concerns:\n${recruiterConcerns.map((item) => `- ${item}`).join("\n")}` : "",
+        transitionRecommendations ? `Adjacent transition logic:\n${transitionRecommendations}` : "",
         `Low-cost learning options to consider only if relevant: ${recommendLowCostLearning(role).join("; ")}`,
         "",
         "Return a practical career pathway analysis. Use short, specific bullets. If candidate background is limited, say what to prepare or prove rather than inventing experience.",
         "For fastestPathRecommendations, prioritize sequencing: what to reframe first, what proof to gather next, and what to practice for recruiter conversations.",
         "For lowestCostPathRecommendations, prefer free or low-cost practice, terminology building, portfolio examples, informational interviews, tool sandboxes, and proof-gathering steps over expensive programs.",
-        "For likelySkillGaps, distinguish true skill gaps from communication or evidence gaps when possible."
+        "For likelySkillGaps, distinguish true skill gaps from communication or evidence gaps when possible.",
+        "For recruiterConcerns, explain what a skeptical hiring manager may question and how to prepare evidence.",
+        "For salaryRange, use broad cautious ranges or relative positioning, and state that local market verification is needed.",
+        "For dayInTheLife, describe realistic work moments, not glamour."
       ]
         .filter(Boolean)
         .join("\n\n")
@@ -92,18 +118,28 @@ export async function generatePathwayAnalysis(input: PathwayInput): Promise<Path
           "typicalRequirements",
           "transferableStrengths",
           "likelySkillGaps",
+          "recruiterConcerns",
           "fastestPathRecommendations",
           "lowestCostPathRecommendations",
+          "suggestedCredentials",
           "learningRecommendations",
+          "expectedTimeline",
+          "salaryRange",
+          "dayInTheLife",
           "suggestedNextSteps"
         ],
         properties: {
           typicalRequirements: arraySchema("Typical role requirements and recruiter expectations."),
           transferableStrengths: arraySchema("Transferable strengths the user may be able to position."),
           likelySkillGaps: arraySchema("Likely skill or proof gaps to close."),
+          recruiterConcerns: arraySchema("Likely recruiter concerns or objections to prepare for."),
           fastestPathRecommendations: arraySchema("Fastest practical path recommendations."),
           lowestCostPathRecommendations: arraySchema("Lowest-cost path recommendations."),
+          suggestedCredentials: arraySchema("Credentials or proof signals worth considering, only when realistically useful."),
           learningRecommendations: arraySchema("Contextual certifications, schools, programs, or practical learning resources with relevance explained."),
+          expectedTimeline: arraySchema("Realistic timeline notes or milestones."),
+          salaryRange: arraySchema("Broad salary or compensation context with caveats to verify locally."),
+          dayInTheLife: arraySchema("Realistic day-in-the-life work moments."),
           suggestedNextSteps: arraySchema("Suggested next actions inside or outside Career Ladder.")
         }
       }
@@ -163,9 +199,13 @@ function inferCommonRequirements(input: PathwayInput): string[] {
   return [...items];
 }
 
-function buildTransferableInsight(input: PathwayInput): string {
+function buildTransferableInsight(input: PathwayInput, signals = inferTransferableSkillSignals(
+  `${input.resumeText ?? ""}\n${input.currentBackground ?? ""}`,
+  input.targetRole
+)): string {
   const background = `${input.resumeText ?? ""}\n${input.currentBackground ?? ""}`.toLowerCase();
   const roleText = `${input.targetRole} ${input.jobPosting ?? ""}`.toLowerCase();
+  const signal = signals[0];
   if (/\b(retail|store|cashier|sales associate|customer service)\b/.test(background)) {
     if (/\b(customer success|client success|account manager|account management)\b/.test(roleText)) {
       return "Your retail or customer-service background may already show customer retention, objection handling, service recovery, and relationship follow-through. The pathway is to frame those examples as account ownership and customer momentum rather than front-line tasks.";
@@ -197,12 +237,8 @@ function buildTransferableInsight(input: PathwayInput): string {
   if (/\b(teacher|education|training|coach)\b/.test(background)) {
     return "Your teaching or coaching background may translate into onboarding, stakeholder communication, needs assessment, and structured explanation.";
   }
-  const signal = inferTransferableSkillSignals(
-    `${input.resumeText ?? ""}\n${input.currentBackground ?? ""}`,
-    input.targetRole
-  )[0];
   if (signal) {
-    return `${signal.source} may support ${signal.mapsTo}. ${signal.why} ${signal.recruiterConcern ?? ""}`.trim();
+    return `${signal.source} may support ${signal.mapsTo}. ${signal.why} In recruiter language, this can become: ${signal.recruiterLanguage} ${signal.recruiterConcern ?? ""}`.trim();
   }
   return "Your most useful transferable strengths will come from concrete examples of communication, ownership, problem solving, follow-through, and measurable impact related to the target role.";
 }
@@ -217,11 +253,23 @@ function isFullAnalysis(value: unknown): value is PathwayFullAnalysis {
     "typicalRequirements",
     "transferableStrengths",
     "likelySkillGaps",
+    "recruiterConcerns",
     "fastestPathRecommendations",
     "lowestCostPathRecommendations",
+    "suggestedCredentials",
     "learningRecommendations",
+    "expectedTimeline",
+    "salaryRange",
+    "dayInTheLife",
     "suggestedNextSteps"
-  ].every((key) => key === "learningRecommendations"
+  ].every((key) => [
+      "recruiterConcerns",
+      "suggestedCredentials",
+      "learningRecommendations",
+      "expectedTimeline",
+      "salaryRange",
+      "dayInTheLife"
+    ].includes(key)
     ? value[key] === undefined || (Array.isArray(value[key]) && value[key].every((item) => typeof item === "string"))
     : Array.isArray(value[key]) && value[key].every((item) => typeof item === "string"));
 }

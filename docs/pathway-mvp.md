@@ -124,9 +124,45 @@ Locked / premium:
 - typical requirements
 - transferable strengths
 - likely skill gaps
+- recruiter concerns
 - fastest path recommendations
 - lowest-cost path recommendations
+- suggested credentials
+- expected timeline
+- broad salary context
+- day-in-the-life context
+- learning recommendations
 - suggested next steps
+
+## Intelligence Quality Sprint - 2026-05-29
+
+Pathway analysis now receives richer deterministic context before generation:
+
+- detected transferable skill signals
+- recruiter-readable language for the user's background
+- evidence examples the user should prepare
+- likely recruiter concerns
+- adjacent transition logic such as easiest, fastest, highest-income, or lowest-risk paths
+
+The prompt now explicitly reasons in this order:
+
+```text
+Current Experience
+-> Transferable Functions
+-> Adjacent Careers
+-> Gap Analysis
+-> Practical Upskilling
+```
+
+The pathway schema was expanded in a backward-compatible way so new analyses can include:
+
+- recruiter concerns
+- suggested credentials
+- expected timeline
+- broad salary range or compensation context
+- day-in-the-life work moments
+
+Old saved pathway records remain reopenable because these fields are optional when reading existing snapshots.
 
 ## Monetization Logic
 

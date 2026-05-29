@@ -33,9 +33,14 @@ type PathwayFullAnalysis = {
   typicalRequirements: string[];
   transferableStrengths: string[];
   likelySkillGaps: string[];
+  recruiterConcerns?: string[];
   fastestPathRecommendations: string[];
   lowestCostPathRecommendations: string[];
+  suggestedCredentials?: string[];
   learningRecommendations?: string[];
+  expectedTimeline?: string[];
+  salaryRange?: string[];
+  dayInTheLife?: string[];
   suggestedNextSteps: string[];
 };
 
@@ -550,10 +555,25 @@ function PathwaySection({
               <PathwayList title="Typical requirements" items={pathway.full.typicalRequirements} />
               <PathwayList title="Transferable strengths" items={pathway.full.transferableStrengths} />
               <PathwayList title="Likely skill gaps" items={pathway.full.likelySkillGaps} />
+              {pathway.full.recruiterConcerns?.length ? (
+                <PathwayList title="Recruiter concerns" items={pathway.full.recruiterConcerns} />
+              ) : null}
               <PathwayList title="Fastest path recommendations" items={pathway.full.fastestPathRecommendations} />
               <PathwayList title="Lowest-cost path recommendations" items={pathway.full.lowestCostPathRecommendations} />
+              {pathway.full.suggestedCredentials?.length ? (
+                <PathwayList title="Suggested credentials" items={pathway.full.suggestedCredentials} />
+              ) : null}
               {pathway.full.learningRecommendations?.length ? (
                 <PathwayList title="Learning recommendations" items={pathway.full.learningRecommendations} />
+              ) : null}
+              {pathway.full.expectedTimeline?.length ? (
+                <PathwayList title="Expected timeline" items={pathway.full.expectedTimeline} />
+              ) : null}
+              {pathway.full.salaryRange?.length ? (
+                <PathwayList title="Salary range" items={pathway.full.salaryRange} />
+              ) : null}
+              {pathway.full.dayInTheLife?.length ? (
+                <PathwayList title="Day in the life" items={pathway.full.dayInTheLife} />
               ) : null}
               <PathwayList title="Suggested next steps" items={pathway.full.suggestedNextSteps} />
             </>

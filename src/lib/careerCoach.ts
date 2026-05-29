@@ -1,5 +1,7 @@
 import {
+  buildRecruiterConcernNotes,
   inferDiscoveryInsights,
+  inferTransitionRecommendations,
   inferTransferableSkillSignals,
   recommendLowCostLearning
 } from "@/lib/careerIntelligence";
@@ -25,6 +27,10 @@ export type CareerMatch = {
   fastestPath: string[];
   lowestCostPath: string[];
   hiringOutlook: string;
+  aiDisruptionRisk: string;
+  recruiterExpectations: string[];
+  likelyChallenges: string[];
+  whyRealistic: string[];
   transferableStrengths: string[];
   likelyRecruiterConcerns: string[];
 };
@@ -36,6 +42,8 @@ const CAREER_MATCHES: Array<{
   dayInLife: string;
   typicalCredentials: string[];
   hiringOutlook: string;
+  aiDisruptionRisk: string;
+  recruiterExpectations: string[];
   concerns: string[];
 }> = [
   {
@@ -47,6 +55,13 @@ const CAREER_MATCHES: Array<{
     typicalCredentials: ["Spreadsheet confidence", "Process documentation", "Project or operations terminology"],
     hiringOutlook:
       "Good transition target when the user can show coordination, follow-through, and calm problem solving under constraints.",
+    aiDisruptionRisk:
+      "Moderate. Tools may automate admin work, but people still need judgment, handoffs, prioritization, and on-the-ground coordination.",
+    recruiterExpectations: [
+      "Proof you can keep moving pieces organized",
+      "Examples of follow-through when priorities changed",
+      "Comfort documenting status, blockers, and next steps"
+    ],
     concerns: ["May need clearer business-tool evidence", "May need examples of documentation or stakeholder updates"]
   },
   {
@@ -58,6 +73,13 @@ const CAREER_MATCHES: Array<{
     typicalCredentials: ["CRM familiarity", "Customer communication examples", "Basic SaaS or product adoption language"],
     hiringOutlook:
       "Realistic for people with strong service, escalation, communication, and follow-through evidence.",
+    aiDisruptionRisk:
+      "Moderate. Simple support may be automated, but relationship judgment, adoption coaching, renewal risk, and escalation handling still matter.",
+    recruiterExpectations: [
+      "Evidence of trust-building and service recovery",
+      "Follow-up discipline and clear account notes",
+      "Ability to explain problems without sounding defensive"
+    ],
     concerns: ["Recruiters may ask about CRM use", "Business-to-business customer examples may be limited"]
   },
   {
@@ -69,6 +91,13 @@ const CAREER_MATCHES: Array<{
     typicalCredentials: ["Client communication", "Follow-up tracking", "Comfort with account notes or CRM"],
     hiringOutlook:
       "A strong adjacent path for service-heavy backgrounds when the user can show trust-building and reliable follow-through.",
+    aiDisruptionRisk:
+      "Moderate. Automation can help with notes and sequences, but client trust, internal coordination, and judgment remain human differentiators.",
+    recruiterExpectations: [
+      "Commercial awareness and client-facing polish",
+      "Examples of keeping promises and managing expectations",
+      "Comfort coordinating internal answers for external people"
+    ],
     concerns: ["Need proof of commercial awareness", "May need examples beyond one-time customer interactions"]
   },
   {
@@ -80,6 +109,13 @@ const CAREER_MATCHES: Array<{
     typicalCredentials: ["Project terminology", "Status update examples", "Optional CAPM or Agile basics"],
     hiringOutlook:
       "Credible when the user has evidence of sequencing work, coordinating people, or keeping complex tasks on track.",
+    aiDisruptionRisk:
+      "Moderate-low for people with strong coordination judgment. Tools can track tasks, but humans still surface risks, negotiate tradeoffs, and communicate context.",
+    recruiterExpectations: [
+      "Proof of timelines, handoffs, and status updates",
+      "Examples of spotting blockers early",
+      "Clear communication with multiple stakeholders"
+    ],
     concerns: ["May need formal project vocabulary", "May need proof of documentation and stakeholder communication"]
   },
   {
@@ -91,7 +127,32 @@ const CAREER_MATCHES: Array<{
     typicalCredentials: ["Writing samples", "Basic analytics", "Campaign or channel awareness"],
     hiringOutlook:
       "Realistic for journalism, writing, education, or communications backgrounds with portfolio examples.",
+    aiDisruptionRisk:
+      "Higher for generic content production, lower when the person can show audience insight, stakeholder judgment, research, and business context.",
+    recruiterExpectations: [
+      "A portfolio that shows audience and goal, not only writing quality",
+      "Basic analytics or performance awareness",
+      "Ability to work with feedback and business constraints"
+    ],
     concerns: ["Recruiters may ask about business impact", "May need analytics or campaign evidence"]
+  },
+  {
+    title: "Training or Enablement Coordinator",
+    patterns: [/teach|coach|mentor|train|onboard|explain|support|education|team lead|documentation/i],
+    salaryExpectation: "Often entry to mid-level; stronger compensation comes with product, customer, or internal enablement scope.",
+    dayInLife:
+      "Creating simple learning materials, helping people adopt processes, answering repeat questions, and turning messy knowledge into usable guidance.",
+    typicalCredentials: ["Training examples", "Documentation samples", "Comfort explaining workflows"],
+    hiringOutlook:
+      "Realistic when the user can prove they help others learn, improve, or follow a process more confidently.",
+    aiDisruptionRisk:
+      "Moderate. AI can draft materials, but humans still diagnose confusion, build trust, adapt explanations, and reinforce adoption.",
+    recruiterExpectations: [
+      "Evidence that people learned or improved because of your support",
+      "Clear documentation or process examples",
+      "Patience, structure, and communication maturity"
+    ],
+    concerns: ["May need examples beyond informal helping", "May need proof of business or adult-learner context"]
   }
 ];
 
@@ -105,10 +166,14 @@ export function generateCareerCoachMatches(input: CareerCoachInput): CareerMatch
     ambition: input.ambition
   });
   const signals = inferTransferableSkillSignals(text);
+  const transitionRecommendations = inferTransitionRecommendations(text);
   const scored = CAREER_MATCHES.map((match) => ({
     match,
     score:
       match.patterns.reduce((total, pattern) => total + (pattern.test(text) ? 2 : 0), 0) +
+      signals.filter((signal) => signal.adjacentCareers.some((career) =>
+        match.title.toLowerCase().includes(career.split(" ")[0]?.toLowerCase() ?? "")
+      )).length +
       insights.filter((insight) =>
         insight.possibleDirections.some((direction) =>
           match.title.toLowerCase().includes(direction.split(" ")[0]?.toLowerCase() ?? "")
@@ -121,6 +186,9 @@ export function generateCareerCoachMatches(input: CareerCoachInput): CareerMatch
   return scored.map(({ match }) => {
     const relevantSignals = signals.slice(0, 2);
     const learning = recommendLowCostLearning(match.title, match.typicalCredentials);
+    const transition = transitionRecommendations.find((item) =>
+      match.title.toLowerCase().includes(item.title.split(" ")[0]?.toLowerCase() ?? "")
+    );
     return {
       title: match.title,
       whyItFits: buildWhyItFits(match.title, relevantSignals, input),
@@ -128,16 +196,27 @@ export function generateCareerCoachMatches(input: CareerCoachInput): CareerMatch
       dayInLife: match.dayInLife,
       typicalCredentials: match.typicalCredentials,
       fastestPath: [
-        "Translate current experience into the target role's operating language.",
-        "Prepare two proof stories that show ownership, judgment, and follow-through.",
-        "Tailor one resume version around this path before applying broadly."
+        transition?.firstMove ?? "Translate current experience into the target role's operating language.",
+        "Prepare two proof stories that show ownership, judgment, and follow-through in the target role's language.",
+        "Tailor one resume version around this path before applying broadly, then practice explaining the transition out loud."
       ],
       lowestCostPath: learning,
       hiringOutlook: match.hiringOutlook,
+      aiDisruptionRisk: match.aiDisruptionRisk,
+      recruiterExpectations: match.recruiterExpectations,
+      likelyChallenges: [
+        transition?.likelyGap,
+        "The transition becomes weaker if the resume repeats old task language instead of showing transferable functions.",
+        "Recruiters may need a simple explanation for why this move is realistic now."
+      ].filter((value): value is string => Boolean(value)).slice(0, 4),
+      whyRealistic: [
+        transition?.whyRealistic,
+        ...relevantSignals.map((signal) => `${signal.source}: ${signal.recruiterLanguage}`)
+      ].filter((value): value is string => Boolean(value)).slice(0, 4),
       transferableStrengths: relevantSignals.map((signal) => `${signal.mapsTo}: ${signal.why}`),
       likelyRecruiterConcerns: [
         ...match.concerns,
-        ...relevantSignals.map((signal) => signal.recruiterConcern).filter((value): value is string => Boolean(value))
+        ...buildRecruiterConcernNotes(relevantSignals, match.title)
       ].slice(0, 4)
     };
   });
@@ -152,10 +231,10 @@ function buildWhyItFits(
   const constraint = input.lifestyleGoals || input.ambition || input.timeline;
   return [
     signal
-      ? `${signal.source} can map toward ${title} because it may already involve ${signal.mapsTo}.`
+      ? `${signal.source} may map toward ${title} because it can contain ${signal.mapsTo}. ${signal.why}`
       : `${title} may fit because it rewards communication, ownership, and practical follow-through.`,
     constraint
-      ? `Your stated constraints matter too: ${constraint.slice(0, 180)}`
+      ? `Your stated constraints matter too: ${constraint.slice(0, 180)}. A good path should fit the life you are trying to build, not just the title.`
       : "The next step is proving the overlap with concrete examples, not broad claims."
   ].join(" ");
 }

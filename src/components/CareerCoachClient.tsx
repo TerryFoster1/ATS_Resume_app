@@ -76,7 +76,7 @@ export default function CareerCoachClient() {
         <p className="app-kicker">Career Coach MVP</p>
         <h1 className="mt-3 text-3xl app-heading sm:text-5xl">Figure out your next realistic move.</h1>
         <p className="mt-4 max-w-3xl text-base leading-7 text-[var(--color-text-muted)]">
-          Answer in plain language. Career Ladder looks for transferable strengths, constraints, recruiter concerns, and practical paths forward.
+          Answer in plain language. Career Ladder looks for transferable strengths, lifestyle constraints, recruiter concerns, and realistic paths that explain why your experience may already count in a new way.
         </p>
       </section>
 
@@ -120,7 +120,7 @@ export default function CareerCoachClient() {
             <p className="app-kicker">Career coach results</p>
             <h2 className="mt-2 text-3xl app-heading">Top realistic directions to explore.</h2>
             <p className="mt-3 text-sm leading-6 text-[var(--color-text-muted)]">
-              These are starting hypotheses, not fixed labels. Use them to compare paths, build a resume direction, or prepare questions recruiters may ask.
+              These are starting hypotheses, not fixed labels. The goal is to show which paths are realistic, what evidence recruiters will look for, and where your current experience may already translate.
             </p>
           </div>
           {matches.map((match) => (
@@ -131,13 +131,17 @@ export default function CareerCoachClient() {
                 <p className="mt-3 text-sm leading-6 text-[var(--color-text-muted)]">{match.whyItFits}</p>
               </div>
               <div className="grid gap-3 md:grid-cols-2">
-                <CoachBlock title="Salary expectations" items={[match.salaryExpectation]} />
+                <CoachBlock title="Why this could be realistic" items={match.whyRealistic} />
                 <CoachBlock title="Day in the life" items={[match.dayInLife]} />
+                <CoachBlock title="Salary expectations" items={[match.salaryExpectation]} />
+                <CoachBlock title="AI disruption risk" items={[match.aiDisruptionRisk]} />
+                <CoachBlock title="What recruiters will want proof of" items={match.recruiterExpectations} />
                 <CoachBlock title="Typical credentials" items={match.typicalCredentials} />
                 <CoachBlock title="Fastest path" items={match.fastestPath} />
                 <CoachBlock title="Lowest-cost path" items={match.lowestCostPath} />
                 <CoachBlock title="Hiring outlook" items={[match.hiringOutlook]} />
                 <CoachBlock title="Transferable strengths" items={match.transferableStrengths} />
+                <CoachBlock title="Likely challenges" items={match.likelyChallenges} />
                 <CoachBlock title="Likely recruiter concerns" items={match.likelyRecruiterConcerns} />
               </div>
             </article>
