@@ -35,6 +35,7 @@ type PathwayFullAnalysis = {
   likelySkillGaps: string[];
   fastestPathRecommendations: string[];
   lowestCostPathRecommendations: string[];
+  learningRecommendations?: string[];
   suggestedNextSteps: string[];
 };
 
@@ -551,6 +552,9 @@ function PathwaySection({
               <PathwayList title="Likely skill gaps" items={pathway.full.likelySkillGaps} />
               <PathwayList title="Fastest path recommendations" items={pathway.full.fastestPathRecommendations} />
               <PathwayList title="Lowest-cost path recommendations" items={pathway.full.lowestCostPathRecommendations} />
+              {pathway.full.learningRecommendations?.length ? (
+                <PathwayList title="Learning recommendations" items={pathway.full.learningRecommendations} />
+              ) : null}
               <PathwayList title="Suggested next steps" items={pathway.full.suggestedNextSteps} />
             </>
           ) : (

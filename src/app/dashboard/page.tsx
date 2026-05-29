@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import AnalyticsEvent from "@/components/AnalyticsEvent";
 import DashboardApplications, { type DashboardApplication } from "@/components/DashboardApplications";
+import PromoCodeRedeemer from "@/components/PromoCodeRedeemer";
 import { getCreditBalance } from "@/lib/accountStorage";
 import { resolveApplicationPipelineMeta } from "@/lib/applicationMeta";
 import { readMockInterview } from "@/lib/mockInterview";
@@ -143,6 +144,8 @@ export default async function DashboardPage({
           <p>Prep packs generated from saved application context.</p>
         </article>
       </section>
+
+      <PromoCodeRedeemer />
 
       {applications.length > 0 ? (
         <DashboardApplications applications={applications} />

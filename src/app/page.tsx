@@ -16,7 +16,7 @@ const FLOW = [
 const LADDER_STAGES = [
   {
     title: "Discover Your Direction",
-    body: "Explore roles, strengths, preferences, and realistic pathways when you are not sure what the next move should be."
+    body: "Use Career Coach and discovery flows to explore roles, strengths, preferences, income needs, lifestyle constraints, and realistic pathways."
   },
   {
     title: "Build Your Professional Identity",
@@ -122,6 +122,9 @@ function LandingPage() {
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <Link href="/?step=intake" className="app-button-primary text-base">
                 Start building your career
+              </Link>
+              <Link href="/career-coach" className="app-button-ghost text-base">
+                Try Career Coach
               </Link>
               <Link href="/career-pathways" className="app-button-ghost text-base">
                 Explore career pathways

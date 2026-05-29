@@ -21,6 +21,34 @@ The result becomes context for pathway exploration and can be saved to the Maste
 - Added live, lightweight pattern reads to the discovery flow.
 - The flow now looks for relational, operational, analytical communication, work-environment, and progression motives.
 - The experience stays framed as practical guidance rather than a personality test.
+- Added a standalone Career Coach MVP at `/career-coach` for users who do not know what they want, need a transition, or are balancing income, lifestyle, learning, and timeline constraints.
+
+## Career Coach MVP
+
+The Career Coach flow asks conversational questions about:
+
+- current experience
+- interests
+- work preferences
+- lifestyle goals
+- ambition and timeline
+- learning tolerance
+- budget constraints
+- education
+
+It returns top career matches with:
+
+- why the path may fit
+- broad salary expectations
+- day-in-the-life summary
+- typical credentials
+- fastest path
+- lowest-cost path
+- hiring outlook
+- transferable strengths
+- likely recruiter concerns
+
+Salary language remains intentionally broad and should be verified against current local market data before a user makes a major decision.
 
 ## Refinement Principles
 
@@ -42,5 +70,5 @@ The result becomes context for pathway exploration and can be saved to the Maste
 - `npm.cmd run build`: passed.
 - `npm.cmd run typecheck`: passed.
 - `npm.cmd audit`: passed with 0 vulnerabilities.
-- Local smoke covered homepage, intake, resume-first, pricing, career discovery, career transition, application tracking, dashboard redirect, profile redirect, and anonymous tracking API access.
+- Local smoke covered homepage, Career Coach, intake, resume-first, pricing, career discovery, career transition, application tracking, dashboard redirect, profile redirect, admin redirect, sitemap, anonymous promo-code API access, and anonymous admin API access.
 - `npm.cmd run lint` is not configured for this project and prompts for interactive ESLint setup, so it was not completed in this pass.

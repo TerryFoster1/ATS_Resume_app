@@ -19,6 +19,7 @@ export type PathwayFullAnalysis = {
   likelySkillGaps: string[];
   fastestPathRecommendations: string[];
   lowestCostPathRecommendations: string[];
+  learningRecommendations?: string[];
   suggestedNextSteps: string[];
 };
 
@@ -93,6 +94,7 @@ export async function generatePathwayAnalysis(input: PathwayInput): Promise<Path
           "likelySkillGaps",
           "fastestPathRecommendations",
           "lowestCostPathRecommendations",
+          "learningRecommendations",
           "suggestedNextSteps"
         ],
         properties: {
@@ -101,6 +103,7 @@ export async function generatePathwayAnalysis(input: PathwayInput): Promise<Path
           likelySkillGaps: arraySchema("Likely skill or proof gaps to close."),
           fastestPathRecommendations: arraySchema("Fastest practical path recommendations."),
           lowestCostPathRecommendations: arraySchema("Lowest-cost path recommendations."),
+          learningRecommendations: arraySchema("Contextual certifications, schools, programs, or practical learning resources with relevance explained."),
           suggestedNextSteps: arraySchema("Suggested next actions inside or outside Career Ladder.")
         }
       }
@@ -216,8 +219,11 @@ function isFullAnalysis(value: unknown): value is PathwayFullAnalysis {
     "likelySkillGaps",
     "fastestPathRecommendations",
     "lowestCostPathRecommendations",
+    "learningRecommendations",
     "suggestedNextSteps"
-  ].every((key) => Array.isArray(value[key]) && value[key].every((item) => typeof item === "string"));
+  ].every((key) => key === "learningRecommendations"
+    ? value[key] === undefined || (Array.isArray(value[key]) && value[key].every((item) => typeof item === "string"))
+    : Array.isArray(value[key]) && value[key].every((item) => typeof item === "string"));
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

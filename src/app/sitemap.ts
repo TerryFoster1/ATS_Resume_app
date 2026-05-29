@@ -5,6 +5,7 @@ const siteUrl = "https://www.careerladder.ca";
 
 const publicRoutes = [
   "/",
+  "/career-coach",
   "/career-discovery",
   "/career-transition",
   "/career-pathways",

@@ -89,11 +89,19 @@ export async function getCreditBalance(userId: string): Promise<number> {
 export async function addCredits(userId: string, amount: number, reason: string) {
   const supabase = createAdminSupabaseClient();
   if (!supabase) throw new Error("Supabase admin client is not configured.");
+  const creditsToAdd = Math.abs(amount);
+  await supabase.from("profiles").upsert({ id: userId }, { onConflict: "id" });
+  const currentCredits = await getCreditBalance(userId);
   await supabase.from("credit_ledger").insert({
     user_id: userId,
-    delta: Math.abs(amount),
+    delta: creditsToAdd,
     reason
   });
+  const { error } = await supabase
+    .from("profiles")
+    .update({ credits: currentCredits + creditsToAdd, updated_at: new Date().toISOString() })
+    .eq("id", userId);
+  if (error) throw error;
 }
 
 export async function fulfillCreditPurchase(args: {

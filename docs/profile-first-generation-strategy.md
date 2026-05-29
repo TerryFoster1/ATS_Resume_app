@@ -122,6 +122,12 @@ Guardrails:
 
 See `docs/transferable-skill-translation-strategy.md`.
 
+## Beta Readiness Update
+
+- Pathway generation now receives contextual low-cost learning suggestions when relevant.
+- Career Coach uses shared transferable-skill intelligence to suggest adjacent careers without adding generation latency.
+- Promo codes grant credits through the same ledger/profile balance model as purchased credits, preserving unlock behavior.
+
 ## What Was Intentionally Deferred
 
 - complete generator rewrite

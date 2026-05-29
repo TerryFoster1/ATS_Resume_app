@@ -9,6 +9,7 @@ Career Ladder should help users understand how real experience can translate int
 - Added a lightweight transferable-skill signal helper in `src/lib/careerIntelligence.ts`.
 - Pathway previews can now fall back to shared transition signals instead of only local text matching.
 - Career discovery and first-resume flows surface plain-language interpretations that show users why their experience may matter.
+- Career Coach uses the same transition signals to recommend realistic adjacent paths.
 
 ## Recruiter-Aware Principles
 
@@ -30,6 +31,7 @@ Career Ladder should help users understand how real experience can translate int
 - Role-to-role transition map UI.
 - Deeper generated explanations per profile item.
 - Career transition landing-page expansion by vertical.
+- Live labor-market salary data.
 
 ## Validation
 

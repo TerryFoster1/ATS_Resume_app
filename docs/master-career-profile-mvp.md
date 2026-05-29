@@ -194,6 +194,7 @@ After migration and deploy:
 ## Known Production Limitations
 
 - Signed-in profile enrichment is best-effort; resume upload remains the primary fallback if profile storage is unavailable.
+- Career Coach currently reads session answers directly. A future phase should let authenticated users optionally save coach results into the Master Career Profile as career goals and transition hypotheses.
 - Manual profile editing is intentionally lightweight and does not yet provide full version history or conflict resolution.
 - Skills are imported and displayed as profile context, but fine-grained skill editing remains a future enhancement.
 - Profile-first generation is a compatibility layer, not a full generator rewrite.
