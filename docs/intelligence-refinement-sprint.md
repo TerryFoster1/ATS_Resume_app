@@ -252,6 +252,42 @@ Anonymous API guard checks:
 - The sprint did not modify auth, Stripe, credit consumption, middleware, profile persistence routes, or dashboard persistence logic.
 - Live post-deploy smoke should still verify authenticated profile load and one known-credit pathway/interview workflow using a QA account before public beta outreach.
 
+## Production deployment record - 2026-05-29
+
+Production deployment:
+
+- Deployed code commit: `eeeff91` containing verified Intelligence Quality Sprint commit `d6a226d`
+- Deployment ID: `dpl_7HnKrNfWEM17J64xkPr4cGqJtKX7`
+- Deployment URL: `https://ats-resume-7b5lpsynb-terryfoster1s-projects.vercel.app`
+- Production URL: `https://www.careerladder.ca`
+- Vercel status: Ready
+- Production alias confirmed: `https://www.careerladder.ca`
+
+Vercel build results:
+
+- Install audit during deployment: 0 vulnerabilities
+- `npm run build`: PASS
+- Static generation: 38/38 pages
+- Production aliasing: PASS
+
+Live smoke results:
+
+- `/`: 200
+- `/career-coach`: 200
+- `/career-discovery`: 200
+- `/career-pathways`: 200
+- `/?step=intake`: 200
+- `/?step=resume`: 200
+- `/pricing`: 200
+- `/sitemap.xml`: 200, `Content-Type: application/xml`
+- `/robots.txt`: 200, `Content-Type: text/plain`
+- `/dashboard`: 307 to `/auth?next=/dashboard`
+- `/profile`: 307 to `/auth?next=/profile`
+
+Remaining post-deploy limitation:
+
+- Authenticated Master Profile mutation, resume-upload enrichment, and credit-consuming pathway/interview unlocks should still be rechecked with a signed-in QA account before public beta outreach. This sprint did not change those routes or credit logic.
+
 ## Validation
 
 Commands to run from:

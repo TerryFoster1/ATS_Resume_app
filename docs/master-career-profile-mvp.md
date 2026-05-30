@@ -317,3 +317,10 @@ The Intelligence Quality Sprint did not change profile persistence routes, Supab
 - first-resume profile persistence
 - career-discovery profile persistence
 - pathway unlock/reopen without duplicate credit consumption
+
+Production deployment note:
+
+- Intelligence Quality Sprint deployment reached Vercel Ready on `2026-05-29`.
+- Production URL: `https://www.careerladder.ca`
+- Deployed code commit: `eeeff91`, which includes verified intelligence commit `d6a226d`.
+- Public and anonymous protected-route smoke passed after deployment.
