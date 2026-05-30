@@ -298,3 +298,22 @@ Known issues from production smoke:
 - Full mock interview generation was not re-run because the pathway smoke consumed the QA account's only remaining credit, and no live Stripe purchase was run.
 - Browser text entry became unavailable in the in-app browser during part of the smoke pass, so some signed-in checks were completed through authenticated production API calls using the app's normal Supabase SSR cookie format.
 - Vercel logs showed successful route/API traffic and no Stripe webhook or checkout errors during the smoke window. Existing npm audit output still reports dependency vulnerabilities from the install step; this was not changed in the deploy pass.
+
+## Intelligence Sprint QA Note - 2026-05-29
+
+During the production-readiness QA for commit `d6a226d21903d81a64a965f1796744dd1d7bfc48`, the local environment verified protected route behavior and anonymous API guards:
+
+- `/profile` redirects anonymous users to `/auth?next=/profile`.
+- `POST /api/career-profile` returns `401` when unsigned.
+- `POST /api/opportunities` returns `401` when unsigned.
+- `POST /api/outputs/fake-id/pathway` returns `401` when unsigned.
+
+Authenticated mutation checks were not rerun in this local pass because no signed-in browser session or QA credentials were available in the environment.
+
+The Intelligence Quality Sprint did not change profile persistence routes, Supabase auth, credit consumption, Stripe, or middleware. Post-deploy QA should still verify with a signed-in test account:
+
+- manual profile entry creation and editing
+- additive resume-upload enrichment
+- first-resume profile persistence
+- career-discovery profile persistence
+- pathway unlock/reopen without duplicate credit consumption

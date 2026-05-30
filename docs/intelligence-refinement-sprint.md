@@ -169,6 +169,89 @@ The first-resume flow now surfaces overlooked evidence sources such as clubs, sp
 - No Stripe, auth, middleware, credit, dashboard, SEO, or database behavior changed.
 - No extra generation pass was added; the richer deterministic context is reused by existing workflows.
 
+## Production-readiness QA - 2026-05-29
+
+Verified code commit:
+
+```text
+d6a226d21903d81a64a965f1796744dd1d7bfc48
+```
+
+Commits pending deployment at the time of QA:
+
+```text
+2f4ad5f Document transferable skill translation strategy
+114578a Evolve homepage and public landing pages
+d89456a Fix dependency audit vulnerabilities
+237f8a5 Implement opportunity tracking MVP
+83d23ea Refine career intelligence experience
+713d09e Add beta launch readiness foundations
+d6a226d Deepen career intelligence reasoning
+```
+
+### Validation commands
+
+Run from:
+
+```text
+C:\Users\kathr\Documents\Claude CoWork Files\Projects\Apps\ats-resume-app\src
+```
+
+Results:
+
+- `npm.cmd run build`: PASS
+- `npm.cmd run typecheck`: PASS
+- `npm.cmd audit`: PASS, 0 vulnerabilities
+
+### Intelligence scenario checks
+
+Career Coach:
+
+- Tested a lost or uncertain laid-off retail/service scenario through the deterministic Career Coach reasoning layer.
+- Output returned 3 career matches.
+- Output included why it fits, day in the life, salary expectations, credentials, fastest path, lowest-cost path, hiring outlook, AI disruption risk, recruiter expectations, likely challenges, recruiter concerns, and transferable strengths.
+- Top match for the test scenario was `Customer Success Associate`, grounded in retail/service, escalation, training, targets, and stability/flexibility constraints.
+
+Career Transition:
+
+- Chef or kitchen lead scenario produced operations-oriented transferable skills: operations management, inventory control, vendor coordination, workforce scheduling, staff training, quality control, and process optimization.
+- Retail manager scenario produced customer success/account support skills before upskilling.
+- Hospitality scenario produced client management, service delivery, stakeholder communication, escalation handling, and account support.
+- The reasoning explained why the transition could be realistic and did not fabricate credentials.
+
+First Resume:
+
+- Verified the first-resume flow includes overlooked experience prompts and examples for clubs, sports, volunteering, community help, family business, side hustles, recognition, awards, school/community activities, and trusted responsibility.
+- The flow now explains how these can become recruiter-readable evidence rather than treating them as blank resume fields.
+
+### Route smoke
+
+Local production server checks:
+
+- `/`: 200
+- `/career-coach`: 200
+- `/career-discovery`: 200
+- `/career-pathways`: 200
+- `/?step=intake`: 200
+- `/?step=resume`: 200
+- `/pricing`: 200
+- `/sitemap.xml`: 200
+- `/robots.txt`: 200
+- `/dashboard`: 307 to `/auth?next=/dashboard`
+- `/profile`: 307 to `/auth?next=/profile`
+
+Anonymous API guard checks:
+
+- `POST /api/career-profile`: 401
+- `POST /api/opportunities`: 401
+- `POST /api/outputs/fake-id/pathway`: 401
+
+### Known QA limitations
+
+- This local QA environment did not have an authenticated browser session or QA credentials available, so signed-in profile persistence, resume-upload profile enrichment, and credit-consuming unlock flows were not re-mutated locally in this pass.
+- The sprint did not modify auth, Stripe, credit consumption, middleware, profile persistence routes, or dashboard persistence logic.
+- Live post-deploy smoke should still verify authenticated profile load and one known-credit pathway/interview workflow using a QA account before public beta outreach.
+
 ## Validation
 
 Commands to run from:
