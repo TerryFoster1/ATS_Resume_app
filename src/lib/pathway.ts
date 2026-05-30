@@ -5,6 +5,10 @@ import {
   inferTransitionRecommendations,
   recommendLowCostLearning
 } from "@/lib/careerIntelligence";
+import {
+  extractTransferableSkillProfile,
+  formatTransferableExtractionForPrompt
+} from "@/lib/transferableSkillExtraction";
 
 export type PathwayPreview = {
   status: "preview" | "completed";
@@ -65,6 +69,7 @@ export async function generatePathwayAnalysis(input: PathwayInput): Promise<Path
   const role = cleanRole(input.targetRole);
   const sourceText = `${input.resumeText ?? ""}\n${input.currentBackground ?? ""}`;
   const signals = inferTransferableSkillSignals(sourceText, role);
+  const extraction = extractTransferableSkillProfile(sourceText, role);
   const recruiterConcerns = buildRecruiterConcernNotes(signals, role);
   const transitionRecommendations = inferTransitionRecommendations(sourceText)
     .map((item) => `${item.title} (${item.category}): ${item.whyRealistic} First move: ${item.firstMove}`)
@@ -92,6 +97,7 @@ export async function generatePathwayAnalysis(input: PathwayInput): Promise<Path
         input.resumeText ? `Resume evidence:\n${input.resumeText.slice(0, 12000)}` : "",
         input.currentBackground ? `Current background: ${input.currentBackground}` : "",
         input.jobPosting ? `Job posting:\n${input.jobPosting}` : "",
+        `Transferable skill extraction:\n${formatTransferableExtractionForPrompt(extraction)}`,
         `Detected transferable skill signals:\n${signals.map((signal) => `- ${signal.source} -> ${signal.mapsTo}. Recruiter language: ${signal.recruiterLanguage}. Evidence examples: ${signal.evidenceExamples.join("; ")}`).join("\n")}`,
         recruiterConcerns.length ? `Likely recruiter concerns:\n${recruiterConcerns.map((item) => `- ${item}`).join("\n")}` : "",
         transitionRecommendations ? `Adjacent transition logic:\n${transitionRecommendations}` : "",

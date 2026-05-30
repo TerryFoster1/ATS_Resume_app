@@ -1,4 +1,9 @@
 import { inspectResumeStructure, type StructuredResume } from "@/lib/resumeStructure";
+import {
+  extractTransferableSkillProfile,
+  transferableExtractionToProfileNotes,
+  transferableExtractionToProfileSkills
+} from "@/lib/transferableSkillExtraction";
 
 export type CareerProfileSource = "resume_import" | "manual" | "first_resume" | "career_discovery";
 
@@ -131,6 +136,7 @@ export function extractProfileFromResumeImport(input: ResumeProfileImport): Mast
   const structured = input.structured ?? inspectResumeStructure(input.resumeText).structured;
   const now = new Date().toISOString();
   const importId = stableId(`resume:${input.fileName ?? "upload"}:${input.resumeText.slice(0, 400)}`);
+  const extraction = extractTransferableSkillProfile(input.resumeText);
   const workExperience = structured.roles.map((role, index) => ({
     id: stableId(`${importId}:role:${role.header}:${index}`),
     title: role.title,
@@ -148,7 +154,10 @@ export function extractProfileFromResumeImport(input: ResumeProfileImport): Mast
     ...EMPTY_MASTER_CAREER_PROFILE,
     workExperience,
     education: structured.education.map((entry, index) => noteFromText(entry, "Education", "resume_import", now, `${importId}:edu:${index}`)),
-    skills: dedupeStrings(structured.skills),
+    skills: dedupeStrings([
+      ...structured.skills,
+      ...transferableExtractionToProfileSkills(extraction)
+    ]),
     resumeImports: [
       {
         id: importId,
@@ -159,6 +168,9 @@ export function extractProfileFromResumeImport(input: ResumeProfileImport): Mast
         skillCount: structured.skills.length
       }
     ],
+    discoveryNotes: transferableExtractionToProfileNotes(extraction).map((note, index) =>
+      noteFromText(note, "Transferable skill inference", "resume_import", now, `${importId}:transferable:${index}`)
+    ),
     updatedAt: now
   };
 }
@@ -196,6 +208,11 @@ export function createManualProfilePatch(args: {
   const title = cleanText(args.title) || labelForKind(args.kind);
   const detail = cleanText(args.detail);
   const profile = { ...EMPTY_MASTER_CAREER_PROFILE };
+  const extraction = extractTransferableSkillProfile(`${title}\n${detail}`);
+  profile.skills = transferableExtractionToProfileSkills(extraction);
+  profile.discoveryNotes = transferableExtractionToProfileNotes(extraction).map((note, index) =>
+    noteFromText(note, "Transferable skill inference", "manual", now, `manual:${args.kind}:${title}:transferable:${index}:${note}`)
+  );
 
   if (args.kind === "work" || args.kind === "volunteer" || args.kind === "project") {
     const experience: CareerProfileExperience = {
@@ -235,13 +252,18 @@ export function buildFirstResumeProfile(args: {
   goals?: string;
 }): { profile: MasterCareerProfile; resumeText: string } {
   const now = new Date().toISOString();
+  const sourceText = Object.values(args).filter(Boolean).join("\n");
+  const extraction = extractTransferableSkillProfile(sourceText);
   const notes = [
     args.responsibilities && noteFromText(args.responsibilities, "Responsibility and leadership", "first_resume", now, "first-resume:responsibility"),
     args.helpingExperience && noteFromText(args.helpingExperience, "People, service, and teamwork", "first_resume", now, "first-resume:helping"),
     args.recognition && noteFromText(args.recognition, "Recognition and achievements", "first_resume", now, "first-resume:recognition"),
     args.schoolCommunity && noteFromText(args.schoolCommunity, "School, clubs, community, and activities", "first_resume", now, "first-resume:community")
   ].filter(Boolean) as CareerProfileNote[];
-  const skills = inferDiscoverySkills(Object.values(args).filter(Boolean).join(" "));
+  const skills = dedupeStrings([
+    ...inferDiscoverySkills(sourceText),
+    ...transferableExtractionToProfileSkills(extraction)
+  ]);
   const profile: MasterCareerProfile = {
     ...EMPTY_MASTER_CAREER_PROFILE,
     achievements: notes.filter((note) => /recognition|achievement/i.test(note.label)),
@@ -257,7 +279,12 @@ export function buildFirstResumeProfile(args: {
       : [],
     skills,
     careerGoals: args.goals ? [args.goals] : [],
-    discoveryNotes: notes,
+    discoveryNotes: [
+      ...notes,
+      ...transferableExtractionToProfileNotes(extraction).map((note, index) =>
+        noteFromText(note, "Transferable skill inference", "first_resume", now, `first-resume:transferable:${index}:${note}`)
+      )
+    ],
     updatedAt: now
   };
   const resumeText = [
@@ -287,13 +314,21 @@ export function buildCareerDiscoveryProfile(args: {
 }): MasterCareerProfile {
   const now = new Date().toISOString();
   const profile = { ...EMPTY_MASTER_CAREER_PROFILE };
+  const sourceText = Object.values(args).filter(Boolean).join("\n");
+  const extraction = extractTransferableSkillProfile(sourceText);
   profile.interests = splitList(args.interests);
   profile.careerGoals = splitList(args.goals);
-  profile.skills = inferDiscoverySkills(`${args.strengths ?? ""} ${args.workPreferences ?? ""}`);
+  profile.skills = dedupeStrings([
+    ...inferDiscoverySkills(`${args.strengths ?? ""} ${args.workPreferences ?? ""}`),
+    ...transferableExtractionToProfileSkills(extraction)
+  ]);
   profile.discoveryNotes = [
     args.strengths && noteFromText(args.strengths, "Strengths to explore", "career_discovery", now, "discovery:strengths"),
     args.workPreferences && noteFromText(args.workPreferences, "Work preferences", "career_discovery", now, "discovery:preferences"),
-    args.energyPatterns && noteFromText(args.energyPatterns, "Energy and environment", "career_discovery", now, "discovery:energy")
+    args.energyPatterns && noteFromText(args.energyPatterns, "Energy and environment", "career_discovery", now, "discovery:energy"),
+    ...transferableExtractionToProfileNotes(extraction).map((note, index) =>
+      noteFromText(note, "Transferable skill inference", "career_discovery", now, `discovery:transferable:${index}:${note}`)
+    )
   ].filter(Boolean) as CareerProfileNote[];
   profile.updatedAt = now;
   return profile;
@@ -321,6 +356,7 @@ export function composeProfileResumeSource(args: {
     ]),
     section("Skills", args.profile.skills),
     section("Career goals", args.profile.careerGoals),
+    section("Career intelligence notes", args.profile.discoveryNotes.map((item) => `${item.label}: ${item.detail}`)),
     "",
     args.uploadedResumeText.trim() ? "LATEST UPLOADED RESUME OR SESSION RESUME" : "",
     args.uploadedResumeText.trim()

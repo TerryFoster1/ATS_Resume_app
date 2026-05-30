@@ -128,6 +128,43 @@ See `docs/transferable-skill-translation-strategy.md`.
 - Career Coach uses shared transferable-skill intelligence to suggest adjacent careers without adding generation latency.
 - Promo codes grant credits through the same ledger/profile balance model as purchased credits, preserving unlock behavior.
 
+## Transferable Intelligence Update - 2026-05-30
+
+Profile-first generation now has a stronger intelligence substrate.
+
+The Master Career Profile can contain:
+
+- explicit user evidence
+- inferred transferable skills
+- professional function labels
+- recruiter-readable inference notes
+
+These are created by the transferable-skill extraction layer and stored through existing profile fields:
+
+- `skills`
+- `discoveryNotes`
+
+Current profile-aware consumers:
+
+- `/api/analyze`
+- `/api/generate`
+- opportunity creation
+- pathway unlock generation
+- interview prep generation
+- mock interview question generation
+- mock interview feedback generation
+- Career Coach client-side reasoning
+
+The principle:
+
+```text
+Generated outputs are views.
+The Master Career Profile is memory.
+Transferable-skill extraction is interpretation.
+```
+
+Future work should add user confirmation for inferred skills before relying on them too strongly in high-stakes outputs.
+
 ## What Was Intentionally Deferred
 
 - complete generator rewrite

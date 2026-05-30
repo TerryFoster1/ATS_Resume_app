@@ -1,4 +1,8 @@
 import { callLlmStructured } from "./llm";
+import {
+  extractTransferableSkillProfile,
+  formatTransferableExtractionForPrompt
+} from "./transferableSkillExtraction";
 
 export type MockInterviewStatus = "not_started" | "in_progress" | "completed";
 
@@ -60,6 +64,10 @@ export type MockInterviewContext = {
 export async function generateMockInterviewQuestions(
   context: MockInterviewContext
 ): Promise<MockInterviewQuestion[]> {
+  const extraction = extractTransferableSkillProfile(
+    `${context.tailoredResume}\n${context.coverLetter}\n${formatAnswers(context.clarificationAnswers)}\n${context.interviewPrep ?? ""}`,
+    context.jobDescription
+  );
   const result = await callLlmStructured<{ questions: Omit<MockInterviewQuestion, "id">[] }>(
     {
       tag: "mock-interview-questions",
@@ -71,6 +79,7 @@ export async function generateMockInterviewQuestions(
         "Create a focused mock interview based only on the saved role context and available application materials.",
         "Questions must be specific, recruiter-realistic, and useful for practice.",
         "Prioritize questions a real recruiter would ask to test fit, proof, risk, communication, motivation, and role-specific judgment.",
+        "Use the transferable-skill extraction to pressure-test explicit skills, implicit professional functions, and likely recruiter concerns.",
         "When the candidate appears to be transitioning fields, ask fair questions that let them translate adjacent experience without pretending it is direct experience.",
         "Do not invent experience, tools, employers, credentials, metrics, or dates.",
         "If no resume or cover letter is available, ask role-based questions and evaluate the user's answers against the posting rather than assumed background.",
@@ -116,7 +125,10 @@ CLARIFICATION ANSWERS
 ${clip(formatAnswers(context.clarificationAnswers), 2500)}
 
 EXISTING INTERVIEW PREP
-${clip(context.interviewPrep ?? "No interview prep has been generated yet.", 4500)}`
+${clip(context.interviewPrep ?? "No interview prep has been generated yet.", 4500)}
+
+TRANSFERABLE SKILL EXTRACTION
+${clip(formatTransferableExtractionForPrompt(extraction), 3500)}`
     },
     {
       toolName: "create_mock_interview_questions",
@@ -161,6 +173,10 @@ export async function evaluateMockInterview(args: {
   questions: MockInterviewQuestion[];
   answers: MockInterviewAnswer[];
 }): Promise<MockInterviewFeedback> {
+  const extraction = extractTransferableSkillProfile(
+    `${args.context.tailoredResume}\n${args.context.coverLetter}`,
+    args.context.jobDescription
+  );
   return callLlmStructured<MockInterviewFeedback>(
     {
       tag: "mock-interview-feedback",
@@ -172,6 +188,7 @@ export async function evaluateMockInterview(args: {
         "Evaluate answer quality, clarity, relevance, proof, role connection, and positioning.",
         "Be honest, tactical, and specific. Do not be generic or overly encouraging.",
         "Explain how a recruiter or hiring manager would likely interpret each answer.",
+        "Evaluate whether the answer proves explicit skills, implicit transferable skills, ownership, leadership, communication quality, and recruiter confidence.",
         "Separate credible transferable framing from overclaiming. Reward honest adjacent experience when it is connected to the role clearly.",
         "Do not invent experience, tools, employers, credentials, metrics, or dates.",
         "If an answer is weak or vague, explain exactly what proof or framing is missing.",
@@ -209,6 +226,9 @@ ${clip(args.context.tailoredResume || "No tailored resume has been provided yet.
 
 COVER LETTER
 ${clip(args.context.coverLetter || "No cover letter has been provided yet.", 3500)}
+
+TRANSFERABLE SKILL EXTRACTION
+${clip(formatTransferableExtractionForPrompt(extraction), 3500)}
 
 QUESTIONS AND ANSWERS
 ${args.questions

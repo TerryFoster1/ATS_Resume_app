@@ -5,6 +5,10 @@ import {
   inferTransferableSkillSignals,
   recommendLowCostLearning
 } from "@/lib/careerIntelligence";
+import {
+  extractTransferableSkillProfile,
+  type TransferableSkillExtraction
+} from "@/lib/transferableSkillExtraction";
 
 export type CareerCoachInput = {
   currentExperience: string;
@@ -31,8 +35,19 @@ export type CareerMatch = {
   recruiterExpectations: string[];
   likelyChallenges: string[];
   whyRealistic: string[];
+  professionalFunctions: string[];
+  fitEvaluation: string[];
   transferableStrengths: string[];
   likelyRecruiterConcerns: string[];
+};
+
+type CareerCoachReasoningPipeline = {
+  strengths: string[];
+  interests: string[];
+  workPreferences: string[];
+  ambitionAndConstraints: string[];
+  extraction: TransferableSkillExtraction;
+  professionalFunctions: string[];
 };
 
 const CAREER_MATCHES: Array<{
@@ -157,6 +172,7 @@ const CAREER_MATCHES: Array<{
 ];
 
 export function generateCareerCoachMatches(input: CareerCoachInput): CareerMatch[] {
+  const pipeline = buildCareerCoachReasoningPipeline(input);
   const text = Object.values(input).join("\n");
   const insights = inferDiscoveryInsights({
     interests: input.interests,
@@ -213,6 +229,8 @@ export function generateCareerCoachMatches(input: CareerCoachInput): CareerMatch
         transition?.whyRealistic,
         ...relevantSignals.map((signal) => `${signal.source}: ${signal.recruiterLanguage}`)
       ].filter((value): value is string => Boolean(value)).slice(0, 4),
+      professionalFunctions: pipeline.professionalFunctions.slice(0, 5),
+      fitEvaluation: buildFitEvaluation(match.title, pipeline, match.salaryExpectation),
       transferableStrengths: relevantSignals.map((signal) => `${signal.mapsTo}: ${signal.why}`),
       likelyRecruiterConcerns: [
         ...match.concerns,
@@ -220,6 +238,47 @@ export function generateCareerCoachMatches(input: CareerCoachInput): CareerMatch
       ].slice(0, 4)
     };
   });
+}
+
+export function buildCareerCoachReasoningPipeline(input: CareerCoachInput): CareerCoachReasoningPipeline {
+  const text = Object.values(input).join("\n");
+  const extraction = extractTransferableSkillProfile(text);
+  return {
+    strengths: splitSignals(input.currentExperience),
+    interests: splitSignals(input.interests),
+    workPreferences: splitSignals(input.workPreferences),
+    ambitionAndConstraints: splitSignals([
+      input.lifestyleGoals,
+      input.ambition,
+      input.timeline,
+      input.financialConstraints,
+      input.learningTolerance,
+      input.education
+    ].filter(Boolean).join("\n")),
+    extraction,
+    professionalFunctions: extraction.professionalFunctions.map((item) => item.functionName)
+  };
+}
+
+function buildFitEvaluation(
+  title: string,
+  pipeline: CareerCoachReasoningPipeline,
+  salaryExpectation: string
+): string[] {
+  const functions = pipeline.professionalFunctions.slice(0, 3);
+  const constraints = pipeline.ambitionAndConstraints.slice(0, 2);
+  return [
+    functions.length
+      ? `Fit: ${title} is worth testing because your evidence points toward ${functions.join(", ")}.`
+      : `Fit: ${title} is worth testing if you can prove communication, ownership, and follow-through.`,
+    `Effort: The first lift is language and proof, then role-specific tools or terminology where gaps are real.`,
+    `Cost: Start with free proof-building, informational interviews, and tool sandboxes before paying for programs.`,
+    constraints.length
+      ? `Constraints: ${constraints.join(" ")}`
+      : `Timeline: Treat this as a staged transition, not a single resume edit.`,
+    `Salary: ${salaryExpectation}`,
+    `Risk: The biggest risk is overclaiming direct experience instead of explaining transferable responsibility clearly.`
+  ];
 }
 
 function buildWhyItFits(
@@ -237,4 +296,12 @@ function buildWhyItFits(
       ? `Your stated constraints matter too: ${constraint.slice(0, 180)}. A good path should fit the life you are trying to build, not just the title.`
       : "The next step is proving the overlap with concrete examples, not broad claims."
   ].join(" ");
+}
+
+function splitSignals(value: string): string[] {
+  return value
+    .split(/[.;\n]+/)
+    .map((item) => item.replace(/\s+/g, " ").trim())
+    .filter((item) => item.length >= 8)
+    .slice(0, 6);
 }

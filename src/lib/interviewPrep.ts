@@ -1,5 +1,9 @@
 import { callLlm } from "./llm";
 import { sanitizeGeneratedText } from "./sanitizeGeneratedText";
+import {
+  extractTransferableSkillProfile,
+  formatTransferableExtractionForPrompt
+} from "./transferableSkillExtraction";
 
 export type InterviewPrepInput = {
   jobDescription: string;
@@ -9,6 +13,10 @@ export type InterviewPrepInput = {
 };
 
 export async function generateInterviewPrep(input: InterviewPrepInput) {
+  const extraction = extractTransferableSkillProfile(
+    `${input.tailoredResume}\n${input.coverLetter}\n${formatAnswers(input.clarificationAnswers)}`,
+    input.jobDescription
+  );
   const text = await callLlm({
     tag: "interview-prep",
     maxTokens: 3200,
@@ -19,6 +27,7 @@ export async function generateInterviewPrep(input: InterviewPrepInput) {
       "Generate practical interview prep from the available role context and application materials.",
       "Be specific to the role, posting, and any candidate evidence that is available.",
       "Reason like a recruiter preparing a screening conversation: identify what the hiring team is trying to prove, what they may doubt, and what evidence would reduce that concern.",
+      "Use the transferable-skill extraction to identify explicit skills, inferred professional functions, likely recruiter concerns, and evidence the candidate should prepare.",
       "Translate adjacent experience into hiring language when it is credible. For example, retail leadership can support customer success, hospitality can support operations, journalism can support marketing, service work can support account management, and trades can support project coordination.",
       "Do not invent experience, metrics, employers, tools, credentials, or dates.",
       "If no resume or cover letter is available, create role-based prep and clearly frame candidate-specific examples as stories to prepare, not proven facts.",
@@ -37,6 +46,9 @@ ${clip(input.coverLetter || "No cover letter has been provided yet.", 3500)}
 
 CLARIFICATION ANSWERS
 ${clip(formatAnswers(input.clarificationAnswers), 2500)}
+
+TRANSFERABLE SKILL EXTRACTION
+${clip(formatTransferableExtractionForPrompt(extraction), 3500)}
 
 Create interview prep in this exact markdown structure. Keep it tactical, skimmable, and specific to this candidate and role:
 
@@ -84,6 +96,7 @@ Include 2 to 3 questions if relevant. If the role has no technical or operationa
 ## Weak-Area Prep
 - 3 to 5 honest preparation notes. Name likely gaps, proof risks, terminology gaps, or platform ownership gaps without sounding discouraging.
 - Include at least one note about how to position adjacent or transferable experience if the candidate is not a direct match.
+- Include at least one note about what a recruiter may hesitate over and what evidence would reduce that hesitation.
 
 ## What to Prepare Before the Interview
 - 4 to 6 concrete prep actions, such as examples to choose, metrics to review, tools to clarify, or stories to rehearse.

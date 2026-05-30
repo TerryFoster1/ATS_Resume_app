@@ -70,6 +70,45 @@ The workflow treats informal or early experience as possible evidence of:
 
 It does not invent jobs, dates, employers, metrics, or credentials.
 
+## Intelligence Update - 2026-05-30
+
+My First Resume now uses the transferable-skill extraction layer to help users understand why nontraditional experience matters.
+
+The flow now looks for evidence in:
+
+- clubs
+- sports
+- volunteer work
+- projects
+- side hustles
+- leadership
+- family business work
+- online communities
+- event organization
+- awards and recognition
+
+The UI explains why recruiters care.
+
+Example:
+
+```text
+Sports team captain
+```
+
+should not only become:
+
+```text
+Leadership
+```
+
+It should be explained as:
+
+```text
+This can demonstrate responsibility, team coordination, communication, and accountability because other people relied on you in a shared goal environment.
+```
+
+First-resume answers now enrich the Master Career Profile with both user evidence and explainable transferable-skill notes.
+
 ## What was intentionally deferred
 
 - no full conversational chat interface

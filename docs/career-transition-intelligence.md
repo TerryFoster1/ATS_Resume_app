@@ -51,6 +51,43 @@ Guardrails:
 - Use language such as "may support", "likely overlaps", and "can be framed as".
 - Require evidence examples before leaning heavily on an inferred skill.
 
+## Extraction Engine Update - 2026-05-30
+
+Transition intelligence now begins with a reusable extraction result:
+
+```text
+Current Experience
+-> Explicit Skills
+-> Implicit Skills
+-> Professional Functions
+-> Adjacent Careers
+-> Recruiter Concerns
+-> Skill Gaps
+-> Upskilling
+```
+
+This avoids the weaker pattern:
+
+```text
+Target Career
+-> Missing Skills
+-> Courses
+```
+
+The extraction layer is shared by Career Coach, Pathways, Interview Prep, Mock Interviews, resume imports, manual profile entries, First Resume, and Career Discovery.
+
+This is what lets Career Ladder answer:
+
+```text
+What careers am I already partially qualified for?
+```
+
+instead of only:
+
+```text
+What am I missing for this job?
+```
+
 ## Deferred
 
 - User-confirmed inferred skill tags in the Master Career Profile.

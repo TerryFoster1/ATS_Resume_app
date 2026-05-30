@@ -324,3 +324,27 @@ Production deployment note:
 - Production URL: `https://www.careerladder.ca`
 - Deployed code commit: `eeeff91`, which includes verified intelligence commit `d6a226d`.
 - Public and anonymous protected-route smoke passed after deployment.
+
+## Transferable Skill Extraction Integration - 2026-05-30
+
+The Master Career Profile now receives explainable transferable-skill intelligence from several profile entry points:
+
+- resume imports
+- manual profile entries
+- My First Resume discovery
+- Career Discovery
+
+Storage strategy:
+
+- user-provided facts remain in the existing experience, education, project, award, interest, and career-goal arrays
+- inferred transferable skills are stored as additional `skills`
+- explainable inference notes are stored in `discoveryNotes`
+
+No database migration was added. This preserves existing production records and keeps the profile additive.
+
+The profile now stores both:
+
+- evidence the user actually provided
+- grounded recruiter-readable interpretations of that evidence
+
+Generators and guidance surfaces can then consume the profile as persistent career memory rather than treating each upload as isolated context.

@@ -80,6 +80,32 @@ Rather than:
 This is a generic career quiz result.
 ```
 
+## Reasoning Pipeline Update - 2026-05-30
+
+Career Coach now uses an explicit reasoning pipeline:
+
+```text
+Profile and answers
+-> strengths, interests, work preferences, ambition, constraints
+-> explicit skills
+-> implicit transferable skills
+-> professional functions
+-> adjacent careers
+-> fit, effort, cost, timeline, salary, risk
+-> recommendations
+```
+
+Signed-in users can have their Master Career Profile loaded as background context for Career Coach. This keeps the experience from feeling stateless and lets saved work, projects, first-resume answers, and discovery notes influence recommendations without forcing the user to retype everything.
+
+Output now includes:
+
+- strongest professional functions
+- fit, effort, cost, timeline, salary, and risk
+- recruiter expectations
+- likely challenges
+- transferable strengths
+- recruiter concerns
+
 ## Refinement Principles
 
 - Ask about real patterns, not abstract identity labels.

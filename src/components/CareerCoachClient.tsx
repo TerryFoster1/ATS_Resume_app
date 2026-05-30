@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { generateCareerCoachMatches, type CareerCoachInput } from "@/lib/careerCoach";
+import type { MasterCareerProfile } from "@/lib/masterCareerProfile";
 
 const QUESTIONS: Array<{ key: keyof CareerCoachInput; label: string; prompt: string }> = [
   {
@@ -60,11 +61,37 @@ const EMPTY_INPUT: CareerCoachInput = {
 
 export default function CareerCoachClient() {
   const [answers, setAnswers] = useState<CareerCoachInput>(EMPTY_INPUT);
+  const [profileContext, setProfileContext] = useState("");
   const [step, setStep] = useState(0);
   const [showResults, setShowResults] = useState(false);
   const current = QUESTIONS[step];
-  const matches = useMemo(() => generateCareerCoachMatches(answers), [answers]);
+  const coachInput = useMemo(
+    () => ({
+      ...answers,
+      currentExperience: [profileContext, answers.currentExperience].filter(Boolean).join("\n\n")
+    }),
+    [answers, profileContext]
+  );
+  const matches = useMemo(() => generateCareerCoachMatches(coachInput), [coachInput]);
   const progress = Math.round(((step + 1) / QUESTIONS.length) * 100);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadProfileContext() {
+      try {
+        const response = await fetch("/api/career-profile", { cache: "no-store" });
+        if (!response.ok) return;
+        const data = (await response.json().catch(() => ({}))) as { profile?: MasterCareerProfile | null };
+        if (!cancelled && data.profile) setProfileContext(formatProfileContext(data.profile));
+      } catch {
+        // Signed-out users can still use Career Coach without persistent profile context.
+      }
+    }
+    void loadProfileContext();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   function update(value: string) {
     setAnswers((currentAnswers) => ({ ...currentAnswers, [current.key]: value }));
@@ -75,10 +102,15 @@ export default function CareerCoachClient() {
       <section className="app-screen-card">
         <p className="app-kicker">Career Coach MVP</p>
         <h1 className="mt-3 text-3xl app-heading sm:text-5xl">Figure out your next realistic move.</h1>
-        <p className="mt-4 max-w-3xl text-base leading-7 text-[var(--color-text-muted)]">
-          Answer in plain language. Career Ladder looks for transferable strengths, lifestyle constraints, recruiter concerns, and realistic paths that explain why your experience may already count in a new way.
-        </p>
-      </section>
+          <p className="mt-4 max-w-3xl text-base leading-7 text-[var(--color-text-muted)]">
+            Answer in plain language. Career Ladder looks for transferable strengths, lifestyle constraints, recruiter concerns, and realistic paths that explain why your experience may already count in a new way.
+          </p>
+          {profileContext && (
+            <p className="mt-4 max-w-2xl rounded-[18px] bg-white/72 px-4 py-3 text-xs font-semibold leading-5 text-[var(--color-text-muted)] shadow-[var(--shadow-inset-soft)]">
+              Your Master Career Profile is being used as background context, so saved experience can inform these recommendations without retyping it.
+            </p>
+          )}
+        </section>
 
       {!showResults ? (
         <section className="app-mini-card">
@@ -132,6 +164,8 @@ export default function CareerCoachClient() {
               </div>
               <div className="grid gap-3 md:grid-cols-2">
                 <CoachBlock title="Why this could be realistic" items={match.whyRealistic} />
+                <CoachBlock title="Strongest professional functions" items={match.professionalFunctions} />
+                <CoachBlock title="Fit, effort, cost, timeline, salary, risk" items={match.fitEvaluation} />
                 <CoachBlock title="Day in the life" items={[match.dayInLife]} />
                 <CoachBlock title="Salary expectations" items={[match.salaryExpectation]} />
                 <CoachBlock title="AI disruption risk" items={[match.aiDisruptionRisk]} />
@@ -171,4 +205,20 @@ function CoachBlock({ title, items }: { title: string; items: string[] }) {
       </ul>
     </div>
   );
+}
+
+function formatProfileContext(profile: MasterCareerProfile): string {
+  const lines = [
+    ...profile.workExperience.flatMap((item) => [
+      [item.title, item.organization, item.dateRange].filter(Boolean).join(" | "),
+      ...item.bullets
+    ]),
+    ...profile.volunteerExperience.flatMap((item) => [item.title ?? "Volunteer experience", ...item.bullets]),
+    ...profile.projects.flatMap((item) => [item.title ?? "Project", ...item.bullets]),
+    ...profile.extracurriculars.flatMap((item) => [item.title ?? "Extracurricular experience", ...item.bullets]),
+    ...profile.skills.map((item) => `Skill: ${item}`),
+    ...profile.careerGoals.map((item) => `Career goal: ${item}`),
+    ...profile.discoveryNotes.map((item) => `${item.label}: ${item.detail}`)
+  ].filter(Boolean);
+  return lines.length ? `MASTER CAREER PROFILE CONTEXT\n${lines.slice(0, 80).join("\n")}` : "";
 }

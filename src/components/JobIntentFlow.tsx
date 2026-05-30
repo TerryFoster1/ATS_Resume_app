@@ -127,19 +127,23 @@ const GOALS: GoalConfig[] = [
 const FIRST_RESUME_EXAMPLES = [
   {
     label: "Clubs, teams, or sports",
-    signal: "coordination, discipline, teamwork, leadership, and commitment"
+    signal: "coordination, discipline, teamwork, leadership, and commitment",
+    why: "Recruiters care because teammates relying on you is evidence of accountability, communication, and consistency."
   },
   {
     label: "Family business or caregiving",
-    signal: "reliability, service, responsibility, scheduling, and practical judgment"
+    signal: "reliability, service, responsibility, scheduling, and practical judgment",
+    why: "Recruiters care because informal responsibility can still prove trust, maturity, and real-world problem solving."
   },
   {
     label: "Side hustles or creative projects",
-    signal: "initiative, customer awareness, follow-through, and learning agility"
+    signal: "initiative, customer awareness, follow-through, and learning agility",
+    why: "Recruiters care because self-started work shows initiative, execution, and learning without someone assigning every step."
   },
   {
     label: "Volunteering or community help",
-    signal: "service orientation, communication, organization, and trust"
+    signal: "service orientation, communication, organization, and trust",
+    why: "Recruiters care because service work often shows empathy, reliability, coordination, and follow-through."
   }
 ];
 
@@ -713,6 +717,9 @@ function FirstResumeDiscovery({
               <strong className="block text-sm font-black text-[var(--color-text-primary)]">{item.label}</strong>
               <span className="mt-2 block text-xs font-semibold leading-5 text-[var(--color-text-muted)]">
                 May show {item.signal}.
+              </span>
+              <span className="mt-2 block text-xs leading-5 text-[var(--color-text-muted)]">
+                {item.why}
               </span>
             </article>
           ))}
