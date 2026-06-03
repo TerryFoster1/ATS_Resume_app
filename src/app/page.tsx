@@ -6,33 +6,22 @@ type Step = "intro" | "intake" | "intent" | "resume" | "job" | "analysis" | "gen
 
 const VALID_STEPS: Step[] = ["intro", "intake", "intent", "resume", "job", "analysis", "generate", "results"];
 
-const SOCIAL_PROOF_ITEMS = [
-  { value: "2,300+", label: "Career Profiles Created", note: "Demo metric for launch layout." },
-  { value: "7,800+", label: "Resumes Tailored", note: "Demo metric for launch layout." },
-  { value: "12,000+", label: "Interview Questions Generated", note: "Demo metric for launch layout." },
-  { value: "150+", label: "Career Paths Explored", note: "Demo metric for launch layout." }
-];
-
-const OUTCOME_CARDS = [
+const HELP_ITEMS = [
   {
-    icon: "01",
-    title: "Understand what's holding you back",
-    body: "Identify resume gaps, positioning problems, and missing opportunities."
+    title: "Find resume gaps",
+    body: "See what may be making your experience easy to miss."
   },
   {
-    icon: "02",
-    title: "Find career paths that fit you",
-    body: "Discover realistic options based on your experience and goals."
+    title: "Translate experience",
+    body: "Turn real work into recruiter-readable evidence."
   },
   {
-    icon: "03",
-    title: "Create resumes that get seen",
-    body: "Tailor your experience to the role and the people reviewing it."
+    title: "Tailor applications",
+    body: "Position your resume and cover letter for the role."
   },
   {
-    icon: "04",
-    title: "Prepare for interviews with confidence",
-    body: "Practice recruiter questions and learn what employers actually care about."
+    title: "Prepare for interviews",
+    body: "Understand likely questions and hiring concerns."
   }
 ];
 
@@ -118,12 +107,11 @@ function LandingPage() {
           <p className="cl-v2-pill">Clarity. Direction. Confidence.</p>
           <h2>
             Not getting interviews?
-            <span>Let's figure out why.</span>
+            <span>Let's fix what's holding you back.</span>
           </h2>
           <p>
-            Most job seekers never learn how modern hiring actually works. Career Ladder
-            helps you identify what's holding you back, uncover opportunities you may be
-            overlooking, and prepare for the jobs you actually want.
+            Career Ladder reviews your resume, identifies gaps, translates your experience
+            into recruiter-ready language, and helps you prepare for the jobs you actually want.
           </p>
           <div className="cl-v2-actions">
             <Link href="/?step=resume" className="app-button-primary text-base">
@@ -134,43 +122,24 @@ function LandingPage() {
             </Link>
           </div>
           <Link href="/career-coach" className="cl-v2-text-link">
-            Not sure what you want to do? Try Career Coach
+            Not sure what direction to take? Try Career Coach -&gt;
           </Link>
           <div className="cl-v2-trust-row">
             <span>Free to get started</span>
             <span>No credit card required</span>
-            <span>Save your profile forever</span>
+            <span>Save your career profile</span>
           </div>
         </div>
-        <BeforeAfterResumeVisual />
+        <ExperienceTranslationVisual />
       </section>
 
-      <section className="cl-v2-outcomes" id="resources">
-        <div className="cl-v2-section-heading is-centered">
-          <h2>Everything you need to move forward.</h2>
-        </div>
-        <div className="cl-v2-outcome-grid">
-          {OUTCOME_CARDS.map((item) => (
+      <section className="cl-v2-help-strip" id="resources">
+        <h2>Career Ladder helps you move forward without guessing.</h2>
+        <div className="cl-v2-help-grid">
+          {HELP_ITEMS.map((item) => (
             <article key={item.title}>
-              <span>{item.icon}</span>
               <h3>{item.title}</h3>
               <p>{item.body}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="cl-v2-metrics">
-        <h2>Helping job seekers take their next step.</h2>
-        <p className="cl-v2-metrics-note">
-          Demo activity metrics for launch QA. Replace with live product data before using as verified claims.
-        </p>
-        <div className="cl-v2-metric-grid">
-          {SOCIAL_PROOF_ITEMS.map((item) => (
-            <article key={item.label}>
-              <strong>{item.value}</strong>
-              <span>{item.label}</span>
-              <p>{item.note}</p>
             </article>
           ))}
         </div>
@@ -242,67 +211,67 @@ function LandingHeader() {
   );
 }
 
-function BeforeAfterResumeVisual() {
-  const beforeItems = ["Missing key skills", "Difficult to scan", "Generic positioning", "Easy to overlook"];
-  const afterItems = ["Highlights relevant experience", "ATS friendly", "Recruiter readable", "Role specific"];
-  return (
-    <div className="cl-v2-comparison" aria-label="Before and after resume comparison">
-      <ResumePreviewCard
-        label="Before"
-        title="Average Resume"
-        tone="before"
-        items={beforeItems}
-      />
-      <div className="cl-v2-comparison-arrow" aria-hidden>
-        <span>to</span>
-      </div>
-      <ResumePreviewCard
-        label="After Career Ladder"
-        title="Career Ladder Resume"
-        tone="after"
-        items={afterItems}
-      />
-    </div>
-  );
-}
+function ExperienceTranslationVisual() {
+  const responsibilities = [
+    "Managed staff",
+    "Handled customer complaints",
+    "Tracked store performance",
+    "Trained new employees"
+  ];
+  const skills = [
+    "Customer Retention",
+    "Escalation Management",
+    "Performance Coaching",
+    "Team Leadership",
+    "Relationship Building",
+    "Process Improvement"
+  ];
+  const paths = [
+    "Customer Success",
+    "Account Management",
+    "Customer Experience",
+    "Client Success",
+    "Customer Onboarding"
+  ];
 
-function ResumePreviewCard({
-  label,
-  title,
-  tone,
-  items
-}: {
-  label: string;
-  title: string;
-  tone: "before" | "after";
-  items: string[];
-}) {
   return (
-    <article className={`cl-v2-resume-card is-${tone}`}>
-      <span className="cl-v2-resume-label">{label}</span>
-      <div className="cl-v2-paper">
-        <div className="cl-v2-paper-line is-short" />
-        <div className="cl-v2-paper-line" />
-        <div className="cl-v2-paper-line" />
-        <div className="cl-v2-paper-line is-muted" />
-        <div className="cl-v2-paper-columns">
-          <div>
-            <div className="cl-v2-paper-line" />
-            <div className="cl-v2-paper-line is-short" />
-          </div>
-          <div>
-            <div className="cl-v2-paper-line" />
-            <div className="cl-v2-paper-line is-short" />
-          </div>
-        </div>
+    <div className="cl-v2-translation-visual" aria-label="Experience translation example">
+      <article className="cl-v2-translation-card is-source">
+        <span className="cl-v2-translation-label">Your experience</span>
+        <h3>Retail Manager</h3>
+        <p>Current responsibilities</p>
+        <ul>
+          {responsibilities.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ul>
+      </article>
+
+      <div className="cl-v2-translation-flow" aria-hidden>
+        <span />
+        <strong>Career Ladder Translation</strong>
+        <span />
       </div>
-      <h3>{title}</h3>
-      <ul>
-        {items.map((item) => (
-          <li key={item}>{item}</li>
-        ))}
-      </ul>
-    </article>
+
+      <article className="cl-v2-translation-card is-skills">
+        <span className="cl-v2-translation-label">Hidden transferable skills</span>
+        <ul>
+          {skills.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ul>
+      </article>
+
+      <article className="cl-v2-translation-card is-paths">
+        <span className="cl-v2-translation-label">New opportunities</span>
+        <h3>Possible career paths</h3>
+        <ul>
+          {paths.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ul>
+      </article>
+    </div>
   );
 }
 
