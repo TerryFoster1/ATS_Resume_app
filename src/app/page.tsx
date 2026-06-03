@@ -104,7 +104,6 @@ function LandingPage() {
 
       <section className="cl-v2-hero">
         <div className="cl-v2-hero-copy">
-          <p className="cl-v2-pill">Clarity. Direction. Confidence.</p>
           <h2>
             Not getting interviews?
             <span>Let's fix what's holding you back.</span>
@@ -229,8 +228,8 @@ function ExperienceTranslationVisual() {
   const paths = [
     "Customer Success",
     "Account Management",
-    "Customer Experience",
     "Client Success",
+    "Customer Experience",
     "Customer Onboarding"
   ];
 
@@ -248,29 +247,39 @@ function ExperienceTranslationVisual() {
       </article>
 
       <div className="cl-v2-translation-flow" aria-hidden>
-        <span />
-        <strong>Career Ladder Translation</strong>
-        <span />
+        <span>to</span>
       </div>
 
       <article className="cl-v2-translation-card is-skills">
-        <span className="cl-v2-translation-label">Hidden transferable skills</span>
+        <span className="cl-v2-translation-label">Career Ladder Translation</span>
+        <h3>What employers actually see</h3>
         <ul>
           {skills.map((item) => (
             <li key={item}>{item}</li>
           ))}
         </ul>
+        <p>
+          The skills you use every day often have more value than their job title suggests.
+        </p>
       </article>
 
+      <div className="cl-v2-translation-flow is-secondary" aria-hidden>
+        <span>to</span>
+      </div>
+
       <article className="cl-v2-translation-card is-paths">
-        <span className="cl-v2-translation-label">New opportunities</span>
-        <h3>Possible career paths</h3>
+        <span className="cl-v2-translation-label">Relevant opportunities</span>
+        <h3>Roles where that experience can matter</h3>
         <ul>
           {paths.map((item) => (
             <li key={item}>{item}</li>
           ))}
         </ul>
       </article>
+
+      <p className="cl-v2-translation-insight">
+        Your experience may already qualify you for more opportunities than you realize.
+      </p>
     </div>
   );
 }
