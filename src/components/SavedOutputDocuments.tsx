@@ -1,14 +1,18 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { ACCOUNT_CREDITS_REFRESH_EVENT } from "@/components/AccountCreditIndicator";
 import InterviewPrepDisplay from "@/components/InterviewPrepDisplay";
+import OpportunityTrackingPanel from "@/components/OpportunityTrackingPanel";
 import { trackEvent } from "@/lib/analytics";
+import type { OpportunityTracking } from "@/lib/opportunityTracking";
 import { sanitizeGeneratedText } from "@/lib/sanitizeGeneratedText";
 import { limitSkillsSection } from "@/lib/skillsSection";
 
 type DocumentKind = "resume" | "coverLetter";
+type WorkspaceTab = "resume" | "coverLetter" | "interview" | "pathway" | "opportunity";
 
 type AccountStatus = {
   signedIn: boolean;
@@ -19,6 +23,8 @@ type SavedOutputDocumentsProps = {
   outputId: string;
   title: string;
   companyName?: string | null;
+  opportunityStatus: string;
+  tracking: OpportunityTracking;
   resumeText: string;
   coverLetterText: string;
   sourceResumeText?: string | null;
@@ -68,10 +74,84 @@ const LH_LETTER = 15;
 const LH_BULLET_GAP = 1.8;
 const CHECKOUT_RETURN_PATH_KEY = "career-ladder:checkout-return-path";
 
+function buildNextActions({
+  hasResume,
+  hasCoverLetter,
+  resumeUnlocked,
+  coverLetterUnlocked,
+  hasInterviewPrep,
+  pathwayUnlocked
+}: {
+  hasResume: boolean;
+  hasCoverLetter: boolean;
+  resumeUnlocked: boolean;
+  coverLetterUnlocked: boolean;
+  hasInterviewPrep: boolean;
+  pathwayUnlocked: boolean;
+}): Array<{ tab: WorkspaceTab; title: string; reason: string }> {
+  const actions: Array<{ tab: WorkspaceTab; title: string; reason: string }> = [];
+  if (hasResume && !resumeUnlocked) {
+    actions.push({
+      tab: "resume",
+      title: "Unlock resume export",
+      reason: "Position yourself first, then use the resume as the anchor for the rest of the process."
+    });
+  }
+  if (hasCoverLetter && !coverLetterUnlocked) {
+    actions.push({
+      tab: "coverLetter",
+      title: "Unlock cover letter",
+      reason: "Use the letter to connect your story to this company without exposing the whole draft early."
+    });
+  }
+  actions.push({
+    tab: "interview",
+    title: hasInterviewPrep ? "Review interview prep" : "Unlock interview prep",
+    reason: "Prepare for what a recruiter is likely to test before the first conversation."
+  });
+  actions.push({
+    tab: "pathway",
+    title: pathwayUnlocked ? "Review pathway analysis" : "Generate pathway analysis",
+    reason: "Clarify transferable strengths, proof gaps, and the most credible next move."
+  });
+  actions.push({
+    tab: "opportunity",
+    title: "Manage the hiring process",
+    reason: "Track follow-ups, rounds, notes, and offer tradeoffs after the strategy is clear."
+  });
+  return actions.slice(0, 4);
+}
+
+function buildInterviewPrepPreview(
+  interviewPrep: string,
+  roleTitle: string,
+  companyName?: string | null
+) {
+  const firstQuestion = extractFirstInterviewQuestion(interviewPrep);
+  const role = roleTitle || "this role";
+  const company = companyName ? ` at ${companyName}` : "";
+  return {
+    question: firstQuestion || `Walk me through why your background fits ${role}${company}.`,
+    why:
+      "Recruiters ask this early to test whether you understand the role, can explain your transition clearly, and have credible evidence behind your positioning.",
+    insight:
+      "Prepare one concise story that connects ownership, communication, measurable follow-through, and the specific expectations in the posting."
+  };
+}
+
+function extractFirstInterviewQuestion(text: string) {
+  const lines = text.split("\n").map((line) => line.trim()).filter(Boolean);
+  const questionLine = lines.find((line) => /\?$/.test(line) && line.length < 220);
+  if (!questionLine) return "";
+  return questionLine.replace(/^[-*\d.)\s]+/, "").replace(/^question:\s*/i, "").trim();
+}
+
 export default function SavedOutputDocuments({
   outputId,
   title,
   companyName,
+  opportunityStatus,
+  tracking,
   resumeText,
   coverLetterText,
   sourceResumeText,
@@ -96,6 +176,11 @@ export default function SavedOutputDocuments({
   const hasResume = resumeText.trim().length > 0;
   const hasCoverLetter = coverLetterText.trim().length > 0;
   const opportunityOnly = !hasResume && !hasCoverLetter;
+  const [activeTab, setActiveTab] = useState<WorkspaceTab>(() => {
+    if (hasResume) return "resume";
+    if (hasCoverLetter) return "coverLetter";
+    return "interview";
+  });
 
   useEffect(() => {
     trackEvent("dashboard_reopen", { outputId });
@@ -264,6 +349,22 @@ export default function SavedOutputDocuments({
     { label: "Interview prep", value: interviewPrep.trim() ? "Ready" : interviewPrepStatus === "failed" ? "Retry needed" : "Not generated" },
     { label: "Pathway", value: pathwayState?.full ? "Unlocked" : pathwayState ? "Preview" : "Not generated" }
   ];
+  const hasInterviewPrep = interviewPrep.trim().length > 0;
+  const nextActions = buildNextActions({
+    hasResume,
+    hasCoverLetter,
+    resumeUnlocked: resumeIsUnlocked,
+    coverLetterUnlocked: coverLetterIsUnlocked,
+    hasInterviewPrep,
+    pathwayUnlocked: Boolean(pathwayState?.full)
+  });
+  const tabs = [
+    { id: "resume" as const, label: "Resume", available: hasResume },
+    { id: "coverLetter" as const, label: "Cover Letter", available: hasCoverLetter },
+    { id: "interview" as const, label: "Interview Prep", available: true },
+    { id: "pathway" as const, label: "Pathway", available: true },
+    { id: "opportunity" as const, label: "Opportunity", available: true }
+  ];
 
   return (
     <div className="space-y-6">
@@ -272,9 +373,13 @@ export default function SavedOutputDocuments({
           <p className="app-kicker">Saved materials</p>
           <h2 className="mt-2 text-xl app-heading">
             {opportunityOnly
-              ? "Prepare for this opportunity."
-              : "Reopen, unlock, and export this application."}
+              ? "Build the next move for this opportunity."
+              : "Your role workspace is ready."}
           </h2>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--color-text-muted)]">
+            Career Ladder organizes this opportunity into focused workspaces so you can position,
+            prepare, plan, and manage the hiring process without seeing everything at once.
+          </p>
         </div>
         <div className="saved-output-credit-card">
           <span>{credits ?? "..."}</span>
@@ -291,9 +396,47 @@ export default function SavedOutputDocuments({
         ))}
       </section>
 
-      {(hasResume || hasCoverLetter) ? (
-        <section className="grid gap-6 xl:grid-cols-2">
-          {hasResume && (
+      <section className="opportunity-next-panel">
+        <div>
+          <p className="app-kicker">Recommended next steps</p>
+          <h3 className="mt-2 text-xl app-heading">Career Ladder recommends this progression.</h3>
+        </div>
+        <div className="opportunity-next-grid">
+          {nextActions.map((item, index) => (
+            <button
+              type="button"
+              key={item.tab}
+              onClick={() => setActiveTab(item.tab)}
+              className="opportunity-next-card"
+            >
+              <span>Step {index + 1}</span>
+              <strong>{item.title}</strong>
+              <small>{item.reason}</small>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section className="opportunity-tabs-shell">
+        <div className="opportunity-tabs" role="tablist" aria-label="Opportunity workspaces">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              role="tab"
+              aria-selected={activeTab === tab.id}
+              disabled={!tab.available}
+              onClick={() => setActiveTab(tab.id)}
+              className={activeTab === tab.id ? "is-active" : ""}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="opportunity-tab-panel">
+          {activeTab === "resume" && (
+            hasResume ? (
             <SavedDocumentPanel
               kind="resume"
               title="Resume"
@@ -302,8 +445,18 @@ export default function SavedOutputDocuments({
               unlocked={resumeIsUnlocked}
               onRequestUnlock={() => requestUnlock("resume")}
             />
+            ) : (
+              <EmptyWorkspace
+                eyebrow="Resume"
+                title="No tailored resume has been generated for this opportunity yet."
+                body="When you are ready to position your background for this role, start a new resume workflow using the same job context."
+                action={<Link href="/?step=intake" className="app-button-primary">Tailor a resume</Link>}
+              />
+            )
           )}
-          {hasCoverLetter && (
+
+          {activeTab === "coverLetter" && (
+            hasCoverLetter ? (
             <SavedDocumentPanel
               kind="coverLetter"
               title="Cover Letter"
@@ -313,37 +466,55 @@ export default function SavedOutputDocuments({
               unlocked={coverLetterIsUnlocked}
               onRequestUnlock={() => requestUnlock("coverLetter")}
             />
+            ) : (
+              <EmptyWorkspace
+                eyebrow="Cover letter"
+                title="No cover letter has been generated for this opportunity yet."
+                body="A tailored letter works best after the role, company, and positioning strategy are clear."
+                action={<Link href="/?step=intake" className="app-button-primary">Create an application package</Link>}
+              />
+            )
           )}
-        </section>
-      ) : (
-        <section className="app-card-soft">
-          <p className="app-kicker">Opportunity context</p>
-          <h3 className="mt-3 text-xl app-heading">No resume or cover letter has been generated yet.</h3>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--color-text-muted)]">
-            This saved opportunity was created from a target role first. You can generate interview
-            prep or start a mock interview now, then return later to tailor documents for the same role.
-          </p>
-        </section>
-      )}
 
-      <InterviewPrepSection
-        outputId={outputId}
-        interviewPrep={interviewPrep}
-        status={interviewPrepStatus}
-        busy={interviewPrepBusy}
-        error={interviewPrepError}
-        fileBaseName={`${safeFilename}-interview-prep`}
-        onGenerate={generatePrep}
-      />
+          {activeTab === "interview" && (
+            <InterviewPrepSection
+              outputId={outputId}
+              roleTitle={title}
+              companyName={companyName}
+              interviewPrep={interviewPrep}
+              status={interviewPrepStatus}
+              busy={interviewPrepBusy}
+              error={interviewPrepError}
+              fileBaseName={`${safeFilename}-interview-prep`}
+              onGenerate={generatePrep}
+            />
+          )}
 
-      {pathwayState && (
-        <PathwaySection
-          pathway={pathwayState}
-          busy={pathwayBusy}
-          error={pathwayError}
-          onUnlock={unlockPathway}
-        />
-      )}
+          {activeTab === "pathway" && (
+            <PathwaySection
+              title={title}
+              pathway={pathwayState}
+              busy={pathwayBusy}
+              error={pathwayError}
+              onUnlock={unlockPathway}
+            />
+          )}
+
+          {activeTab === "opportunity" && (
+            <div className="opportunity-supporting-panel">
+              <div className="mb-5">
+                <p className="app-kicker">Supporting tools</p>
+                <h3 className="mt-2 text-xl app-heading">Manage the process after your positioning is clear.</h3>
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--color-text-muted)]">
+                  Current stage: <strong>{opportunityStatus}</strong>. Use this space for notes,
+                  interview rounds, recruiter details, follow-ups, and offer tradeoffs.
+                </p>
+              </div>
+              <OpportunityTrackingPanel outputId={outputId} initialTracking={tracking} />
+            </div>
+          )}
+        </div>
+      </section>
 
       {unlockTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(32,23,53,0.34)] px-4 py-8 backdrop-blur-sm">
@@ -408,6 +579,8 @@ export default function SavedOutputDocuments({
 
 function InterviewPrepSection({
   outputId,
+  roleTitle,
+  companyName,
   interviewPrep,
   status,
   busy,
@@ -416,6 +589,8 @@ function InterviewPrepSection({
   onGenerate
 }: {
   outputId: string;
+  roleTitle: string;
+  companyName?: string | null;
   interviewPrep: string;
   status: string;
   busy: boolean;
@@ -425,6 +600,7 @@ function InterviewPrepSection({
 }) {
   const [copied, setCopied] = useState(false);
   const hasPrep = interviewPrep.trim().length > 0;
+  const preview = buildInterviewPrepPreview(interviewPrep, roleTitle, companyName);
 
   async function copy() {
     if (!hasPrep) return;
@@ -447,8 +623,8 @@ function InterviewPrepSection({
             Practice this application like a real recruiter screen.
           </h3>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--color-text-muted)]">
-            Start an interactive mock interview with one question at a time, saved answers, and
-            hiring-manager style feedback. Static prep notes are still available below when generated.
+            Start with a recruiter-style question, then unlock the full preparation plan when you
+            want screening questions, weak areas, recruiter concerns, and closing points.
           </p>
           {status === "failed" && !hasPrep && (
             <p className="mt-3 rounded-[14px] border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold leading-5 text-rose-900">
@@ -476,7 +652,7 @@ function InterviewPrepSection({
               disabled={busy}
               className="app-button-ghost shrink-0 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {busy ? "Generating notes..." : "Generate prep notes - 1 credit"}
+              {busy ? "Generating..." : "Unlock Full Interview Prep - 1 credit"}
             </button>
           )}
         </div>
@@ -486,22 +662,178 @@ function InterviewPrepSection({
           {error}
         </p>
       )}
-      {hasPrep && <InterviewPrepDisplay text={interviewPrep} />}
+      {hasPrep ? (
+        <InterviewPrepDisplay text={interviewPrep} />
+      ) : (
+        <LockedInterviewPrepPreview preview={preview} busy={busy} onGenerate={onGenerate} />
+      )}
     </section>
   );
 }
 
+function EmptyWorkspace({
+  eyebrow,
+  title,
+  body,
+  action
+}: {
+  eyebrow: string;
+  title: string;
+  body: string;
+  action: ReactNode;
+}) {
+  return (
+    <section className="app-card-soft">
+      <p className="app-kicker">{eyebrow}</p>
+      <h3 className="mt-3 text-xl app-heading">{title}</h3>
+      <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--color-text-muted)]">
+        {body}
+      </p>
+      <div className="mt-5">{action}</div>
+    </section>
+  );
+}
+
+function LockedInterviewPrepPreview({
+  preview,
+  busy,
+  onGenerate
+}: {
+  preview: { question: string; why: string; insight: string };
+  busy: boolean;
+  onGenerate: () => void;
+}) {
+  return (
+    <div className="locked-service-preview">
+      <article className="interview-prep-feature">
+        <h4>Free preview</h4>
+        <div className="interview-prep-lines">
+          <div className="interview-prep-line is-question">
+            <span>Question #1</span>
+            <p>{preview.question}</p>
+          </div>
+          <div className="interview-prep-line is-featured">
+            <span>Why recruiters ask it</span>
+            <p>{preview.why}</p>
+          </div>
+          <div className="interview-prep-line is-featured">
+            <span>Preparation insight</span>
+            <p>{preview.insight}</p>
+          </div>
+        </div>
+      </article>
+      <article className="locked-service-card">
+        <p className="app-kicker">Locked until unlock</p>
+        <h4>Full Interview Prep</h4>
+        <ul>
+          <li>Screening, behavioral, role-specific, and weak-area questions</li>
+          <li>Recruiter reasoning, evaluation focus, and proof risks</li>
+          <li>Preparation plan, closing points, and story guidance</li>
+        </ul>
+        <button
+          type="button"
+          onClick={onGenerate}
+          disabled={busy}
+          className="app-button-primary mt-5 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {busy ? "Unlocking..." : "Unlock Full Interview Prep - 1 credit"}
+        </button>
+      </article>
+    </div>
+  );
+}
+
+function LockedPathwayPreview({
+  commonRequirements = [],
+  busy,
+  onUnlock
+}: {
+  commonRequirements?: string[];
+  busy: boolean;
+  onUnlock: () => void;
+}) {
+  const previewItems = [
+    "Transferable skills",
+    "Career matches",
+    "Recruiter expectations",
+    "Skill gaps",
+    "Fastest path"
+  ];
+  return (
+    <article className="locked-service-card">
+      <p className="app-kicker">Career Pathway Analysis</p>
+      <h4>Discover what makes this move credible.</h4>
+      <div className="locked-service-checks">
+        {previewItems.map((item) => (
+          <span key={item}>Included: {item}</span>
+        ))}
+      </div>
+      {commonRequirements.length > 0 && (
+        <div className="mt-5 rounded-[20px] bg-white/80 p-4 shadow-[var(--shadow-inset-soft)]">
+          <span className="block text-[11px] font-black uppercase tracking-[0.14em] text-[#245f9f]">
+            Preview
+          </span>
+          <p className="mt-2 text-sm font-semibold leading-6 text-[var(--color-text-muted)]">
+            {commonRequirements[0]}
+          </p>
+        </div>
+      )}
+      <button
+        type="button"
+        onClick={onUnlock}
+        disabled={busy}
+        className="app-button-primary mt-5 disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        {busy ? "Unlocking..." : "Unlock Analysis - 1 credit"}
+      </button>
+    </article>
+  );
+}
+
 function PathwaySection({
+  title,
   pathway,
   busy,
   error,
   onUnlock
 }: {
-  pathway: PathwayPreview;
+  title: string;
+  pathway: PathwayPreview | null;
   busy: boolean;
   error: string | null;
   onUnlock: () => void;
 }) {
+  if (!pathway) {
+    return (
+      <section className="interview-prep-panel space-y-5">
+        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+          <div>
+            <p className="app-kicker">Career pathway</p>
+            <h3 className="mt-2 text-xl app-heading">Career Pathway Analysis</h3>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--color-text-muted)]">
+              Discover how your experience can translate into {title}, where recruiters may hesitate,
+              and what practical steps make the transition more credible.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onUnlock}
+            disabled={busy}
+            className="app-button-primary shrink-0 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {busy ? "Unlocking..." : "Unlock Analysis - 1 credit"}
+          </button>
+        </div>
+        {error && (
+          <p className="rounded-[18px] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-900">
+            {error}
+          </p>
+        )}
+        <LockedPathwayPreview onUnlock={onUnlock} busy={busy} />
+      </section>
+    );
+  }
+
   return (
     <section className="interview-prep-panel space-y-5">
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
@@ -522,7 +854,7 @@ function PathwaySection({
             disabled={busy}
             className="app-button-primary shrink-0 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {busy ? "Unlocking..." : "Unlock pathway analysis - 1 credit"}
+            {busy ? "Unlocking..." : "Unlock Analysis - 1 credit"}
           </button>
         )}
       </div>
@@ -549,7 +881,6 @@ function PathwaySection({
         </article>
 
         <div className="interview-prep-section-grid">
-          <PathwayList title="Common requirements" items={pathway.commonRequirements} />
           {pathway.full ? (
             <>
               <PathwayList title="Typical requirements" items={pathway.full.typicalRequirements} />
@@ -578,17 +909,7 @@ function PathwaySection({
               <PathwayList title="Suggested next steps" items={pathway.full.suggestedNextSteps} />
             </>
           ) : (
-            <article className="interview-prep-section">
-              <h4>Personalized analysis locked</h4>
-              <div className="interview-prep-lines">
-                <div className="interview-prep-line">
-                  <p>
-                    Unlock the full pathway for personalized proof gaps, practical sequencing,
-                    low-cost next steps, and a realistic role-positioning strategy.
-                  </p>
-                </div>
-              </div>
-            </article>
+            <LockedPathwayPreview onUnlock={onUnlock} busy={busy} commonRequirements={pathway.commonRequirements} />
           )}
         </div>
       </div>
@@ -718,6 +1039,22 @@ function LockedPreview({
   headerSource?: string;
   onRequestUnlock: () => void;
 }) {
+  if (kind === "coverLetter") {
+    return (
+      <div className="saved-document-cover-preview">
+        <p className="app-kicker">Free preview</p>
+        <CoverLetterFirstParagraph text={text} headerSource={headerSource} />
+        <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm font-semibold leading-6 text-[var(--color-text-muted)]">
+            Unlock the full cover letter to review, copy, and export the complete application letter.
+          </p>
+          <button type="button" onClick={onRequestUnlock} className="app-button-primary shrink-0">
+            Unlock Full Cover Letter
+          </button>
+        </div>
+      </div>
+    );
+  }
   return (
     <div
       className="saved-document-lock"
@@ -729,6 +1066,38 @@ function LockedPreview({
       <DocumentPreview text={text} kind={kind} headerSource={headerSource} locked />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-52 bg-gradient-to-t from-[#f5f7fa] via-[#f5f7fa]/92 to-[#f5f7fa]/10" />
     </div>
+  );
+}
+
+function CoverLetterFirstParagraph({
+  text,
+  headerSource
+}: {
+  text: string;
+  headerSource?: string;
+}) {
+  const header = headerSource ? extractCandidateHeader(headerSource) : {};
+  const [firstParagraph] = ensureGreeting(normalizeCoverLetterParagraphs(sanitizeGeneratedText(text)))
+    .filter((paragraph) => !/^dear\b/i.test(paragraph));
+  return (
+    <article className="document-card saved-document-page saved-document-page-letter min-h-0">
+      {(header.name || header.contact) && (
+        <header className="mb-6 border-b border-[#2f3a4a]/20 pb-4">
+          {header.name && (
+            <h4 className="text-[20px] font-bold leading-tight tracking-normal text-[#111827]">
+              {header.name}
+            </h4>
+          )}
+          {header.contact && (
+            <p className="mt-2 text-[11.5px] leading-5 text-[#475569]">{header.contact}</p>
+          )}
+        </header>
+      )}
+      <p className="mb-4 text-[12px] text-[#64748b]">{formatToday()}</p>
+      <p className="text-[13px] font-normal leading-[1.65] text-[#1f2937]">
+        {firstParagraph ?? "Your opening paragraph will preview here once the cover letter is generated."}
+      </p>
+    </article>
   );
 }
 

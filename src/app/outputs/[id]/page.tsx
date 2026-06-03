@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import AccountCreditIndicator from "@/components/AccountCreditIndicator";
-import OpportunityTrackingPanel from "@/components/OpportunityTrackingPanel";
 import SavedOutputDocuments from "@/components/SavedOutputDocuments";
 import { normalizeSavedApplicationTitle } from "@/lib/applicationMeta";
 import { readOpportunityTracking } from "@/lib/opportunityTracking";
@@ -87,12 +86,12 @@ export default async function SavedOutputPage({
         </div>
       </header>
 
-      <OpportunityTrackingPanel outputId={data.id} initialTracking={tracking} />
-
       <SavedOutputDocuments
         outputId={data.id}
         title={displayTitle}
         companyName={data.company_name}
+        opportunityStatus={tracking.status}
+        tracking={tracking}
         resumeText={data.resume_text ?? ""}
         coverLetterText={data.cover_letter_text ?? ""}
         sourceResumeText={data.resume_text ?? null}

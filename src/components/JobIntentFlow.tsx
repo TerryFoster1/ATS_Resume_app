@@ -42,85 +42,34 @@ type GoalConfig = {
 
 const GOALS: GoalConfig[] = [
   {
-    id: "firstResume",
-    title: "Build My First Resume",
-    description: "Find useful experience even if you have never written a resume.",
-    eyebrow: "Guided discovery",
-    contextCopy:
-      "Career Ladder will help you identify responsibility, service, school, community, and achievement evidence before structuring it professionally.",
-    experienceMode: "none",
-    startLabel: "Build First Resume"
-  },
-  {
     id: "careerDiscovery",
-    title: "Discover Career Direction",
-    description: "Explore strengths, preferences, and realistic adjacent paths.",
-    eyebrow: "Career discovery",
+    title: "Plan My Career",
+    description: "Career Coach, Career Discovery, and Career Pathways.",
+    eyebrow: "Career strategy",
     contextCopy:
       "Career Ladder can explore your interests, strengths, and work preferences without pretending a quiz can predict your future.",
     experienceMode: "none",
-    startLabel: "Explore Direction"
+    startLabel: "Start"
   },
   {
     id: "resume",
-    title: "Tailor My Resume",
-    description: "Position your experience for a specific role.",
-    eyebrow: "Resume positioning",
+    title: "Apply for a Position",
+    description: "Resume tailoring, cover letters, and job analysis.",
+    eyebrow: "Application strategy",
     contextCopy:
       "The role context helps Career Ladder understand what the recruiter is likely trying to prove before it rewrites your resume.",
     experienceMode: "recommended",
-    startLabel: "Continue to Resume Tailoring"
-  },
-  {
-    id: "resumeCoverLetter",
-    title: "Resume + Cover Letter",
-    description: "Create a tailored application package.",
-    eyebrow: "Application package",
-    contextCopy:
-      "The posting helps connect your resume and cover letter to the same hiring expectations, not two disconnected documents.",
-    experienceMode: "required",
-    startLabel: "Continue to Application Package"
+    startLabel: "Start"
   },
   {
     id: "interviewPrep",
     title: "Prepare for an Interview",
-    description: "Prepare for the questions a recruiter is most likely to test.",
+    description: "Interview prep, mock interviews, and recruiter feedback.",
     eyebrow: "Interview readiness",
     contextCopy:
       "Paste the posting to generate more realistic recruiter-style interview questions and sharper prep notes.",
     experienceMode: "recommended",
-    startLabel: "Generate Interview Prep"
-  },
-  {
-    id: "mockInterview",
-    title: "Practice a Mock Interview",
-    description: "Answer one question at a time and tighten your framing.",
-    eyebrow: "Practice room",
-    contextCopy:
-      "The role context helps the mock interview ask questions that feel closer to a real recruiter screen.",
-    experienceMode: "recommended",
-    startLabel: "Start Mock Interview"
-  },
-  {
-    id: "careerPathway",
-    title: "Explore a Career Path",
-    description: "Map transferable strengths, likely gaps, and next steps.",
-    eyebrow: "Pathway analysis",
-    contextCopy:
-      "Paste the posting to compare your current experience against real hiring expectations for this path.",
-    experienceMode: "recommended",
-    startLabel: "Create Pathway Preview"
-  },
-  {
-    id: "tracking",
-    title: "Track Applications & Offers",
-    description: "Manage opportunities, interviews, and application progress.",
-    eyebrow: "Pipeline beta",
-    contextCopy:
-      "Track the role as an opportunity so your materials, prep, and next steps stay connected.",
-    experienceMode: "none",
-    startLabel: "Open Dashboard",
-    beta: true
+    startLabel: "Start"
   }
 ];
 
@@ -288,6 +237,15 @@ export default function JobIntentFlow({
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
+    const mode = params.get("mode");
+    if (mode === "firstResume") {
+      params.delete("mode");
+      const next = `${window.location.pathname}?${params.toString()}`.replace(/\?$/, "");
+      window.history.replaceState(null, "", next);
+      setSelectedGoal("firstResume");
+      setStage("firstResume");
+      return;
+    }
     const intent = params.get("intent") as JobIntent | null;
     if (!intent || !GOALS.some((item) => item.id === intent)) return;
     setSelectedGoal(intent);
@@ -348,16 +306,15 @@ export default function JobIntentFlow({
     return (
       <section className="app-screen-card space-y-7">
         <div className="max-w-3xl">
-          <p className="app-kicker">Career services</p>
+          <p className="app-kicker">Welcome back to Career Ladder</p>
           <h2 className="mt-3 text-4xl app-heading">What would you like help with?</h2>
           <p className="mt-4 text-base leading-7 text-[var(--color-text-muted)]">
-            Choose the outcome first. Career Ladder will ask for only the role
-            and experience context needed to interpret the opportunity with a
-            recruiter lens.
+            Choose one primary goal. Career Ladder will ask only for the context needed
+            to guide your next step with a recruiter-aware lens.
           </p>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-4 lg:grid-cols-3">
           {GOALS.map((goal) => (
             <button
               key={goal.id}
@@ -365,13 +322,13 @@ export default function JobIntentFlow({
               onClick={() => continueFromGoal(goal.id)}
               className="app-mini-card group min-h-[13rem] text-left transition hover:-translate-y-0.5 hover:shadow-[0_20px_42px_rgba(17,35,63,0.1)]"
             >
-              <span className="app-kicker">{goal.beta ? "Beta service" : goal.eyebrow}</span>
+              <span className="app-kicker">{goal.eyebrow}</span>
               <strong className="mt-3 block text-xl app-heading">{goal.title}</strong>
               <span className="mt-3 block text-sm leading-6 text-[var(--color-text-muted)]">
                 {goal.description}
               </span>
               <span className="mt-5 inline-flex text-sm font-black text-[#245f9f]">
-                {goal.id === "tracking" ? "Open workspace" : "Choose this path"}
+                Start
               </span>
             </button>
           ))}

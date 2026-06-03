@@ -6,66 +6,78 @@ type Step = "intro" | "intake" | "intent" | "resume" | "job" | "analysis" | "gen
 
 const VALID_STEPS: Step[] = ["intro", "intake", "intent", "resume", "job", "analysis", "generate", "results"];
 
-const FLOW = [
-  "Choose the career service you need",
-  "Add the role or opportunity context",
-  "Translate your experience into hiring language",
-  "Build a reusable career workspace"
+const SOCIAL_PROOF_ITEMS = [
+  { value: "2,300+", label: "Career Profiles Created", note: "Demo metric for launch layout." },
+  { value: "7,800+", label: "Resumes Tailored", note: "Demo metric for launch layout." },
+  { value: "12,000+", label: "Interview Questions Generated", note: "Demo metric for launch layout." },
+  { value: "150+", label: "Career Paths Explored", note: "Demo metric for launch layout." }
 ];
 
-const LADDER_STAGES = [
+const OUTCOME_CARDS = [
   {
-    title: "Discover Your Direction",
-    body: "Use Career Coach and discovery flows to explore roles, strengths, preferences, income needs, lifestyle constraints, and realistic pathways."
+    icon: "01",
+    title: "Understand what's holding you back",
+    body: "Identify resume gaps, positioning problems, and missing opportunities."
   },
   {
-    title: "Build Your Professional Identity",
-    body: "Use a living career profile to organize experience, projects, credentials, and achievements before generating tailored outputs."
+    icon: "02",
+    title: "Find career paths that fit you",
+    body: "Discover realistic options based on your experience and goals."
   },
   {
-    title: "Understand How Recruiters Think",
-    body: "Prepare for interviews, screenings, and weak-area questions with guidance built around the actual role."
+    icon: "03",
+    title: "Create resumes that get seen",
+    body: "Tailor your experience to the role and the people reviewing it."
   },
   {
-    title: "Transition Into New Opportunities",
-    body: "Map undervalued experience into recruiter-readable evidence for adjacent roles and career changes."
-  },
-  {
-    title: "Grow Throughout Your Career",
-    body: "Keep opportunities, applications, preparation, and future learning decisions connected over time."
+    icon: "04",
+    title: "Prepare for interviews with confidence",
+    body: "Practice recruiter questions and learn what employers actually care about."
   }
 ];
 
-const VALUE_PROPS = [
+const HOW_IT_WORKS = [
   {
-    title: "Interprets real experience",
-    body: "Career Ladder looks for the professional functions beneath your background, from customer trust and operations to coordination and judgment."
+    title: "Add your resume",
+    body: "Upload an existing resume or create one from scratch."
   },
   {
-    title: "Builds around recruiter expectations",
-    body: "Each workflow starts from the role, then helps you prepare the evidence, language, and stories a hiring team is likely to test."
+    title: "Get your personalized plan",
+    body: "We will identify opportunities, gaps, strengths, and next steps."
   },
   {
-    title: "Grows with your career",
-    body: "Your master career profile becomes reusable context for resumes, interviews, pathways, and future opportunity tracking."
+    title: "Take action with confidence",
+    body: "Apply with stronger materials and prepare for the interview process."
   }
 ];
 
-const TRANSFERABLE_EXAMPLES = [
+const TESTIMONIALS = [
   {
-    from: "Chef",
-    to: "Operations Coordinator",
-    skills: ["Inventory planning", "Vendor coordination", "Team scheduling", "Quality control"]
+    name: "Sarah M.",
+    role: "Marketing Manager",
+    quote:
+      "I had been applying for months without responses. Career Ladder showed me what was missing and helped me finally get interviews.",
+    problem: "No callbacks",
+    changed: "Clearer resume positioning",
+    result: "Interview momentum"
   },
   {
-    from: "Retail Manager",
-    to: "Customer Success",
-    skills: ["Escalation handling", "Customer retention", "Team coaching", "Follow-through"]
+    name: "James T.",
+    role: "Project Coordinator",
+    quote:
+      "I did not realize my experience could transfer into another industry. The pathway recommendations completely changed my job search.",
+    problem: "Stuck in one path",
+    changed: "Transferable skills surfaced",
+    result: "New direction"
   },
   {
-    from: "Hospitality",
-    to: "Account Management",
-    skills: ["Relationship building", "Service recovery", "Prioritization", "Client communication"]
+    name: "Lisa R.",
+    role: "Operations Specialist",
+    quote:
+      "The interview preparation helped me walk into the interview feeling ready instead of guessing.",
+    problem: "Interview anxiety",
+    changed: "Recruiter-style practice",
+    result: "More confidence"
   }
 ];
 
@@ -98,227 +110,238 @@ function WizardShell({ initialStep }: { initialStep: Step }) {
 
 function LandingPage() {
   return (
-    <main className="space-y-8 sm:space-y-10">
-      <ProductHeader />
+    <main className="homepage-redesign space-y-8 sm:space-y-10">
+      <LandingHeader />
 
-      <section className="app-screen-card homepage-hero overflow-hidden p-0">
-        <div className="grid gap-0 lg:grid-cols-[1.02fr_0.98fr]">
-          <div className="p-6 sm:p-10 lg:p-12">
-            <div className="flex flex-wrap gap-2">
-              <span className="app-chip">Career intelligence platform</span>
-              <span className="app-chip">Recruiter-aware guidance</span>
-              <span className="app-chip">Transferable skill translation</span>
-            </div>
-
-            <h2 className="mt-7 max-w-3xl text-4xl font-black leading-tight text-[var(--color-text-primary)] sm:text-6xl">
-              The platform that grows with your career.
-            </h2>
-            <p className="mt-5 max-w-2xl text-base leading-8 text-[var(--color-text-primary)]/74 sm:text-lg">
-              Career Ladder helps you discover direction, translate your
-              experience, tailor career materials, prepare for interviews, and
-              keep building a professional identity that moves with you.
-            </p>
-
-            <div className="mt-8 flex flex-wrap items-center gap-3">
-              <Link href="/?step=intake" className="app-button-primary text-base">
-                Start building your career
-              </Link>
-              <Link href="/career-coach" className="app-button-ghost text-base">
-                Try Career Coach
-              </Link>
-              <Link href="/career-pathways" className="app-button-ghost text-base">
-                Explore career pathways
-              </Link>
-            </div>
-
-            <ol className="mt-9 hidden gap-3 sm:grid sm:grid-cols-2">
-              {FLOW.map((item, index) => (
-                <li key={item} className="app-soft-band flex items-center gap-3 px-4 py-3">
-                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--color-accent-purple)] text-xs font-black text-white">
-                    {index + 1}
-                  </span>
-                  <span className="text-sm font-bold text-[var(--color-text-primary)]">
-                    {item}
-                  </span>
-                </li>
-              ))}
-            </ol>
+      <section className="cl-v2-hero">
+        <div className="cl-v2-hero-copy">
+          <p className="cl-v2-pill">Clarity. Direction. Confidence.</p>
+          <h2>
+            Not getting interviews?
+            <span>Let's figure out why.</span>
+          </h2>
+          <p>
+            Most job seekers never learn how modern hiring actually works. Career Ladder
+            helps you identify what's holding you back, uncover opportunities you may be
+            overlooking, and prepare for the jobs you actually want.
+          </p>
+          <div className="cl-v2-actions">
+            <Link href="/?step=resume" className="app-button-primary text-base">
+              Upload My Resume
+            </Link>
+            <Link href="/?step=intake&mode=firstResume" className="app-button-ghost text-base">
+              Create My First Resume
+            </Link>
           </div>
-
-          <div className="hero-visual-zone p-5 sm:p-8 lg:p-10">
-            <ProductPreview />
+          <Link href="/career-coach" className="cl-v2-text-link">
+            Not sure what you want to do? Try Career Coach
+          </Link>
+          <div className="cl-v2-trust-row">
+            <span>Free to get started</span>
+            <span>No credit card required</span>
+            <span>Save your profile forever</span>
           </div>
+        </div>
+        <BeforeAfterResumeVisual />
+      </section>
+
+      <section className="cl-v2-outcomes" id="resources">
+        <div className="cl-v2-section-heading is-centered">
+          <h2>Everything you need to move forward.</h2>
+        </div>
+        <div className="cl-v2-outcome-grid">
+          {OUTCOME_CARDS.map((item) => (
+            <article key={item.title}>
+              <span>{item.icon}</span>
+              <h3>{item.title}</h3>
+              <p>{item.body}</p>
+            </article>
+          ))}
         </div>
       </section>
 
-      <section className="career-ladder-section">
-        <div className="career-ladder-intro">
-          <p className="app-section-label">Every rung of the ladder</p>
-          <h2 className="mt-3 text-3xl app-heading sm:text-4xl">
-            From first resume to career transition.
-          </h2>
-          <p className="mt-4 max-w-3xl text-base leading-7 text-[var(--color-text-muted)]">
-            Career Ladder is designed as a long-term career workspace, not a
-            one-time document generator. Each service uses the same role context
-            and career memory so your preparation becomes more connected over time.
-          </p>
+      <section className="cl-v2-metrics">
+        <h2>Helping job seekers take their next step.</h2>
+        <p className="cl-v2-metrics-note">
+          Demo activity metrics for launch QA. Replace with live product data before using as verified claims.
+        </p>
+        <div className="cl-v2-metric-grid">
+          {SOCIAL_PROOF_ITEMS.map((item) => (
+            <article key={item.label}>
+              <strong>{item.value}</strong>
+              <span>{item.label}</span>
+              <p>{item.note}</p>
+            </article>
+          ))}
         </div>
+      </section>
 
-        <div className="career-rung-list">
-          {LADDER_STAGES.map((stage, index) => (
-            <article key={stage.title} className="career-rung">
-              <span>{String(index + 1).padStart(2, "0")}</span>
+      <section className="cl-v2-steps" id="how-it-works">
+        <div className="cl-v2-section-heading is-centered">
+          <h2>Your next opportunity in three simple steps.</h2>
+        </div>
+        <div className="cl-v2-step-grid">
+          {HOW_IT_WORKS.map((step, index) => (
+            <article key={step.title}>
+              <span>{index + 1}</span>
               <div>
-                <h3>{stage.title}</h3>
-                <p>{stage.body}</p>
+                <h3>{step.title}</h3>
+                <p>{step.body}</p>
               </div>
             </article>
           ))}
         </div>
       </section>
 
-      <section id="example-transformation" className="grid gap-4 lg:grid-cols-[0.92fr_1.08fr]">
-        <TransformationVisual />
-        <div className="transferable-story-panel">
-          <p className="app-section-label">Transferable skill intelligence</p>
-          <h2 className="mt-3 text-3xl app-heading">
-            Your experience may be more valuable than your resume makes it look.
-          </h2>
-          <p className="mt-4 text-sm leading-7 text-[var(--color-text-muted)]">
-            Career Ladder does not ask users to already know hiring-market
-            language. It helps interpret real work, responsibilities, and
-            pressure-tested judgment into recruiter-readable evidence.
-          </p>
-
-          <div className="mt-6 grid gap-3">
-            {TRANSFERABLE_EXAMPLES.map((item) => (
-              <article key={item.from} className="transferable-example-card">
-                <div className="transferable-path">
-                  <strong>{item.from}</strong>
-                  <span aria-hidden>to</span>
-                  <strong>{item.to}</strong>
-                </div>
-                <div className="transferable-skills">
-                  {item.skills.map((skill) => (
-                    <span key={skill}>{skill}</span>
-                  ))}
-                </div>
-              </article>
-            ))}
-          </div>
+      <section className="cl-v2-stories" id="success-stories">
+        <div className="cl-v2-section-heading is-centered">
+          <h2>Real stories from real job seekers.</h2>
         </div>
+        <SuccessStoriesCarousel />
       </section>
 
-      <section className="grid gap-4 md:grid-cols-3">
-        {VALUE_PROPS.map((item) => (
-          <article key={item.title} className="app-mini-card">
-            <h3 className="text-lg font-black text-[var(--color-text-primary)]">
-              {item.title}
-            </h3>
-            <p className="mt-3 text-sm leading-6 text-[var(--color-text-muted)]">
-              {item.body}
-            </p>
-          </article>
-        ))}
+      <section className="cl-v2-final-cta">
+        <h2>Your next opportunity starts now.</h2>
+        <p>
+          Upload your resume or create one from scratch and start building a profile that grows with you.
+        </p>
+        <div className="cl-v2-actions">
+          <Link href="/?step=resume" className="app-button-primary text-base">
+            Upload My Resume
+          </Link>
+          <Link href="/?step=intake&mode=firstResume" className="app-button-ghost text-base">
+            Create My First Resume
+          </Link>
+        </div>
+        <small>Free to get started.</small>
       </section>
     </main>
   );
 }
 
-function ProductPreview() {
+function LandingHeader() {
   return (
-    <div className="hero-intelligence mx-auto max-w-xl">
-      <div className="hero-insight-card">
-        <div>
-          <p className="hero-label">Career intelligence</p>
-          <h3>Hidden experience translated</h3>
-        </div>
-        <span>Profile-first</span>
+    <header className="cl-v2-header">
+      <Link href="/" className="cl-v2-brand">
+        <span aria-hidden>CL</span>
+        <strong>Career Ladder</strong>
+      </Link>
+      <nav aria-label="Homepage navigation">
+        <a href="#how-it-works">How It Works</a>
+        <a href="#success-stories">Success Stories</a>
+        <a href="#resources">Resources</a>
+        <Link href="/pricing">Pricing</Link>
+      </nav>
+      <div className="cl-v2-header-actions">
+        <Link href="/auth">Log in</Link>
+        <Link href="/?step=resume" className="cl-v2-header-cta">
+          Get Started Free
+        </Link>
       </div>
+    </header>
+  );
+}
 
-      <div className="hero-doc-stack" aria-label="Career intelligence preview">
-        <article className="hero-document hero-document-before">
-          <div className="hero-doc-topline">
-            <span>Experience</span>
-            <span>User language</span>
-          </div>
-          <h4>Chef & Shift Lead</h4>
-          <p>
-            Ran busy services, ordered supplies, trained new staff, handled
-            timing, quality, and team communication.
-          </p>
-          <div className="hero-section-title">Raw signal</div>
-          <ul>
-            <li>Coordinated people, materials, and timing</li>
-            <li>Maintained service quality under pressure</li>
-            <li>Balanced cost, inventory, and customer experience</li>
-          </ul>
-        </article>
-
-        <div className="hero-transform-rail" aria-hidden>
-          <span>translated into hiring language</span>
-        </div>
-
-        <article className="hero-document hero-document-after">
-          <div className="hero-doc-topline">
-            <span>Positioned</span>
-            <span>Recruiter-readable evidence</span>
-          </div>
-          <h4>Operations & Team Coordination</h4>
-          <p>
-            Coordinated daily operations, inventory planning, team scheduling,
-            vendor communication, and quality control in high-pressure service environments.
-          </p>
-          <div className="hero-section-title">Career pathways</div>
-          <ul>
-            <li>Operations coordinator</li>
-            <li>Customer success associate</li>
-            <li>Project coordination support</li>
-          </ul>
-        </article>
+function BeforeAfterResumeVisual() {
+  const beforeItems = ["Missing key skills", "Difficult to scan", "Generic positioning", "Easy to overlook"];
+  const afterItems = ["Highlights relevant experience", "ATS friendly", "Recruiter readable", "Role specific"];
+  return (
+    <div className="cl-v2-comparison" aria-label="Before and after resume comparison">
+      <ResumePreviewCard
+        label="Before"
+        title="Average Resume"
+        tone="before"
+        items={beforeItems}
+      />
+      <div className="cl-v2-comparison-arrow" aria-hidden>
+        <span>to</span>
       </div>
-
-      <div className="hero-signal-grid">
-        <article>
-          <p>Recruiter lens</p>
-          <strong>What proof will they test?</strong>
-          <span>Map the role to evidence, gaps, and interview themes.</span>
-        </article>
-        <article>
-          <p>Career memory</p>
-          <strong>Master profile context</strong>
-          <span>Reuse experience across resumes, pathways, and mock interviews.</span>
-        </article>
-      </div>
+      <ResumePreviewCard
+        label="After Career Ladder"
+        title="Career Ladder Resume"
+        tone="after"
+        items={afterItems}
+      />
     </div>
   );
 }
 
-function TransformationVisual() {
+function ResumePreviewCard({
+  label,
+  title,
+  tone,
+  items
+}: {
+  label: string;
+  title: string;
+  tone: "before" | "after";
+  items: string[];
+}) {
   return (
-    <article className="transformation-visual-card">
-      <div className="transformation-photo" aria-label="Recruiter reviewing resume during an interview">
-        <img
-          src="/career-ladder-recruiter-interview.jpg"
-          alt="Recruiter holding a resume during an interview conversation"
-        />
-        <div className="transformation-photo-scrim" aria-hidden />
-        <div className="transformation-photo-note">
-          <p>Recruiter lens</p>
-          <strong>Real experience becomes clearer when it is translated into the language hiring teams recognize.</strong>
+    <article className={`cl-v2-resume-card is-${tone}`}>
+      <span className="cl-v2-resume-label">{label}</span>
+      <div className="cl-v2-paper">
+        <div className="cl-v2-paper-line is-short" />
+        <div className="cl-v2-paper-line" />
+        <div className="cl-v2-paper-line" />
+        <div className="cl-v2-paper-line is-muted" />
+        <div className="cl-v2-paper-columns">
+          <div>
+            <div className="cl-v2-paper-line" />
+            <div className="cl-v2-paper-line is-short" />
+          </div>
+          <div>
+            <div className="cl-v2-paper-line" />
+            <div className="cl-v2-paper-line is-short" />
+          </div>
         </div>
       </div>
-      <div className="transformation-visual-copy">
-        <p className="app-section-label">Example transformation</p>
-        <h3 className="mt-3 text-2xl app-heading">
-          From overlooked work to credible career evidence.
-        </h3>
-        <p className="mt-3 text-sm leading-6 text-[var(--color-text-muted)]">
-          Career Ladder helps users see the professional function inside their
-          background without inventing claims or inflating titles.
-        </p>
-      </div>
+      <h3>{title}</h3>
+      <ul>
+        {items.map((item) => (
+          <li key={item}>{item}</li>
+        ))}
+      </ul>
     </article>
+  );
+}
+
+function SuccessStoriesCarousel() {
+  return (
+    <div className="cl-v2-story-carousel">
+      {TESTIMONIALS.map((story) => (
+        <article key={story.name}>
+          <span className="cl-v2-quote-mark">"</span>
+          <p>{story.quote}</p>
+          <dl>
+            <div>
+              <dt>Problem</dt>
+              <dd>{story.problem}</dd>
+            </div>
+            <div>
+              <dt>What changed</dt>
+              <dd>{story.changed}</dd>
+            </div>
+            <div>
+              <dt>Result</dt>
+              <dd>{story.result}</dd>
+            </div>
+          </dl>
+          <footer>
+            <span>{story.name.slice(0, 1)}</span>
+            <div>
+              <strong>{story.name}</strong>
+              <small>{story.role}</small>
+            </div>
+          </footer>
+        </article>
+      ))}
+      <div className="cl-v2-story-dots" aria-hidden>
+        <span />
+        <span />
+        <span />
+      </div>
+    </div>
   );
 }
 
