@@ -1,9 +1,11 @@
 ﻿"use client";
 
-import { useRef, useState } from "react";
+import Link from "next/link";
+import { useMemo, useRef, useState } from "react";
 import LoadingIndicator from "@/components/LoadingIndicator";
 import StepIndicator from "@/components/StepIndicator";
 import { DocumentStackGraphic } from "@/components/VisualDecor";
+import { extractTransferableSkillProfile } from "@/lib/transferableSkillExtraction";
 
 interface Props {
   value: string;
@@ -28,6 +30,11 @@ export default function StepResume({ value, onChange, onNext }: Props) {
   );
   const [warning, setWarning] = useState<string | null>(null);
   const [tooShort, setTooShort] = useState(false);
+  const resumeText = value.trim();
+  const insightPreview = useMemo(
+    () => buildUploadInsightPreview(resumeText),
+    [resumeText]
+  );
 
   function handleFileSelection(file: File | null) {
     setSelectedFile(file);
@@ -183,6 +190,13 @@ export default function StepResume({ value, onChange, onNext }: Props) {
           </div>
         </div>
 
+        {hasUploadedResume && resumeText.length >= 50 && (
+          <PostUploadInsightPreview
+            preview={insightPreview}
+            onApply={continueToJob}
+          />
+        )}
+
         <div className="app-work-panel p-5 sm:p-6">
           <div>
             <label className="block text-sm font-black text-[var(--color-text-primary)]">
@@ -222,6 +236,194 @@ export default function StepResume({ value, onChange, onNext }: Props) {
       </div>
     </section>
   );
+}
+
+type UploadInsightPreview = {
+  strengths: string[];
+  employerValue: string[];
+  frictionPoints: string[];
+};
+
+function PostUploadInsightPreview({
+  preview,
+  onApply
+}: {
+  preview: UploadInsightPreview;
+  onApply: () => void;
+}) {
+  return (
+    <section className="app-feature-panel space-y-5">
+      <div className="max-w-3xl">
+        <p className="app-kicker">Initial read</p>
+        <h3 className="mt-2 text-2xl app-heading">We&apos;ve reviewed your experience.</h3>
+        <p className="mt-2 text-sm leading-6 text-[var(--color-text-muted)]">
+          Here&apos;s what Career Ladder noticed before you choose your next step.
+          These are early signals from your resume, not final claims.
+        </p>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-3">
+        <InsightColumn title="Strengths we found" items={preview.strengths} tone="strength" />
+        <InsightColumn title="Experience employers may value" items={preview.employerValue} tone="value" />
+        <InsightColumn title="Possible friction points" items={preview.frictionPoints} tone="risk" />
+      </div>
+
+      <div className="rounded-[24px] bg-white p-4 shadow-[var(--shadow-inset-soft)]">
+        <p className="app-kicker">Relevant next steps</p>
+        <div className="mt-4 grid gap-3 lg:grid-cols-3">
+          <NextStepCard
+            title="Plan My Career"
+            body="Use these signals to explore roles where your existing experience may already translate."
+            href="/career-coach"
+          />
+          <NextStepCard
+            title="Apply For A Position"
+            body="Paste a job posting next so Career Ladder can compare this evidence against real recruiter expectations."
+            onClick={onApply}
+            primary
+          />
+          <NextStepCard
+            title="Prepare For An Interview"
+            body="Use your resume evidence to prepare stronger examples once you choose a target role."
+            onClick={onApply}
+          />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function InsightColumn({
+  title,
+  items,
+  tone
+}: {
+  title: string;
+  items: string[];
+  tone: "strength" | "value" | "risk";
+}) {
+  const toneClass =
+    tone === "risk"
+      ? "border-orange-200 bg-orange-50/70"
+      : tone === "value"
+        ? "border-purple-200 bg-purple-50/70"
+        : "border-emerald-200 bg-emerald-50/70";
+  return (
+    <article className={`rounded-[24px] border px-4 py-4 ${toneClass}`}>
+      <h4 className="text-sm font-black text-[var(--color-text-primary)]">{title}</h4>
+      <ul className="mt-3 space-y-2">
+        {items.map((item) => (
+          <li key={item} className="flex gap-2 text-sm leading-6 text-[var(--color-text-muted)]">
+            <span aria-hidden className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-accent-purple)]" />
+            <span>{item}</span>
+          </li>
+        ))}
+      </ul>
+    </article>
+  );
+}
+
+function NextStepCard({
+  title,
+  body,
+  href,
+  onClick,
+  primary = false
+}: {
+  title: string;
+  body: string;
+  href?: string;
+  onClick?: () => void;
+  primary?: boolean;
+}) {
+  const className = primary
+    ? "rounded-[20px] bg-[var(--color-accent-purple)] px-4 py-4 text-left text-white shadow-[0_18px_46px_rgba(107,80,255,0.22)]"
+    : "rounded-[20px] border border-[var(--color-border)] bg-white px-4 py-4 text-left shadow-[var(--shadow-inset-soft)]";
+  const content = (
+    <>
+      <strong className={primary ? "block text-base font-black text-white" : "block text-base font-black text-[var(--color-text-primary)]"}>
+        {title}
+      </strong>
+      <span className={primary ? "mt-2 block text-sm leading-6 text-white/78" : "mt-2 block text-sm leading-6 text-[var(--color-text-muted)]"}>
+        {body}
+      </span>
+    </>
+  );
+  if (href) {
+    return (
+      <Link href={href} className={className}>
+        {content}
+      </Link>
+    );
+  }
+  return (
+    <button type="button" onClick={onClick} className={className}>
+      {content}
+    </button>
+  );
+}
+
+function buildUploadInsightPreview(text: string): UploadInsightPreview {
+  if (text.trim().length < 50) {
+    return {
+      strengths: [
+        "Your resume may contain useful experience signals once more detail is available.",
+        "Career Ladder can look for responsibility, service, coordination, and communication evidence."
+      ],
+      employerValue: [
+        "This could reveal transferable skills once the resume includes concrete examples."
+      ],
+      frictionPoints: [
+        "We may want to clarify your strongest responsibilities.",
+        "Your resume may need more role-specific examples."
+      ]
+    };
+  }
+
+  const extraction = extractTransferableSkillProfile(text);
+  const strengths = [
+    ...extraction.professionalFunctions.map((item) => item.functionName),
+    ...extraction.explicitSkills.map((item) => item.skill)
+  ];
+  const employerValue = [
+    ...extraction.implicitSkills.map((item) => item.skill),
+    ...extraction.transferableSkills
+  ];
+  const frictionPoints = extraction.recruiterConcerns.map(
+    (item) => `We may want to clarify: ${item}`
+  );
+
+  return {
+    strengths: takeOrFallback(strengths, [
+      "Customer-facing or service experience may be present.",
+      "Communication and follow-through may be worth strengthening.",
+      "Your resume suggests practical responsibility that may need clearer framing."
+    ], 5),
+    employerValue: takeOrFallback(employerValue, [
+      "Relationship building",
+      "Problem solving",
+      "Process ownership",
+      "Communication experience"
+    ], 5),
+    frictionPoints: takeOrFallback(frictionPoints, [
+      "Your resume may not clearly show measurable results.",
+      "Some roles may expect specific tools or credentials.",
+      "Your experience may need stronger role-specific positioning.",
+      "Interview stories may need clearer examples."
+    ], 4)
+  };
+}
+
+function takeOrFallback(values: string[], fallback: string[], limit: number): string[] {
+  const cleaned = values
+    .map((value) => value.replace(/\s+/g, " ").trim())
+    .filter(Boolean);
+  const unique: string[] = [];
+  for (const value of cleaned) {
+    if (unique.some((item) => item.toLowerCase() === value.toLowerCase())) continue;
+    unique.push(value);
+  }
+  return (unique.length ? unique : fallback).slice(0, limit);
 }
 
 
