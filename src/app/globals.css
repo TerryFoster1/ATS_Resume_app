@@ -1145,14 +1145,14 @@ body {
 
   .cl-v2-hero {
     display: grid;
-    gap: clamp(22px, 3.4vw, 42px);
-    align-items: center;
-    padding: clamp(18px, 2.8vw, 34px) 2px 2px;
+    gap: clamp(18px, 2.5vw, 30px);
+    align-items: start;
+    padding: clamp(12px, 2vw, 24px) 2px 2px;
   }
 
-  @media (min-width: 1020px) {
+  @media (min-width: 1100px) {
     .cl-v2-hero {
-      grid-template-columns: minmax(0, 0.84fr) minmax(580px, 1fr);
+      grid-template-columns: minmax(0, 1.05fr) minmax(500px, 0.95fr);
     }
   }
 
@@ -1170,11 +1170,11 @@ body {
   }
 
   .cl-v2-hero-copy h2 {
-    max-width: 680px;
+    max-width: 760px;
     color: #080930;
-    font-size: clamp(3rem, 4.45vw, 4.35rem);
+    font-size: clamp(2.75rem, 3.75vw, 3.95rem);
     font-weight: 950;
-    line-height: 1;
+    line-height: 0.98;
     letter-spacing: 0;
   }
 
@@ -1184,23 +1184,23 @@ body {
   }
 
   .cl-v2-hero-copy > p:not(.cl-v2-pill) {
-    margin-top: 16px;
-    max-width: 640px;
+    margin-top: 12px;
+    max-width: 720px;
     color: rgba(8, 9, 48, 0.78);
-    font-size: clamp(1rem, 1.4vw, 1.12rem);
+    font-size: clamp(0.98rem, 1.18vw, 1.08rem);
     font-weight: 650;
-    line-height: 1.65;
+    line-height: 1.52;
   }
 
   .cl-v2-actions {
-    margin-top: 22px;
+    margin-top: 18px;
     display: flex;
     flex-wrap: wrap;
-    gap: 14px;
+    gap: 12px;
   }
 
   .cl-v2-text-link {
-    margin-top: 14px;
+    margin-top: 10px;
     display: inline-flex;
     color: #4b2cff;
     font-size: 14px;
@@ -1208,10 +1208,10 @@ body {
   }
 
   .cl-v2-trust-row {
-    margin-top: 18px;
+    margin-top: 12px;
     display: flex;
     flex-wrap: wrap;
-    gap: 14px 18px;
+    gap: 10px 16px;
   }
 
   .cl-v2-trust-row span {
@@ -1236,14 +1236,15 @@ body {
 
   .cl-v2-translation-visual {
     display: grid;
-    gap: 12px;
-    max-width: 760px;
+    gap: 8px;
+    max-width: 720px;
     justify-self: end;
+    align-self: start;
   }
 
   @media (min-width: 920px) {
     .cl-v2-translation-visual {
-      grid-template-columns: minmax(0, 0.9fr) 32px minmax(0, 1.16fr) 32px minmax(0, 0.94fr);
+      grid-template-columns: minmax(0, 0.9fr) 28px minmax(0, 1.14fr) 28px minmax(0, 0.94fr);
       grid-template-areas:
         "source flow skills flow2 paths"
         "insight insight insight insight insight";
@@ -1279,13 +1280,13 @@ body {
     border-radius: 18px;
     border: 1px solid rgba(196, 213, 229, 0.78);
     background: rgba(255, 255, 255, 0.92);
-    min-height: 255px;
-    padding: 15px;
+    min-height: 224px;
+    padding: 13px;
     box-shadow: 0 18px 46px rgba(17, 35, 63, 0.09);
   }
 
   .cl-v2-translation-card.is-skills {
-    min-height: 296px;
+    min-height: 258px;
     border-color: rgba(98, 70, 255, 0.48);
     background:
       radial-gradient(circle at 88% 12%, rgba(98, 70, 255, 0.18), transparent 42%),
@@ -1304,7 +1305,7 @@ body {
     width: fit-content;
     border-radius: 999px;
     background: rgba(98, 70, 255, 0.09);
-    padding: 6px 9px;
+    padding: 5px 8px;
     color: #4b2cff;
     font-size: 10px;
     font-weight: 950;
@@ -1323,31 +1324,31 @@ body {
   }
 
   .cl-v2-translation-card h3 {
-    margin-top: 12px;
+    margin-top: 9px;
     color: #080930;
-    font-size: 17px;
+    font-size: 16px;
     font-weight: 950;
     line-height: 1.15;
   }
 
   .cl-v2-translation-card p {
-    margin-top: 6px;
+    margin-top: 5px;
     color: rgba(8, 9, 48, 0.58);
     font-size: 12px;
     font-weight: 800;
   }
 
   .cl-v2-translation-card ul {
-    margin-top: 11px;
+    margin-top: 9px;
     display: grid;
-    gap: 7px;
+    gap: 6px;
   }
 
   .cl-v2-translation-card li {
     position: relative;
     padding-left: 17px;
     color: rgba(8, 9, 48, 0.78);
-    font-size: 11.5px;
+    font-size: 11px;
     font-weight: 790;
     line-height: 1.32;
   }
@@ -1369,11 +1370,11 @@ body {
   }
 
   .cl-v2-translation-card.is-skills p {
-    margin-top: 12px;
+    margin-top: 9px;
     border-top: 1px solid rgba(196, 213, 229, 0.72);
-    padding-top: 11px;
+    padding-top: 9px;
     color: rgba(8, 9, 48, 0.7);
-    font-size: 11.5px;
+    font-size: 11px;
     font-weight: 760;
     line-height: 1.45;
   }
@@ -1399,8 +1400,8 @@ body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 32px;
-    height: 32px;
+    min-width: 28px;
+    height: 28px;
     border-radius: 999px;
     background: #4b2cff;
     color: #ffffff;
@@ -1415,10 +1416,10 @@ body {
     margin: 0;
     border-radius: 999px;
     background: rgba(255, 255, 255, 0.82);
-    padding: 12px 16px;
+    padding: 9px 14px;
     text-align: center;
     color: #080930;
-    font-size: 13px;
+    font-size: 12.5px;
     font-weight: 900;
     box-shadow: 0 14px 34px rgba(17, 35, 63, 0.07);
   }
