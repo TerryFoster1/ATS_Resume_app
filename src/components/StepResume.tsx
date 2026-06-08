@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { useMemo, useRef, useState } from "react";
@@ -109,11 +109,11 @@ export default function StepResume({ value, onChange, onNext }: Props) {
           <div className="app-step-hero p-6 sm:p-8">
             <div className="flex h-full flex-col justify-between gap-6">
               <div>
-                <p className="app-kicker">Step one</p>
+                <p className="app-kicker">Your experience</p>
                 <h2 className="mt-2 text-3xl app-heading">Bring in your resume</h2>
                 <p className="mt-3 max-w-xl text-sm leading-6 text-[var(--color-text-primary)]/74">
-                  Upload your resume file. We extract the text into an editable
-                  review space before the job match.
+                  Upload your resume so Career Ladder can start finding strengths,
+                  gaps, and recruiter-readable evidence in your background.
                 </p>
               </div>
               <DocumentStackGraphic className="mx-auto" />
@@ -122,13 +122,13 @@ export default function StepResume({ value, onChange, onNext }: Props) {
 
           <div className="app-consult-card p-5 sm:p-6">
             <div className="mb-5">
-              <p className="app-section-label">Upload module</p>
+              <p className="app-section-label">Resume import</p>
               <h3 className="mt-2 text-xl app-heading">
                 Choose a resume file
               </h3>
               <p className="mt-2 text-sm leading-6 text-[var(--color-text-muted)]">
-                PDF, DOC, DOCX, and TXT files are supported. Click Upload after
-                choosing a file so the extracted text appears below.
+                PDF, DOC, DOCX, and TXT files are supported. After upload, you will
+                see an early read on what your experience may already prove.
               </p>
             </div>
 
@@ -160,7 +160,7 @@ export default function StepResume({ value, onChange, onNext }: Props) {
                 </span>
                 <span className="mt-1 block text-xs text-[var(--color-text-muted)]">
                   {selectedFile
-                    ? "Ready to upload and extract."
+                    ? "Ready to review for strengths, gaps, and transferable signals."
                     : "Resume upload imports your current experience and can enrich your Master Career Profile when signed in."}
                 </span>
               </div>
@@ -177,12 +177,12 @@ export default function StepResume({ value, onChange, onNext }: Props) {
               {uploading && (
                 <LoadingIndicator
                   variant="inline"
-                  message={"Extracting text from your file\u2026"}
+                  message={"Reviewing the experience in your resume\u2026"}
                 />
               )}
               {extractedFileName && !uploading && (
                 <p className="text-xs font-semibold text-emerald-700">
-                  Extracted text from {extractedFileName}. Review it before continuing.
+                  Reviewed {extractedFileName}. Check the insight preview before continuing.
                 </p>
               )}
               {warning && <p className="text-xs text-orange-700">{warning}</p>}
@@ -252,24 +252,28 @@ function PostUploadInsightPreview({
   onApply: () => void;
 }) {
   return (
-    <section className="app-feature-panel space-y-5">
-      <div className="max-w-3xl">
-        <p className="app-kicker">Initial read</p>
-        <h3 className="mt-2 text-2xl app-heading">We&apos;ve reviewed your experience.</h3>
-        <p className="mt-2 text-sm leading-6 text-[var(--color-text-muted)]">
-          Here&apos;s what Career Ladder noticed before you choose your next step.
-          These are early signals from your resume, not final claims.
-        </p>
+    <section className="app-feature-panel upload-insight-preview space-y-5">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="max-w-3xl">
+          <p className="app-kicker">Step 2 of 3</p>
+          <h3 className="mt-2 text-2xl app-heading">We&apos;ve reviewed your experience.</h3>
+          <p className="mt-2 text-sm leading-6 text-[var(--color-text-muted)]">
+            Here&apos;s what Career Ladder noticed before you choose your next step.
+            These are early signals from your resume, not final claims.
+          </p>
+        </div>
+        <span className="upload-insight-status">Resume reviewed</span>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="upload-insight-flow">
         <InsightColumn title="Strengths we found" items={preview.strengths} tone="strength" />
         <InsightColumn title="Experience employers may value" items={preview.employerValue} tone="value" />
         <InsightColumn title="Possible friction points" items={preview.frictionPoints} tone="risk" />
       </div>
 
       <div className="rounded-[24px] bg-white p-4 shadow-[var(--shadow-inset-soft)]">
-        <p className="app-kicker">Relevant next steps</p>
+        <p className="app-kicker">Step 3 of 3</p>
+        <h4 className="mt-2 text-lg app-heading">Choose the next move this resume should power.</h4>
         <div className="mt-4 grid gap-3 lg:grid-cols-3">
           <NextStepCard
             title="Plan My Career"
@@ -314,7 +318,7 @@ function InsightColumn({
       <ul className="mt-3 space-y-2">
         {items.map((item) => (
           <li key={item} className="flex gap-2 text-sm leading-6 text-[var(--color-text-muted)]">
-            <span aria-hidden className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-accent-purple)]" />
+            <span aria-hidden className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#2f80ed]" />
             <span>{item}</span>
           </li>
         ))}
@@ -425,5 +429,7 @@ function takeOrFallback(values: string[], fallback: string[], limit: number): st
   }
   return (unique.length ? unique : fallback).slice(0, limit);
 }
+
+
 
 

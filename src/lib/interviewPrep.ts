@@ -1,4 +1,4 @@
-import { callLlm } from "./llm";
+﻿import { callLlm } from "./llm";
 import { sanitizeGeneratedText } from "./sanitizeGeneratedText";
 import {
   extractTransferableSkillProfile,
@@ -54,6 +54,12 @@ Create interview prep in this exact markdown structure. Keep it tactical, skimma
 
 # Recruiter-Style Interview Prep
 
+## Interview Themes Recruiters Will Test
+- 3 to 5 themes the interview is likely to revolve around. Name the hiring-manager concern behind each theme and the evidence the candidate should prepare.
+
+## Likely Recruiter Concerns
+- 3 to 5 concerns or objections a recruiter may quietly evaluate. Explain what evidence would reduce each concern.
+
 ## Most Likely to Appear
 1. Question:
    Why likely:
@@ -94,7 +100,7 @@ Include 3 to 4 questions tied directly to the posting.
 Include 2 to 3 questions if relevant. If the role has no technical or operational focus, write 2 practical process, tools, reporting, workflow, or collaboration questions.
 
 ## Weak-Area Prep
-- 3 to 5 honest preparation notes. Name likely gaps, proof risks, terminology gaps, or platform ownership gaps without sounding discouraging.
+- 3 to 5 honest preparation notes. Name likely gaps, proof risks, terminology gaps, platform ownership gaps, or transition-framing risks without sounding discouraging.
 - Include at least one note about how to position adjacent or transferable experience if the candidate is not a direct match.
 - Include at least one note about what a recruiter may hesitate over and what evidence would reduce that hesitation.
 
@@ -106,6 +112,7 @@ Include 2 to 3 questions if relevant. If the role has no technical or operationa
 
 Rules:
 - Do not include generic advice that could fit any candidate.
+- Every concern should connect to evidence, role expectations, transferable skill framing, or a real gap to prepare.
 - Do not overclaim missing tools, platforms, metrics, credentials, or dates.
 - If resume or cover letter context is absent, focus on role expectations, likely evaluation areas, and examples the user should prepare.
 - If direct platform ownership is weak, recommend adjacent positioning clearly.
@@ -142,3 +149,5 @@ function clip(text: string, max: number) {
   if (text.length <= max) return text;
   return `${text.slice(0, max)}\n[Truncated for interview prep generation]`;
 }
+
+

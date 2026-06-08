@@ -35,10 +35,10 @@ export default async function SavedOutputPage({
   if (!data) {
     return (
       <main className="app-screen-card space-y-4">
-        <p className="app-kicker">Saved output</p>
+        <p className="app-kicker">Saved workspace</p>
         <h1 className="text-3xl app-heading">We could not find that saved application.</h1>
         <Link href="/dashboard" className="app-button-primary">
-          Back to dashboard
+          Back to workspace
         </Link>
       </main>
     );
@@ -80,7 +80,7 @@ export default async function SavedOutputPage({
           <div className="flex flex-wrap items-center gap-2">
             <AccountCreditIndicator />
             <Link href="/dashboard" className="app-button-ghost">
-              Back to dashboard
+              Back to workspace
             </Link>
           </div>
         </div>

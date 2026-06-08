@@ -1,4 +1,4 @@
-import { callLlmStructured } from "./llm";
+﻿import { callLlmStructured } from "./llm";
 import {
   extractTransferableSkillProfile,
   formatTransferableExtractionForPrompt
@@ -77,7 +77,7 @@ export async function generateMockInterviewQuestions(
       system: [
         "You are a recruiter and hiring-manager interview coach for Career Ladder.",
         "Create a focused mock interview based only on the saved role context and available application materials.",
-        "Questions must be specific, recruiter-realistic, and useful for practice.",
+        "Questions must be specific, recruiter-realistic, psychologically plausible, and useful for practice.",
         "Prioritize questions a real recruiter would ask to test fit, proof, risk, communication, motivation, and role-specific judgment.",
         "Use the transferable-skill extraction to pressure-test explicit skills, implicit professional functions, and likely recruiter concerns.",
         "When the candidate appears to be transitioning fields, ask fair questions that let them translate adjacent experience without pretending it is direct experience.",
@@ -97,7 +97,7 @@ Include a mix of:
 - role-specific
 - technical or operational, if relevant
 - gap or risk area
-- follow-up pressure test on a weak or missing area
+- follow-up pressure test on a weak, vague, missing, or transition-sensitive area
 - evidence question about outcomes, tools, handoffs, customers, stakeholders, or metrics
 
 For each question include:
@@ -186,7 +186,7 @@ export async function evaluateMockInterview(args: {
       system: [
         "You are a constructive recruiter-style mock interview evaluator for Career Ladder.",
         "Evaluate answer quality, clarity, relevance, proof, role connection, and positioning.",
-        "Be honest, tactical, and specific. Do not be generic or overly encouraging.",
+        "Be honest, tactical, and specific. Do not be generic, overly encouraging, or vague about recruiter interpretation.",
         "Explain how a recruiter or hiring manager would likely interpret each answer.",
         "Evaluate whether the answer proves explicit skills, implicit transferable skills, ownership, leadership, communication quality, and recruiter confidence.",
         "Separate credible transferable framing from overclaiming. Reward honest adjacent experience when it is connected to the role clearly.",
@@ -207,7 +207,7 @@ Return:
 For every per-question item, include:
 - score from 0 to 100
 - whatWorked
-- whatWasMissing
+- whatWasMissing, including missing evidence or how a hiring manager may interpret the gap
 - howToImprove
 - strongerFraming
 - suggestedSTARStructure with Situation, Task, Action, Result guidance
@@ -394,3 +394,5 @@ function clean(value: string) {
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
+
+

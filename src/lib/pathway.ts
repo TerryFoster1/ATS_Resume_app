@@ -85,8 +85,8 @@ export async function generatePathwayAnalysis(input: PathwayInput): Promise<Path
         "Create realistic, practical pathway guidance that explains how hiring teams would evaluate the transition.",
         "Do not promise jobs, salaries, instant transitions, or fake experience.",
         "Emphasize transferable skills, proof gaps, practical sequencing, low-cost next steps, and honest positioning.",
-        "Think in this order: current experience -> transferable functions -> adjacent careers -> proof gaps -> practical upskilling.",
-        "Separate true skill gaps from evidence gaps and language gaps.",
+        "Think and write in this order: current experience -> what already counts -> why employers care -> transferable functions -> adjacent careers -> recruiter concerns -> proof gaps -> practical upskilling.",
+        "Separate true skill gaps from evidence gaps, language gaps, confidence gaps, and missing recruiter proof.",
         "Explain why the transition is realistic without inflating titles or inventing responsibilities.",
         "Translate adjacent experience when credible: retail to customer success, hospitality to operations, journalism to marketing, service industry to account management, trades to project coordination.",
         "Avoid generic certification lists unless a certification is genuinely useful for the role context."
@@ -104,7 +104,7 @@ export async function generatePathwayAnalysis(input: PathwayInput): Promise<Path
         `Low-cost learning options to consider only if relevant: ${recommendLowCostLearning(role).join("; ")}`,
         "",
         "Return a practical career pathway analysis. Use short, specific bullets. If candidate background is limited, say what to prepare or prove rather than inventing experience.",
-        "For fastestPathRecommendations, prioritize sequencing: what to reframe first, what proof to gather next, and what to practice for recruiter conversations.",
+        "For fastestPathRecommendations, prioritize sequencing: what to reframe first, what proof to gather next, what language to practice, and what to avoid overclaiming in recruiter conversations.",
         "For lowestCostPathRecommendations, prefer free or low-cost practice, terminology building, portfolio examples, informational interviews, tool sandboxes, and proof-gathering steps over expensive programs.",
         "For likelySkillGaps, distinguish true skill gaps from communication or evidence gaps when possible.",
         "For recruiterConcerns, explain what a skeptical hiring manager may question and how to prepare evidence.",
@@ -136,9 +136,9 @@ export async function generatePathwayAnalysis(input: PathwayInput): Promise<Path
         ],
         properties: {
           typicalRequirements: arraySchema("Typical role requirements and recruiter expectations."),
-          transferableStrengths: arraySchema("Transferable strengths the user may be able to position."),
+          transferableStrengths: arraySchema("Transferable strengths the user may be able to position, with why employers may value each one."),
           likelySkillGaps: arraySchema("Likely skill or proof gaps to close."),
-          recruiterConcerns: arraySchema("Likely recruiter concerns or objections to prepare for."),
+          recruiterConcerns: arraySchema("Likely recruiter concerns or objections, with the evidence needed to reduce each concern."),
           fastestPathRecommendations: arraySchema("Fastest practical path recommendations."),
           lowestCostPathRecommendations: arraySchema("Lowest-cost path recommendations."),
           suggestedCredentials: arraySchema("Credentials or proof signals worth considering, only when realistically useful."),
@@ -146,7 +146,7 @@ export async function generatePathwayAnalysis(input: PathwayInput): Promise<Path
           expectedTimeline: arraySchema("Realistic timeline notes or milestones."),
           salaryRange: arraySchema("Broad salary or compensation context with caveats to verify locally."),
           dayInTheLife: arraySchema("Realistic day-in-the-life work moments."),
-          suggestedNextSteps: arraySchema("Suggested next actions inside or outside Career Ladder.")
+          suggestedNextSteps: arraySchema("Suggested next actions inside or outside Career Ladder, ordered by practical sequence.")
         }
       }
     }
@@ -283,3 +283,4 @@ function isFullAnalysis(value: unknown): value is PathwayFullAnalysis {
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
+

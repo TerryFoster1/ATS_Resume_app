@@ -100,10 +100,12 @@ export default function CareerCoachClient() {
   return (
     <div className="space-y-6">
       <section className="app-screen-card">
-        <p className="app-kicker">Career Coach MVP</p>
+        <p className="app-kicker">Career Coach</p>
         <h1 className="mt-3 text-3xl app-heading sm:text-5xl">Figure out your next realistic move.</h1>
           <p className="mt-4 max-w-3xl text-base leading-7 text-[var(--color-text-muted)]">
-            Answer in plain language. Career Ladder looks for transferable strengths, lifestyle constraints, recruiter concerns, and realistic paths that explain why your experience may already count in a new way.
+            Answer in plain language. Career Ladder looks for transferable strengths,
+            practical constraints, recruiter concerns, and realistic paths that explain
+            why your experience may already count in a new way.
           </p>
           {profileContext && (
             <p className="mt-4 max-w-2xl rounded-[18px] bg-white/72 px-4 py-3 text-xs font-semibold leading-5 text-[var(--color-text-muted)] shadow-[var(--shadow-inset-soft)]">
@@ -111,6 +113,15 @@ export default function CareerCoachClient() {
             </p>
           )}
         </section>
+
+      <section className="coach-journey-strip" aria-label="Career Coach steps">
+        {[
+          "Understand what needs to change",
+          "Find transferable strengths",
+          "Compare realistic paths",
+          "Choose a next move"
+        ].map((item, index) => <span key={item}><strong>{index + 1}</strong>{item}</span>)}
+      </section>
 
       {!showResults ? (
         <section className="app-mini-card">
@@ -127,7 +138,7 @@ export default function CareerCoachClient() {
           <textarea
             value={answers[current.key]}
             onChange={(event) => update(event.target.value)}
-            className="app-input mt-5 min-h-[12rem] resize-y"
+            className="app-input mt-5 min-h-[10rem] resize-y"
             placeholder="Plain language is enough. Career Ladder will translate the career signal."
           />
           <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
@@ -149,7 +160,7 @@ export default function CareerCoachClient() {
       ) : (
         <section className="space-y-4">
           <div className="app-mini-card">
-            <p className="app-kicker">Career coach results</p>
+            <p className="app-kicker">Recommended directions</p>
             <h2 className="mt-2 text-3xl app-heading">Top realistic directions to explore.</h2>
             <p className="mt-3 text-sm leading-6 text-[var(--color-text-muted)]">
               These are starting hypotheses, not fixed labels. The goal is to show which paths are realistic, what evidence recruiters will look for, and where your current experience may already translate.
@@ -222,3 +233,4 @@ function formatProfileContext(profile: MasterCareerProfile): string {
   ].filter(Boolean);
   return lines.length ? `MASTER CAREER PROFILE CONTEXT\n${lines.slice(0, 80).join("\n")}` : "";
 }
+

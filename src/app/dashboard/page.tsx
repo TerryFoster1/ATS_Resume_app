@@ -69,6 +69,17 @@ export default async function DashboardPage({
     0
   );
   const interviewPrepReady = applications.filter((item) => item.interviewPrepReady).length;
+  const recentWork = applications.slice(0, 3);
+  const profileSignals = [
+    { label: "Profile", ready: applications.length > 0 || unlockedExports > 0 },
+    { label: "Resume import", ready: applications.some((item) => item.resumeUnlocked) },
+    { label: "Career goals", ready: applications.some((item) => item.pathwayReady || item.pathwayPreview) }
+  ];
+  const profileCompleteness = Math.round(
+    (profileSignals.filter((item) => item.ready).length / profileSignals.length) * 100
+  );
+  const planCount = applications.filter((item) => item.pathwayReady || item.pathwayPreview).length;
+  const winCount = applications.length;
 
   return (
     <main className="dashboard-workspace space-y-8">
@@ -83,18 +94,18 @@ export default async function DashboardPage({
           <div className="max-w-3xl">
             <p className="dashboard-eyebrow">Career workspace</p>
             <h1 className="mt-3 text-3xl app-heading sm:text-4xl">
-              Welcome back. Keep each opportunity moving with clarity.
+              Welcome back. Keep your next moves connected.
             </h1>
             <p className="mt-4 max-w-2xl text-sm leading-6 text-[var(--color-text-primary)]/72 sm:text-base">
-              Keep tailored materials, recruiter prep, pathway notes, and hiring-stage details
-              organized around the roles you are actively pursuing.
+              Keep tailored materials, recruiter prep, pathway notes, and hiring-stage
+              details organized around the roles you are actively pursuing.
             </p>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
               <Link href="/?step=intake" className="app-button-primary dashboard-primary-cta">
                 Add a new opportunity
               </Link>
               <Link href="/profile" className="dashboard-secondary-cta">
-                Update profile
+                Update career profile
               </Link>
               <Link href="/pricing?pack=5&checkout=1" className="dashboard-secondary-cta">
                 Buy credits
@@ -127,23 +138,53 @@ export default async function DashboardPage({
         </div>
       </header>
 
-      <section className="dashboard-metric-grid">
-        <article className="dashboard-metric-card">
-          <span>Saved roles</span>
-          <strong>{applications.length}</strong>
-          <p>Role workspaces tied to real postings and career goals.</p>
-        </article>
-        <article className="dashboard-metric-card">
-          <span>Unlocked materials</span>
-          <strong>{unlockedExports}</strong>
-          <p>Resume and cover letter exports ready to reuse.</p>
-        </article>
-        <article className="dashboard-metric-card">
-          <span>Interview prep ready</span>
-          <strong>{interviewPrepReady}</strong>
-          <p>Prep packs generated from saved application context.</p>
-        </article>
+      <section className="dashboard-journey-grid" aria-label="Career Ladder journeys">
+        <JourneyCard
+          step="01"
+          title="Build My Career Profile"
+          body="Keep the evidence Career Ladder should remember: resume imports, projects, skills, credentials, goals, and overlooked experience."
+          href="/profile"
+          cta="Continue profile"
+          progressLabel={`${profileCompleteness}% started`}
+          progress={profileCompleteness}
+          details={profileSignals.map((item) => `${item.ready ? "Saved" : "Add"}: ${item.label}`)}
+        />
+        <JourneyCard
+          step="02"
+          title="Plan My Career"
+          body="Explore realistic paths, transferable strengths, recruiter expectations, and the next practical move."
+          href="/career-coach"
+          cta="Plan next move"
+          progressLabel={`${planCount} pathway${planCount === 1 ? "" : "s"}`}
+          progress={Math.min(100, planCount * 34)}
+          details={["Career Coach", "Career Pathways", "Transferable skills"]}
+        />
+        <JourneyCard
+          step="03"
+          title="Win Opportunities"
+          body="Turn a target role into stronger materials, interview prep, and a clean opportunity workspace."
+          href="/?step=intake"
+          cta="Start application"
+          progressLabel={`${winCount} role workspace${winCount === 1 ? "" : "s"}`}
+          progress={Math.min(100, winCount * 20)}
+          details={[`${unlockedExports} ready material${unlockedExports === 1 ? "" : "s"}`, `${interviewPrepReady} prep plan${interviewPrepReady === 1 ? "" : "s"}`, "Saved opportunity notes"]}
+        />
       </section>
+
+      {recentWork.length > 0 && (
+        <section className="dashboard-recent-work">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="dashboard-eyebrow">Recent work</p>
+              <h2 className="mt-2 text-2xl app-heading">Pick up where you left off</h2>
+            </div>
+            <Link href="/?step=intake" className="dashboard-secondary-cta">Add another role</Link>
+          </div>
+          <div className="mt-4 grid gap-3 md:grid-cols-3">
+            {recentWork.map((item) => <RecentWorkCard key={item.id} item={item} />)}
+          </div>
+        </section>
+      )}
 
       <PromoCodeRedeemer />
 
@@ -154,7 +195,7 @@ export default async function DashboardPage({
           <div className="mx-auto max-w-3xl text-center">
             <p className="dashboard-eyebrow">No saved applications yet</p>
             <h2 className="mt-3 text-3xl app-heading sm:text-4xl">
-              Your first opportunity workspace starts here.
+              Your first career workspace starts here.
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-sm leading-6 text-[#5d6f85] sm:text-base">
               Start with a target role, then choose whether to tailor materials,
@@ -211,4 +252,61 @@ function DashboardSetupMissing() {
       </p>
     </main>
   );
+}
+
+function JourneyCard({
+  step,
+  title,
+  body,
+  href,
+  cta,
+  progressLabel,
+  progress,
+  details
+}: {
+  step: string;
+  title: string;
+  body: string;
+  href: string;
+  cta: string;
+  progressLabel: string;
+  progress: number;
+  details: string[];
+}) {
+  return (
+    <article className="dashboard-journey-card">
+      <div className="flex items-start justify-between gap-3">
+        <span className="dashboard-benefit-mark">{step}</span>
+        <span className="dashboard-date-pill">{progressLabel}</span>
+      </div>
+      <h2 className="mt-4 text-xl app-heading">{title}</h2>
+      <p className="mt-3 text-sm leading-6 text-[#5d6f85]">{body}</p>
+      <div className="mt-4 h-2 overflow-hidden rounded-full bg-[#e6edf4]">
+        <div className="h-full rounded-full bg-gradient-to-r from-[#2f80ed] to-[#626be6]" style={{ width: `${Math.max(8, progress)}%` }} />
+      </div>
+      <div className="mt-4 flex flex-wrap gap-2">
+        {details.map((detail) => <span key={detail} className="dashboard-badge">{detail}</span>)}
+      </div>
+      <Link href={href} className="dashboard-journey-action">{cta}</Link>
+    </article>
+  );
+}
+
+function RecentWorkCard({ item }: { item: DashboardApplication }) {
+  return (
+    <Link href={`/outputs/${item.id}`} className="dashboard-recent-card">
+      <span className={`dashboard-status-pill ${resolveRecentStatusClass(item.applicationStatus)}`}>{item.applicationStatus}</span>
+      <strong className="mt-3 block text-base app-heading">{item.jobTitle}</strong>
+      <span className="mt-1 block text-sm font-bold text-[#65748a]">{item.companyName ?? "Company not detected"}</span>
+      <span className="mt-3 block text-xs font-black uppercase tracking-[0.12em] text-[#245f9f]">Open workspace</span>
+    </Link>
+  );
+}
+
+function resolveRecentStatusClass(status: DashboardApplication["applicationStatus"]) {
+  if (status === "Applied") return "is-applied";
+  if (status === "Offer" || status === "Accepted") return "is-offer";
+  if (status === "Rejected" || status === "Archived") return "is-archived";
+  if (status === "Screening" || status === "Interviewing" || status === "Final Interview") return "is-interviewing";
+  return "is-draft";
 }

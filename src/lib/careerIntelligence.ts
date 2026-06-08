@@ -1,4 +1,4 @@
-export type TransferableSkillSignal = {
+﻿export type TransferableSkillSignal = {
   source: string;
   mapsTo: string;
   why: string;
@@ -144,6 +144,42 @@ const TRANSITION_PATTERNS: Array<{
     confidence: "strong"
   },
   {
+    pattern: /\b(admin|administrative assistant|office manager|reception|coordinator|office support|executive assistant)\b/i,
+    source: "Administrative, office, or coordination experience",
+    mapsTo: "operations coordination, stakeholder follow-up, process documentation, calendar management, prioritization, and internal service delivery",
+    why: "Administrative work often contains the exact coordination layer employers need: keeping people organized, protecting deadlines, handling requests, documenting details, and making sure nothing important gets lost.",
+    recruiterLanguage:
+      "Coordinated schedules, managed requests, organized documentation, supported stakeholders, prioritized competing needs, and kept operational details moving.",
+    evidenceExamples: [
+      "managing calendars, requests, files, or office workflows",
+      "following up with internal or external stakeholders",
+      "documenting processes, notes, or next steps",
+      "prioritizing competing tasks without losing service quality"
+    ],
+    recruiterConcern:
+      "Hiring teams may want proof that the work involved judgment, prioritization, and cross-functional follow-through rather than only task completion.",
+    directions: ["Operations coordinator", "Project coordinator", "Customer operations", "Executive assistant"],
+    confidence: "strong"
+  },
+  {
+    pattern: /\b(social media|community manager|creator|instagram|tiktok|facebook|content creator|online community)\b/i,
+    source: "Social media, creator, or community experience",
+    mapsTo: "digital marketing, audience engagement, community operations, content coordination, customer listening, and campaign support",
+    why: "Community and social work can show audience judgment, message testing, engagement patterns, moderation, content planning, and the ability to translate feedback into action.",
+    recruiterLanguage:
+      "Managed audience engagement, coordinated content, interpreted community feedback, adapted messaging, and supported digital communication workflows.",
+    evidenceExamples: [
+      "planning posts, content calendars, or community updates",
+      "responding to comments, messages, or audience concerns",
+      "tracking engagement signals or recurring themes",
+      "building trust with an online audience or customer community"
+    ],
+    recruiterConcern:
+      "Recruiters may ask whether the work connects to business goals, audience outcomes, channel performance, or stakeholder expectations.",
+    directions: ["Digital marketing coordinator", "Customer engagement coordinator", "Community operations", "Content marketing assistant"],
+    confidence: "moderate"
+  },
+  {
     pattern: /\b(club|sports?|team captain|volunteer|community|fundraiser|student council|school event|side hustle|family business)\b/i,
     source: "School, community, volunteer, sports, or side-project experience",
     mapsTo: "early leadership, coordination, service orientation, accountability, and initiative",
@@ -207,7 +243,7 @@ export function buildRecruiterConcernNotes(signals: TransferableSkillSignal[], t
     .map((signal) => signal.recruiterConcern)
     .filter((value): value is string => Boolean(value));
   if (targetRole) {
-    notes.unshift(`For ${targetRole}, recruiters will care less about the old title and more about whether the evidence proves similar responsibility, tools, pace, customers, or outcomes.`);
+    notes.unshift(`For ${targetRole}, recruiters will care less about the old title and more about whether the evidence proves similar responsibility, tools, pace, customers, outcomes, and judgment under realistic constraints.`);
   }
   return [...new Set(notes)].slice(0, 4);
 }
@@ -230,10 +266,10 @@ export function inferTransitionRecommendations(text: string): TransitionRecommen
     recommendations.push({
       title: career,
       category,
-      whyRealistic: `${career} can be realistic if the user proves ${primary.mapsTo} with grounded examples rather than relying on a title change.`,
+      whyRealistic: `${career} can be realistic if the user proves ${primary.mapsTo} with grounded examples. The strongest case starts with what they already did, then translates it into the responsibility language this role uses.`,
       transferableEvidence: primary.evidenceExamples.slice(0, 3),
       likelyGap: primary.recruiterConcern ?? "The likely gap is translating real work into role-specific proof.",
-      firstMove: `Rewrite two examples using this language: ${primary.recruiterLanguage}`
+      firstMove: `Rewrite two examples using this language: ${primary.recruiterLanguage} Then prepare the evidence behind each phrase so it sounds like lived experience, not keyword substitution.`
     });
   }
 
@@ -314,3 +350,6 @@ export function recommendLowCostLearning(targetRole: string, gaps: string[] = []
   }
   return [...recommendations].slice(0, 3);
 }
+
+
+

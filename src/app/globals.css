@@ -476,9 +476,10 @@ body {
     padding: 24px;
     color: var(--color-text-primary);
     background:
-      linear-gradient(115deg, rgba(255,255,255,0.42), rgba(255,255,255,0) 44%),
-      linear-gradient(135deg, #fff5e8, var(--color-surface-orange-from) 45%, var(--color-surface-orange-to));
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.46), 0 18px 42px rgba(232, 119, 40, 0.16);
+      radial-gradient(circle at 88% 8%, rgba(98, 70, 255, 0.13), transparent 34%),
+      linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(244, 249, 253, 0.94));
+    border: 1px solid rgba(196, 213, 229, 0.72);
+    box-shadow: 0 20px 56px rgba(16, 32, 51, 0.09);
   }
 
   @media (min-width: 640px) {
@@ -1961,15 +1962,15 @@ body {
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    gap: 18px;
-    border-radius: 28px;
+    gap: 16px;
+    border-radius: 26px;
     background:
       linear-gradient(135deg, rgba(47, 128, 237, 0.1), transparent 38%),
       linear-gradient(225deg, rgba(42, 169, 154, 0.09), transparent 38%),
       linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(244, 249, 253, 0.94));
     border: 1px solid rgba(196, 213, 229, 0.7);
-    box-shadow: 0 24px 62px rgba(17, 35, 63, 0.1);
-    padding: 22px;
+    box-shadow: 0 22px 58px rgba(17, 35, 63, 0.09);
+    padding: 20px;
   }
 
   .saved-output-toolbar::after {
@@ -1991,7 +1992,7 @@ body {
       flex-direction: row;
       align-items: center;
       justify-content: space-between;
-      padding: 26px;
+      padding: 24px;
     }
   }
 
@@ -2097,13 +2098,13 @@ body {
 
   .opportunity-next-panel,
   .opportunity-tabs-shell {
-    border-radius: 30px;
+    border-radius: 24px;
     border: 1px solid rgba(196, 213, 229, 0.72);
     background:
       linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(246, 250, 253, 0.92)),
       #ffffff;
-    box-shadow: 0 22px 62px rgba(17, 35, 63, 0.08);
-    padding: 22px;
+    box-shadow: 0 18px 52px rgba(17, 35, 63, 0.075);
+    padding: 20px;
   }
 
   .opportunity-next-grid {
@@ -2277,8 +2278,8 @@ body {
       linear-gradient(135deg, rgba(98, 107, 230, 0.08), transparent 36%),
       linear-gradient(225deg, rgba(64, 179, 162, 0.1), transparent 40%),
       rgba(255, 255, 255, 0.94);
-    box-shadow: 0 24px 68px rgba(17, 35, 63, 0.1);
-    padding: 24px;
+    box-shadow: 0 20px 56px rgba(17, 35, 63, 0.09);
+    padding: 22px;
   }
 
   .interview-prep-display {
@@ -2299,12 +2300,12 @@ body {
   }
 
   .locked-service-card {
-    border-radius: 28px;
+    border-radius: 22px;
     border: 1px solid rgba(196, 213, 229, 0.72);
     background:
       linear-gradient(135deg, rgba(47, 128, 237, 0.08), transparent 40%),
       rgba(255, 255, 255, 0.92);
-    padding: 20px;
+    padding: 18px;
     box-shadow: var(--shadow-inset-soft);
   }
 
@@ -2985,10 +2986,10 @@ body {
   .pricing-trust-strip {
     display: grid;
     gap: 3px;
-    border-radius: 28px;
+    border-radius: 24px;
     border: 1px solid rgba(196, 213, 229, 0.72);
     background: rgba(255, 255, 255, 0.78);
-    box-shadow: 0 18px 48px rgba(17, 35, 63, 0.08);
+    box-shadow: 0 16px 42px rgba(17, 35, 63, 0.07);
     overflow: hidden;
   }
 
@@ -3007,13 +3008,13 @@ body {
 
   .pricing-pack-card,
   .pricing-usage-panel {
-    border-radius: 30px;
+    border-radius: 24px;
     border: 1px solid rgba(196, 213, 229, 0.72);
     background:
       linear-gradient(135deg, rgba(47, 128, 237, 0.08), transparent 40%),
       rgba(255, 255, 255, 0.94);
-    box-shadow: 0 24px 68px rgba(17, 35, 63, 0.1);
-    padding: 24px;
+    box-shadow: 0 20px 56px rgba(17, 35, 63, 0.09);
+    padding: 22px;
   }
 
   .pricing-pack-card {
@@ -3147,9 +3148,10 @@ body {
   .app-step-hero {
     border-radius: 26px;
     background:
-      linear-gradient(135deg, rgba(255, 255, 255, 0.22), transparent 40%),
-      linear-gradient(135deg, #fff5e8, var(--color-surface-orange-from) 48%, var(--color-surface-orange-to));
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.42), 0 20px 48px rgba(232, 119, 40, 0.16);
+      radial-gradient(circle at 82% 14%, rgba(47, 128, 237, 0.16), transparent 38%),
+      linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(239, 246, 255, 0.94));
+    border: 1px solid rgba(196, 213, 229, 0.74);
+    box-shadow: 0 20px 48px rgba(16, 32, 51, 0.08);
   }
 
   .app-consult-card {
@@ -3730,8 +3732,8 @@ body {
       radial-gradient(circle at 76% 10%, rgba(47, 128, 237, 0.16), transparent 34%),
       radial-gradient(circle at 14% 12%, rgba(42, 169, 154, 0.1), transparent 34%),
       linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(246, 250, 253, 0.92));
-    padding: clamp(22px, 5vw, 42px);
-    box-shadow: 0 28px 78px rgba(17, 35, 63, 0.1);
+    padding: clamp(20px, 3.4vw, 34px);
+    box-shadow: 0 24px 64px rgba(17, 35, 63, 0.09);
   }
 
   .marketing-nav {
@@ -3784,32 +3786,32 @@ body {
   .marketing-hero-grid {
     position: relative;
     z-index: 1;
-    margin-top: 42px;
+    margin-top: 30px;
     display: grid;
-    gap: 28px;
+    gap: 24px;
     align-items: center;
   }
 
   .marketing-hero-grid h1 {
-    max-width: 820px;
+    max-width: 760px;
     color: var(--color-text-primary);
-    font-size: clamp(2.6rem, 7vw, 5.8rem);
-    line-height: 0.96;
+    font-size: clamp(2.35rem, 5.2vw, 4.5rem);
+    line-height: 1;
     font-weight: 950;
     letter-spacing: 0;
   }
 
   .marketing-hero-grid p {
-    margin-top: 22px;
+    margin-top: 16px;
     max-width: 680px;
     color: rgba(16, 32, 51, 0.72);
-    font-size: 17px;
-    line-height: 1.8;
+    font-size: 16px;
+    line-height: 1.65;
     font-weight: 600;
   }
 
   .marketing-cta-row {
-    margin-top: 30px;
+    margin-top: 22px;
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
@@ -3821,18 +3823,17 @@ body {
   }
 
   .marketing-proof-card {
-    border-radius: 26px;
+    border-radius: 22px;
     border: 1px solid rgba(196, 213, 229, 0.76);
     background: rgba(255, 255, 255, 0.86);
-    padding: 22px;
-    box-shadow: 0 18px 48px rgba(17, 35, 63, 0.08);
+    padding: 18px;
+    box-shadow: 0 16px 42px rgba(17, 35, 63, 0.07);
   }
 
   .marketing-proof-card.is-main {
     background:
       linear-gradient(135deg, rgba(47, 128, 237, 0.1), transparent 42%),
       rgba(255, 255, 255, 0.92);
-    transform: rotate(-1deg);
   }
 
   .marketing-proof-card span {
@@ -3847,7 +3848,7 @@ body {
     display: block;
     margin-top: 10px;
     color: #102033;
-    font-size: 22px;
+    font-size: 20px;
     line-height: 1.2;
     font-weight: 950;
   }
@@ -3866,11 +3867,11 @@ body {
 
   .marketing-story-grid article,
   .marketing-related {
-    border-radius: 28px;
+    border-radius: 24px;
     border: 1px solid rgba(196, 213, 229, 0.72);
     background: rgba(255, 255, 255, 0.88);
-    padding: clamp(22px, 4vw, 32px);
-    box-shadow: 0 20px 58px rgba(17, 35, 63, 0.07);
+    padding: clamp(20px, 3vw, 28px);
+    box-shadow: 0 18px 48px rgba(17, 35, 63, 0.065);
   }
 
   .marketing-story-grid h2,
@@ -3962,14 +3963,14 @@ body {
   .dashboard-hero {
     position: relative;
     overflow: hidden;
-    border-radius: 28px;
-    padding: 24px;
+    border-radius: 26px;
+    padding: 22px;
     background:
       linear-gradient(135deg, rgba(47, 128, 237, 0.12), transparent 38%),
       linear-gradient(225deg, rgba(42, 169, 154, 0.1), transparent 42%),
       linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(244, 249, 253, 0.94));
     border: 1px solid rgba(196, 213, 229, 0.74);
-    box-shadow: 0 28px 70px rgba(17, 35, 63, 0.1);
+    box-shadow: 0 24px 64px rgba(17, 35, 63, 0.09);
   }
 
   .dashboard-hero::after {
@@ -3983,7 +3984,7 @@ body {
 
   @media (min-width: 640px) {
     .dashboard-hero {
-      padding: 34px;
+      padding: 30px;
     }
   }
 
@@ -4088,7 +4089,139 @@ body {
     }
   }
 
-  .dashboard-empty-state {
+    .dashboard-journey-grid {
+    display: grid;
+    gap: 14px;
+  }
+
+  .dashboard-journey-card,
+  .dashboard-recent-work,
+  .dashboard-recent-card,
+  .profile-builder-checklist {
+    border: 1px solid rgba(196, 213, 229, 0.72);
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 16px 42px rgba(17, 35, 63, 0.075);
+  }
+
+  .dashboard-journey-card {
+    border-radius: 24px;
+    padding: 18px;
+  }
+
+  .dashboard-journey-action {
+    margin-top: 18px;
+    display: inline-flex;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #102033, #173a62 54%, #2f80ed);
+    color: #ffffff;
+    padding: 12px 16px;
+    font-size: 13px;
+    font-weight: 900;
+    box-shadow: 0 12px 26px rgba(47, 128, 237, 0.2);
+  }
+
+  .dashboard-recent-work {
+    border-radius: 26px;
+    padding: 18px;
+  }
+
+  .dashboard-recent-card {
+    display: block;
+    border-radius: 20px;
+    padding: 16px;
+  }
+
+  .upload-insight-flow {
+    display: grid;
+    gap: 12px;
+  }
+
+  .upload-insight-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: rgba(64, 179, 162, 0.12);
+    color: #22796f;
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 950;
+  }
+
+  .coach-journey-strip {
+    display: grid;
+    gap: 10px;
+  }
+
+  .coach-journey-strip span {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-radius: 18px;
+    border: 1px solid rgba(196, 213, 229, 0.72);
+    background: rgba(255, 255, 255, 0.9);
+    padding: 12px 14px;
+    color: #65748a;
+    font-size: 13px;
+    font-weight: 800;
+    box-shadow: 0 12px 28px rgba(17, 35, 63, 0.055);
+  }
+
+  .coach-journey-strip strong {
+    display: inline-flex;
+    height: 28px;
+    width: 28px;
+    flex: 0 0 28px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: #eef6ff;
+    color: #245f9f;
+    font-size: 12px;
+    font-weight: 950;
+  }
+
+  .profile-builder-checklist {
+    display: grid;
+    gap: 16px;
+    border-radius: 24px;
+    padding: 18px;
+  }
+
+  .profile-builder-grid {
+    display: grid;
+    gap: 10px;
+  }
+
+  .profile-builder-grid span {
+    border-radius: 16px;
+    background: #f3f6f9;
+    color: #60738a;
+    padding: 12px 14px;
+    font-size: 13px;
+    font-weight: 900;
+  }
+
+  .profile-builder-grid span.is-complete {
+    background: rgba(64, 179, 162, 0.12);
+    color: #22796f;
+  }
+
+  @media (min-width: 760px) {
+    .dashboard-journey-grid,
+    .upload-insight-flow,
+    .profile-builder-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .coach-journey-strip {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+.dashboard-empty-state {
     border-radius: 28px;
     padding: 28px;
     background:
@@ -4543,3 +4676,4 @@ body {
     }
   }
 }
+

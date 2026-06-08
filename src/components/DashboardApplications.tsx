@@ -39,10 +39,11 @@ export default function DashboardApplications({
     <section className="dashboard-list-section">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="dashboard-eyebrow">Hiring pipeline</p>
-          <h2 className="mt-2 text-2xl app-heading">Tracked opportunities</h2>
+          <p className="dashboard-eyebrow">Opportunity workspaces</p>
+          <h2 className="mt-2 text-2xl app-heading">Roles you are working on</h2>
           <p className="mt-2 text-sm leading-6 text-[#5d6f85]">
-            Reopen each role workspace, see what assets are ready, and keep a lightweight view of where the opportunity stands.
+            Reopen each role, see what materials are ready, and keep a lightweight
+            view of where the hiring process stands.
           </p>
         </div>
         <label className="dashboard-search">
@@ -77,7 +78,7 @@ export default function DashboardApplications({
                 {item.companyName ?? "Company not detected"}
               </p>
               <p className="mt-2 text-sm leading-6 text-[#65748a]">
-                Role workspace with generated materials, interview preparation, notes, and offer context.
+                Career workspace with positioning, interview preparation, notes, and offer context.
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {item.followUpDate && (
@@ -111,7 +112,7 @@ export default function DashboardApplications({
             </div>
 
             <div className="dashboard-open-action">
-              Open materials
+              Open workspace
             </div>
           </Link>
         ))}
@@ -137,3 +138,4 @@ function statusClassName(status: DashboardApplication["applicationStatus"]) {
   if (status === "Archived") return "is-archived";
   return "is-draft";
 }
+

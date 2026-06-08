@@ -370,11 +370,11 @@ export default function SavedOutputDocuments({
     <div className="space-y-6">
       <section className="saved-output-toolbar">
         <div>
-          <p className="app-kicker">Saved materials</p>
+          <p className="app-kicker">Role workspace</p>
           <h2 className="mt-2 text-xl app-heading">
             {opportunityOnly
               ? "Build the next move for this opportunity."
-              : "Your role workspace is ready."}
+              : "Your role workspace is organized."}
           </h2>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--color-text-muted)]">
             Career Ladder organizes this opportunity into focused workspaces so you can position,
@@ -398,8 +398,8 @@ export default function SavedOutputDocuments({
 
       <section className="opportunity-next-panel">
         <div>
-          <p className="app-kicker">Recommended next steps</p>
-          <h3 className="mt-2 text-xl app-heading">Career Ladder recommends this progression.</h3>
+          <p className="app-kicker">Recommended progression</p>
+          <h3 className="mt-2 text-xl app-heading">Focus on the next useful step.</h3>
         </div>
         <div className="opportunity-next-grid">
           {nextActions.map((item, index) => (
@@ -563,7 +563,7 @@ export default function SavedOutputDocuments({
       )}
 
       <section className="app-card-soft">
-        <p className="app-kicker">Need another angle?</p>
+        <p className="app-kicker">Reposition this background</p>
         <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="max-w-2xl text-sm leading-6 text-[var(--color-text-muted)]">
             Start a new application when you want to reposition this background for a different role or posting.

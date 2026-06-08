@@ -116,6 +116,9 @@ function isSectionHeading(line: string) {
   if (line.length > 92) return false;
   const normalized = line.toLowerCase().replace(/[:\s]+$/, "");
   return [
+    "interview themes recruiters will test",
+    "likely recruiter concerns",
+    "recruiter concerns",
     "most likely to appear",
     "likely screening questions",
     "screening questions",
@@ -170,7 +173,7 @@ function isQuestionLine(line: PrepLine) {
 }
 
 function isLikelySection(title: string) {
-  return /most likely/i.test(title);
+  return /interview themes|recruiter concerns|most likely/i.test(title);
 }
 
 function isStarSection(title: string) {
@@ -187,3 +190,4 @@ function titleCase(value: string) {
     .map((word) => word.slice(0, 1).toUpperCase() + word.slice(1).toLowerCase())
     .join(" ");
 }
+

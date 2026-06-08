@@ -38,10 +38,10 @@ const RESCORE_TIMEOUT_MS = 110_000;
 
 const PHASES = [
   "Reading recruiter expectations and confirmed details",
-  "Translating your experience into role-specific evidence",
-  "Drafting a tailored resume in your voice",
-  "Writing a cover letter grounded in your real experience",
-  "Checking structure, proof, and role alignment"
+  "Identifying transferable strengths the role is likely to value",
+  "Turning confirmed experience into recruiter-readable positioning",
+  "Connecting your evidence to the company and role",
+  "Checking proof, gaps, and role alignment before results"
 ];
 
 export default function StepGenerate({ state, onBack, onDone }: Props) {
@@ -357,6 +357,8 @@ function errorText(err: unknown): string {
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
+
+
 
 
 

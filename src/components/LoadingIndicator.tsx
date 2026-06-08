@@ -37,7 +37,7 @@ interface Props {
 }
 
 const DOT_BASE =
-  "inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-accent-orange)]";
+  "inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-[#2f80ed]";
 // Tailwind's animate-pulse uses a ~2s cycle. We keep that and stagger the
 // start time for each dot via inline style so the three dots ripple.
 const DOT_DELAYS = ["0ms", "200ms", "400ms"];
@@ -100,7 +100,7 @@ export default function LoadingIndicator({
         {message && <span className="text-[var(--color-text-primary)]/75">{message}</span>}
         {subtext && (
           <span className="text-[var(--color-text-primary)]/55" aria-live="polite">
-            &mdash; {subtext}
+            <span aria-hidden="true">·</span> {subtext}
           </span>
         )}
       </span>
@@ -132,4 +132,7 @@ export default function LoadingIndicator({
     </div>
   );
 }
+
+
+
 

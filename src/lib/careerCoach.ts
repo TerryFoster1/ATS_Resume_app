@@ -1,4 +1,4 @@
-import {
+﻿import {
   buildRecruiterConcernNotes,
   inferDiscoveryInsights,
   inferTransitionRecommendations,
@@ -188,8 +188,8 @@ export function generateCareerCoachMatches(input: CareerCoachInput): CareerMatch
     score:
       match.patterns.reduce((total, pattern) => total + (pattern.test(text) ? 2 : 0), 0) +
       signals.filter((signal) => signal.adjacentCareers.some((career) =>
-        match.title.toLowerCase().includes(career.split(" ")[0]?.toLowerCase() ?? "")
-      )).length +
+        careerMatchesTitle(career, match.title)
+      )).length * 2 +
       insights.filter((insight) =>
         insight.possibleDirections.some((direction) =>
           match.title.toLowerCase().includes(direction.split(" ")[0]?.toLowerCase() ?? "")
@@ -202,9 +202,7 @@ export function generateCareerCoachMatches(input: CareerCoachInput): CareerMatch
   return scored.map(({ match }) => {
     const relevantSignals = signals.slice(0, 2);
     const learning = recommendLowCostLearning(match.title, match.typicalCredentials);
-    const transition = transitionRecommendations.find((item) =>
-      match.title.toLowerCase().includes(item.title.split(" ")[0]?.toLowerCase() ?? "")
-    );
+    const transition = transitionRecommendations.find((item) => careerMatchesTitle(item.title, match.title));
     return {
       title: match.title,
       whyItFits: buildWhyItFits(match.title, relevantSignals, input),
@@ -222,7 +220,7 @@ export function generateCareerCoachMatches(input: CareerCoachInput): CareerMatch
       recruiterExpectations: match.recruiterExpectations,
       likelyChallenges: [
         transition?.likelyGap,
-        "The transition becomes weaker if the resume repeats old task language instead of showing transferable functions.",
+        "The transition becomes weaker if the resume repeats old task language instead of showing the professional function behind the work.",
         "Recruiters may need a simple explanation for why this move is realistic now."
       ].filter((value): value is string => Boolean(value)).slice(0, 4),
       whyRealistic: [
@@ -277,7 +275,7 @@ function buildFitEvaluation(
       ? `Constraints: ${constraints.join(" ")}`
       : `Timeline: Treat this as a staged transition, not a single resume edit.`,
     `Salary: ${salaryExpectation}`,
-    `Risk: The biggest risk is overclaiming direct experience instead of explaining transferable responsibility clearly.`
+    `Risk: The biggest risk is sounding like a keyword match. The stronger move is to explain what you actually did, why it maps, and where you are still closing gaps.`
   ];
 }
 
@@ -290,14 +288,28 @@ function buildWhyItFits(
   const constraint = input.lifestyleGoals || input.ambition || input.timeline;
   return [
     signal
-      ? `${signal.source} may map toward ${title} because it can contain ${signal.mapsTo}. ${signal.why}`
-      : `${title} may fit because it rewards communication, ownership, and practical follow-through.`,
+      ? `${signal.source} may map toward ${title} because it can contain ${signal.mapsTo}. ${signal.why} The opportunity is not to pretend the old role was the same job, but to show the employer the responsibility pattern underneath it.`
+      : `${title} may fit if you can prove communication, ownership, practical judgment, and follow-through with concrete examples.`,
     constraint
       ? `Your stated constraints matter too: ${constraint.slice(0, 180)}. A good path should fit the life you are trying to build, not just the title.`
       : "The next step is proving the overlap with concrete examples, not broad claims."
   ].join(" ");
 }
 
+function careerMatchesTitle(candidate: string, title: string): boolean {
+  const left = normalizeCareerWords(candidate);
+  const right = normalizeCareerWords(title);
+  if (!left.length || !right.length) return false;
+  return left.some((word) => right.includes(word)) || right.some((word) => left.includes(word));
+}
+
+function normalizeCareerWords(value: string): string[] {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ")
+    .split(/\s+/)
+    .filter((word) => word.length >= 4 && !["associate", "assistant", "coordinator", "manager", "specialist"].includes(word));
+}
 function splitSignals(value: string): string[] {
   return value
     .split(/[.;\n]+/)
@@ -305,3 +317,5 @@ function splitSignals(value: string): string[] {
     .filter((item) => item.length >= 8)
     .slice(0, 6);
 }
+
+

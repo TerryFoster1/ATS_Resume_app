@@ -44,7 +44,7 @@ const GOALS: GoalConfig[] = [
   {
     id: "careerDiscovery",
     title: "Plan My Career",
-    description: "Career Coach, Career Discovery, and Career Pathways.",
+    description: "Find realistic directions based on your experience, goals, and constraints.",
     eyebrow: "Career strategy",
     contextCopy:
       "Career Ladder can explore your interests, strengths, and work preferences without pretending a quiz can predict your future.",
@@ -54,7 +54,7 @@ const GOALS: GoalConfig[] = [
   {
     id: "resume",
     title: "Apply for a Position",
-    description: "Resume tailoring, cover letters, and job analysis.",
+    description: "Position your background for a specific role and recruiter review.",
     eyebrow: "Application strategy",
     contextCopy:
       "The role context helps Career Ladder understand what the recruiter is likely trying to prove before it rewrites your resume.",
@@ -64,7 +64,7 @@ const GOALS: GoalConfig[] = [
   {
     id: "interviewPrep",
     title: "Prepare for an Interview",
-    description: "Interview prep, mock interviews, and recruiter feedback.",
+    description: "Practice likely questions and prepare stronger proof for the role.",
     eyebrow: "Interview readiness",
     contextCopy:
       "Paste the posting to generate more realistic recruiter-style interview questions and sharper prep notes.",
@@ -306,11 +306,11 @@ export default function JobIntentFlow({
     return (
       <section className="app-screen-card space-y-7">
         <div className="max-w-3xl">
-          <p className="app-kicker">Welcome back to Career Ladder</p>
-          <h2 className="mt-3 text-4xl app-heading">What would you like help with?</h2>
-          <p className="mt-4 text-base leading-7 text-[var(--color-text-muted)]">
-            Choose one primary goal. Career Ladder will ask only for the context needed
-            to guide your next step with a recruiter-aware lens.
+          <p className="app-kicker">Choose your next step</p>
+          <h2 className="mt-3 text-3xl app-heading sm:text-4xl">What would you like help with?</h2>
+          <p className="mt-3 text-base leading-7 text-[var(--color-text-muted)]">
+            Start with one clear goal. Career Ladder will ask only for the context
+            needed to help you move forward with a recruiter-aware lens.
           </p>
         </div>
 
@@ -320,7 +320,7 @@ export default function JobIntentFlow({
               key={goal.id}
               type="button"
               onClick={() => continueFromGoal(goal.id)}
-              className="app-mini-card group min-h-[13rem] text-left transition hover:-translate-y-0.5 hover:shadow-[0_20px_42px_rgba(17,35,63,0.1)]"
+              className="app-mini-card group min-h-[11.5rem] text-left transition hover:-translate-y-0.5 hover:shadow-[0_20px_42px_rgba(17,35,63,0.1)]"
             >
               <span className="app-kicker">{goal.eyebrow}</span>
               <strong className="mt-3 block text-xl app-heading">{goal.title}</strong>

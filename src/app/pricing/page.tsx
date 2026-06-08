@@ -4,7 +4,7 @@ import AnalyticsEvent from "@/components/AnalyticsEvent";
 import CheckoutButton from "@/components/CheckoutButton";
 
 const CREDIT_USES = [
-  { label: "Resume PDF export", cost: "1 credit" },
+  { label: "Resume export", cost: "1 credit" },
   { label: "Cover letter unlock", cost: "1 credit" },
   { label: "Interview prep", cost: "1 credit" }
 ];
@@ -15,14 +15,14 @@ const PACKS = [
     pack: "5" as const,
     credits: "5 credits",
     price: "$19.99",
-    note: "Good for a focused application or two."
+    note: "Good for a focused application push."
   },
   {
     name: "10 Credit Pack",
     pack: "10" as const,
     credits: "10 credits",
     price: "$39.99",
-    note: "Built for multiple applications and export unlocks."
+    note: "Built for multiple roles, letters, and preparation steps."
   }
 ];
 
@@ -45,13 +45,14 @@ export default async function PricingPage({
       <header className="app-product-header px-5 py-5 sm:px-7">
         <div className="relative z-10 flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="app-kicker">Credits preview</p>
+            <p className="app-kicker">Simple unlocks</p>
             <h1 className="mt-2 text-3xl app-heading">
-              Buy credits to unlock exports.
+              Pay only when you want the full material.
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--color-text-primary)]/72">
-              Stripe Checkout handles payment securely. Credits are added to
-              your signed-in account after successful payment.
+              Start with free previews, then use credits to unlock exports,
+              full cover letters, and deeper preparation when the result is useful.
+              Stripe Checkout handles payment securely.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -80,7 +81,7 @@ export default async function PricingPage({
         </div>
         <div>
           <p className="app-kicker">Career materials</p>
-          <strong>Credits apply to exports, letters, and prep.</strong>
+          <strong>Credits apply to exports, letters, and preparation.</strong>
         </div>
       </section>
 

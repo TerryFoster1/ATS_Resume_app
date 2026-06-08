@@ -65,6 +65,16 @@ export default function MasterCareerProfileClient() {
       imports: profile.resumeImports.length
     };
   }, [profile]);
+  const checklist = useMemo(() => {
+    if (!profile) return [];
+    return [
+      { label: "Experience", complete: profile.workExperience.length + profile.volunteerExperience.length + profile.projects.length > 0 },
+      { label: "Education", complete: profile.education.length > 0 },
+      { label: "Skills", complete: profile.skills.length > 0 },
+      { label: "Credentials", complete: profile.certifications.length + profile.awards.length > 0 },
+      { label: "Goals", complete: profile.careerGoals.length + profile.discoveryNotes.length > 0 }
+    ];
+  }, [profile]);
 
   async function fetchProfile() {
     setLoading(true);
@@ -181,7 +191,7 @@ export default function MasterCareerProfileClient() {
           <div>
             <p className="app-kicker">Master Career Profile</p>
             <h1 className="mt-3 text-3xl app-heading sm:text-4xl">
-              Build a living profile Career Ladder can reuse.
+              Your living career profile.
             </h1>
             <p className="mt-4 max-w-2xl text-sm leading-6 text-[var(--color-text-muted)] sm:text-base">
               Your profile is the long-term source of truth. Uploaded resumes, first-resume answers,
@@ -210,15 +220,34 @@ export default function MasterCareerProfileClient() {
         </div>
       </section>
 
+      {profile && (
+        <section className="profile-builder-checklist">
+          <div>
+            <p className="app-kicker">Guided profile builder</p>
+            <h2 className="mt-2 text-2xl app-heading">Build your professional memory section by section.</h2>
+            <p className="mt-2 text-sm leading-6 text-[var(--color-text-muted)]">
+              Complete the sections that help Career Ladder understand your background before generating resumes, pathways, or interview prep.
+            </p>
+          </div>
+          <div className="profile-builder-grid">
+            {checklist.map((item) => (
+              <span key={item.label} className={item.complete ? "is-complete" : ""}>
+                {item.complete ? "Complete" : "Add"} {item.label}
+              </span>
+            ))}
+          </div>
+        </section>
+      )}
+
       <section className="grid gap-5 lg:grid-cols-[0.9fr_1.1fr]">
         <article className="app-mini-card">
-          <p className="app-kicker">Add career evidence</p>
+          <p className="app-kicker">Add evidence</p>
           <h2 className="mt-2 text-2xl app-heading">
             {editing ? "Edit career evidence." : "Add one useful detail."}
           </h2>
           <p className="mt-2 text-sm leading-6 text-[var(--color-text-muted)]">
-            Keep it lightweight. Add work, projects, awards, certifications, goals, or notes that
-            future resume, pathway, and interview prep outputs should remember.
+            Keep it lightweight. Add work, projects, awards, certifications, goals,
+            or notes that future resume, pathway, and interview prep outputs should remember.
           </p>
 
           <div className="mt-5 space-y-4">
@@ -274,7 +303,7 @@ export default function MasterCareerProfileClient() {
         </article>
 
         <article className="app-mini-card">
-          <p className="app-kicker">Current profile evidence</p>
+          <p className="app-kicker">Career memory</p>
           <h2 className="mt-2 text-2xl app-heading">What Career Ladder knows so far</h2>
           {loading ? (
             <p className="mt-4 text-sm text-[var(--color-text-muted)]">Loading profile...</p>
@@ -397,3 +426,4 @@ function formatEditableItem(item: EditableProfileItem) {
   const heading = [item.label, item.organization, item.dateRange].filter(Boolean).join(" | ");
   return [heading, item.detail].filter(Boolean).join(": ");
 }
+
