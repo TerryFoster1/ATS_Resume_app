@@ -97,20 +97,13 @@ export default function StepJobPost({
             <p className="app-kicker">Step two</p>
             <h2 className="mt-2 text-3xl app-heading">Add the role you want</h2>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--color-text-primary)]/72">
-              Add the full posting so Career Ladder can identify what the hiring
-              team is likely trying to prove, where your experience already maps,
-              and what may need clearer framing.
+              Add the full posting so Career Ladder can identify what employers want,
+              compare it against your profile or uploaded resume, and decide what needs
+              clearer role-specific framing before generation.
             </p>
-            <div className="mt-5 grid gap-3 sm:grid-cols-3">
-              {["Requirements", "Responsibilities", "Keywords"].map((label) => (
-                <div key={label} className="app-soft-band px-4 py-3">
-                  <p className="text-xs font-black text-[var(--color-accent-purple)]">
-                    {label}
-                  </p>
-                  <p className="mt-1 text-[11px] leading-4 text-[var(--color-text-muted)]">
-                    Read for evidence, not just matching words.
-                  </p>
-                </div>
+            <div className="flow-roadmap mt-5" aria-label="Application workflow preview">
+              {["Job context", "Employer expectations", "Profile comparison", "Resume strategy"].map((label, index) => (
+                <span key={label}><strong>{index + 1}</strong>{label}</span>
               ))}
             </div>
           </div>

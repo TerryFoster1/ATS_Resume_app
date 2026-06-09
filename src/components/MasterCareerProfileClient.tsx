@@ -67,14 +67,13 @@ export default function MasterCareerProfileClient() {
   }, [profile]);
   const checklist = useMemo(() => {
     if (!profile) return [];
-    return [
-      { label: "Experience", complete: profile.workExperience.length + profile.volunteerExperience.length + profile.projects.length > 0 },
-      { label: "Education", complete: profile.education.length > 0 },
-      { label: "Skills", complete: profile.skills.length > 0 },
-      { label: "Credentials", complete: profile.certifications.length + profile.awards.length > 0 },
-      { label: "Goals", complete: profile.careerGoals.length + profile.discoveryNotes.length > 0 }
-    ];
+    return buildProfileChecklist(profile);
   }, [profile]);
+  const profileCompletion = useMemo(() => {
+    if (!checklist.length) return 0;
+    return Math.round((checklist.filter((item) => item.complete).length / checklist.length) * 100);
+  }, [checklist]);
+  const missingGuidance = useMemo(() => checklist.filter((item) => !item.complete).slice(0, 4), [checklist]);
 
   async function fetchProfile() {
     setLoading(true);
@@ -222,12 +221,19 @@ export default function MasterCareerProfileClient() {
 
       {profile && (
         <section className="profile-builder-checklist">
-          <div>
-            <p className="app-kicker">Guided profile builder</p>
-            <h2 className="mt-2 text-2xl app-heading">Build your professional memory section by section.</h2>
-            <p className="mt-2 text-sm leading-6 text-[var(--color-text-muted)]">
-              Complete the sections that help Career Ladder understand your background before generating resumes, pathways, or interview prep.
-            </p>
+          <div className="profile-completion-panel">
+            <div>
+              <p className="app-kicker">Guided profile builder</p>
+              <h2 className="mt-2 text-2xl app-heading">Your profile is {profileCompletion}% complete.</h2>
+              <p className="mt-2 text-sm leading-6 text-[var(--color-text-muted)]">
+                Career Ladder uses this profile as the shared context for planning, applications,
+                interviews, and future opportunities. Add enough evidence for the platform to stop
+                guessing and start connecting your experience across workflows.
+              </p>
+            </div>
+            <div className="profile-completion-meter" aria-label={"Profile " + profileCompletion + "% complete"}>
+              <span style={{ width: profileCompletion + "%" }} />
+            </div>
           </div>
           <div className="profile-builder-grid">
             {checklist.map((item) => (
@@ -235,6 +241,26 @@ export default function MasterCareerProfileClient() {
                 {item.complete ? "Complete" : "Add"} {item.label}
               </span>
             ))}
+          </div>
+          {missingGuidance.length ? (
+            <div className="profile-guidance-grid">
+              {missingGuidance.map((item) => (
+                <article key={item.label}>
+                  <strong>{item.label}</strong>
+                  <p>{item.why}</p>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <div className="profile-ready-panel">
+              <strong>Your profile has enough core evidence to power the main journeys.</strong>
+              <p>Keep adding details as your career changes so future resumes, pathways, and interview prep stay connected.</p>
+            </div>
+          )}
+          <div className="profile-next-actions">
+            <a href="/?step=intake" className="app-button-primary">Plan my next move</a>
+            <a href="/?step=resume" className="app-button-ghost">Tailor an application</a>
+            <a href="/dashboard" className="profile-next-link">Continue in dashboard</a>
           </div>
         </section>
       )}
@@ -344,6 +370,23 @@ export default function MasterCareerProfileClient() {
       </section>
     </div>
   );
+}
+
+type ProfileChecklistItem = {
+  label: string;
+  complete: boolean;
+  why: string;
+};
+
+function buildProfileChecklist(profile: MasterCareerProfile): ProfileChecklistItem[] {
+  return [
+    { label: "Work or responsibility", complete: profile.workExperience.length + profile.projects.length > 0, why: "Work, projects, side hustles, or trusted responsibility give recruiters proof to evaluate." },
+    { label: "Volunteer or community evidence", complete: profile.volunteerExperience.length + profile.extracurriculars.length > 0, why: "Community, clubs, sports, and informal responsibility often reveal leadership, service, and follow-through." },
+    { label: "Education or training", complete: profile.education.length > 0, why: "Education, coursework, and training help Career Ladder explain credentials or equivalent evidence." },
+    { label: "Skills, tools, or languages", complete: profile.skills.length >= 3, why: "Tools, software, languages, and practical skills help match your profile to real role requirements." },
+    { label: "Credentials or recognition", complete: profile.certifications.length + profile.awards.length + profile.achievements.length > 0, why: "Certifications, awards, and achievements help prove readiness without overstating your experience." },
+    { label: "Career goals", complete: profile.careerGoals.length + profile.discoveryNotes.length > 0, why: "Goals help Career Ladder recommend the next journey instead of treating every workflow as a separate tool." }
+  ];
 }
 
 function ProfileStat({ label, value }: { label: string; value: number }) {

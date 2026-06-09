@@ -396,6 +396,12 @@ export default function SavedOutputDocuments({
         ))}
       </section>
 
+      <section className="opportunity-story-strip" aria-label="Opportunity progression">
+        {["Position yourself", "Prepare", "Plan", "Manage", "Decide"].map((step, index) => (
+          <span key={step}><strong>{index + 1}</strong>{step}</span>
+        ))}
+      </section>
+
       <section className="opportunity-next-panel">
         <div>
           <p className="app-kicker">Recommended progression</p>

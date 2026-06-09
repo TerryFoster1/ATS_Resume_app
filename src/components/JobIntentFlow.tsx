@@ -314,6 +314,8 @@ export default function JobIntentFlow({
           </p>
         </div>
 
+        <JourneyModelStrip />
+
         <div className="grid gap-4 lg:grid-cols-3">
           {GOALS.map((goal) => (
             <button
@@ -353,6 +355,8 @@ export default function JobIntentFlow({
           }}
           backLabel="Change goal"
         />
+
+        <FlowRoadmap goal={selectedConfig?.id ?? null} />
 
         <div className="grid gap-4 lg:grid-cols-[0.8fr_0.8fr_1.4fr]">
           <label className="block text-sm font-black text-[var(--color-text-primary)]">
@@ -446,6 +450,8 @@ export default function JobIntentFlow({
         backLabel="Edit role context"
       />
 
+      <ProfileContextPanel goal={selectedConfig?.id ?? null} hasResumeContext={hasResumeContext} />
+
       <section className="grid gap-4 lg:grid-cols-[1.08fr_0.92fr]">
         <div className="app-mini-card bg-gradient-to-br from-white to-[#eef6ff]">
           <div className="flex flex-wrap items-center justify-between gap-3">
@@ -535,6 +541,35 @@ export default function JobIntentFlow({
   );
 }
 
+function JourneyModelStrip() {
+  return <div className="career-journey-strip" aria-label="Career Ladder journeys"><span><strong>1</strong> Build your profile</span><span><strong>2</strong> Plan your direction</span><span><strong>3</strong> Win opportunities</span></div>;
+}
+
+function FlowRoadmap({ goal }: { goal: GoalId | null }) {
+  const steps = goal === "interviewPrep" ? ["Analyze the role", "Identify recruiter expectations", "Generate likely questions", "Practice with feedback"] : ["Add role context", "Read what employers want", "Compare with your profile", "Generate stronger materials"];
+  return <div className="flow-roadmap" aria-label="Workflow preview">{steps.map((step, index) => <span key={step}><strong>{index + 1}</strong>{step}</span>)}</div>;
+}
+
+function ProfileContextPanel({ goal, hasResumeContext }: { goal: GoalId | null; hasResumeContext: boolean }) {
+  const items = goal === "interviewPrep" ? ["saved profile evidence", "uploaded resume details", "role requirements", "likely recruiter concerns"] : ["saved profile evidence", "uploaded resume details", "target role requirements", "transferable strengths"];
+  return (
+    <section className="profile-context-panel">
+      <div><p className="app-kicker">Using your career profile</p><h3 className="mt-2 text-xl app-heading">Career Ladder keeps the context connected.</h3><p className="mt-2 text-sm leading-6 text-[var(--color-text-muted)]">{hasResumeContext ? "Your uploaded resume will work with any saved profile evidence for this step." : "If you have saved profile evidence, Career Ladder can use it before relying on this upload alone."}</p></div>
+      <div className="profile-context-tags">{items.map((item) => <span key={item}>{item}</span>)}</div>
+    </section>
+  );
+}
+
+function FirstResumeCoverageGuide() {
+  const areas = ["Work or responsibility", "Education or coursework", "Volunteer or community", "Sports, clubs, or activities", "Projects or side hustles", "Awards or recognition", "Languages, software, or tools", "Career goals"];
+  return (
+    <section className="first-resume-coverage">
+      <div><p className="app-kicker">Profile builder interview</p><h3 className="mt-2 text-xl app-heading">We will look for experience people often leave out.</h3><p className="mt-2 text-sm leading-6 text-[var(--color-text-muted)]">The goal is not to fill a template. It is to uncover evidence that can become your first career profile.</p></div>
+      <div className="first-resume-coverage-grid">{areas.map((area) => <span key={area}>{area}</span>)}</div>
+    </section>
+  );
+}
+
 function FirstResumeDiscovery({
   onBack,
   onComplete
@@ -620,6 +655,7 @@ function FirstResumeDiscovery({
         onBack={onBack}
         backLabel="Change goal"
       />
+      <FirstResumeCoverageGuide />
       <div className="grid gap-4 md:grid-cols-2">
         <DiscoveryPrompt
           label="Responsibility or leadership"

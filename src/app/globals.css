@@ -4210,15 +4210,133 @@ body {
     color: #22796f;
   }
 
+  .career-journey-strip,
+  .flow-roadmap,
+  .opportunity-story-strip {
+    display: grid;
+    gap: 10px;
+  }
+
+  .career-journey-strip span,
+  .flow-roadmap span,
+  .opportunity-story-strip span {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    border-radius: 18px;
+    border: 1px solid rgba(196, 213, 229, 0.72);
+    background: rgba(255, 255, 255, 0.92);
+    padding: 12px 14px;
+    color: #65748a;
+    font-size: 13px;
+    font-weight: 850;
+    box-shadow: 0 12px 28px rgba(17, 35, 63, 0.055);
+  }
+
+  .career-journey-strip strong,
+  .flow-roadmap strong,
+  .opportunity-story-strip strong {
+    display: inline-flex;
+    height: 28px;
+    width: 28px;
+    flex: 0 0 28px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: #eef6ff;
+    color: #245f9f;
+    font-size: 12px;
+    font-weight: 950;
+  }
+
+  .flow-roadmap span:nth-child(2) strong,
+  .opportunity-story-strip span:nth-child(2) strong {
+    background: rgba(81, 55, 245, 0.1);
+    color: #5137f5;
+  }
+
+  .flow-roadmap span:nth-child(3) strong,
+  .opportunity-story-strip span:nth-child(3) strong {
+    background: rgba(64, 179, 162, 0.12);
+    color: #22796f;
+  }
+
+  .profile-context-panel,
+  .first-resume-coverage,
+  .profile-ready-panel {
+    border-radius: 24px;
+    border: 1px solid rgba(196, 213, 229, 0.72);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(238, 246, 255, 0.82));
+    padding: 18px;
+    box-shadow: 0 16px 42px rgba(17, 35, 63, 0.065);
+  }
+
+  .profile-context-panel {
+    display: grid;
+    gap: 16px;
+  }
+
+  .profile-context-tags,
+  .first-resume-coverage-grid,
+  .profile-guidance-grid,
+  .profile-next-actions {
+    display: grid;
+    gap: 10px;
+  }
+
+  .profile-context-tags span,
+  .first-resume-coverage-grid span {
+    border-radius: 999px;
+    background: #ffffff;
+    padding: 10px 12px;
+    color: #245f9f;
+    font-size: 12px;
+    font-weight: 900;
+    text-align: center;
+    box-shadow: var(--shadow-inset-soft);
+  }
+
+  .profile-completion-panel { display: grid; gap: 14px; }
+  .profile-completion-meter { overflow: hidden; height: 12px; border-radius: 999px; background: #e6edf4; }
+  .profile-completion-meter span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(135deg, #102033, #5137f5 56%, #2f80ed); }
+  .profile-guidance-grid article { border-radius: 18px; background: #ffffff; padding: 14px; box-shadow: var(--shadow-inset-soft); }
+  .profile-guidance-grid strong, .profile-ready-panel strong { display: block; color: #11233f; font-size: 14px; font-weight: 950; }
+  .profile-guidance-grid p, .profile-ready-panel p { margin-top: 6px; color: #65748a; font-size: 13px; line-height: 1.55; font-weight: 650; }
+  .profile-next-actions { align-items: center; }
+  .profile-next-link { justify-self: start; color: #245f9f; font-size: 13px; font-weight: 900; }
+  .mock-flow-roadmap { margin-top: -6px; }
+
   @media (min-width: 760px) {
     .dashboard-journey-grid,
     .upload-insight-flow,
-    .profile-builder-grid {
+    .profile-builder-grid,
+    .career-journey-strip,
+    .first-resume-coverage-grid,
+    .profile-guidance-grid {
       grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
+    .flow-roadmap,
     .coach-journey-strip {
       grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .profile-context-panel {
+      grid-template-columns: 0.95fr 1.05fr;
+      align-items: center;
+    }
+
+    .profile-context-tags {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .profile-next-actions {
+      grid-template-columns: max-content max-content 1fr;
+    }
+
+    .opportunity-story-strip {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
     }
   }
 .dashboard-empty-state {

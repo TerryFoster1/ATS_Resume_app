@@ -359,6 +359,8 @@ export default function MockInterviewClient({
         </div>
       </header>
 
+      <InterviewJourneyStrip />
+
       {error && (
         <p className="rounded-[20px] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-900">
           {error}
@@ -474,6 +476,11 @@ export default function MockInterviewClient({
       </div>
     </section>
   );
+}
+
+function InterviewJourneyStrip() {
+  const steps = ["Job analysis", "Recruiter evaluation focus", "Practice questions", "Hiring-manager feedback"];
+  return <div className="flow-roadmap mock-flow-roadmap" aria-label="Interview preparation flow">{steps.map((step, index) => <span key={step}><strong>{index + 1}</strong>{step}</span>)}</div>;
 }
 
 function GenerationProgressPanel({
