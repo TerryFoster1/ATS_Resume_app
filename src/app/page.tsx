@@ -25,6 +25,21 @@ const HELP_ITEMS = [
   }
 ];
 
+const HOMEPAGE_JOURNEYS = [
+  {
+    title: "Build My Career Profile",
+    body: "Turn your experience into one profile Career Ladder can keep improving."
+  },
+  {
+    title: "Plan My Career",
+    body: "Explore realistic paths, transferable skills, and practical next steps."
+  },
+  {
+    title: "Win Opportunities",
+    body: "Tailor applications and prepare for interviews with clearer direction."
+  }
+];
+
 const HOW_IT_WORKS = [
   {
     title: "Add your resume",
@@ -105,12 +120,11 @@ function LandingPage() {
       <section className="cl-v2-hero">
         <div className="cl-v2-hero-copy">
           <h2>
-            Not getting interviews?
-            <span>Let's fix what's holding you back.</span>
+            Your Future Starts With
+            <span>The Right Career</span>
           </h2>
           <p>
-            Career Ladder reviews your resume, identifies gaps, translates your experience
-            into recruiter-ready language, and helps you prepare for the jobs you actually want.
+            Find your path, build a standout resume, and prepare for interviews — all in one place.
           </p>
           <div className="cl-v2-actions">
             <Link href="/?step=resume" className="app-button-primary text-base">
@@ -127,6 +141,14 @@ function LandingPage() {
             <span>Free to get started</span>
             <span>No credit card required</span>
             <span>Save your career profile</span>
+          </div>
+          <div className="cl-v2-journey-tiles" aria-label="Career Ladder journeys">
+            {HOMEPAGE_JOURNEYS.map((journey) => (
+              <article key={journey.title}>
+                <strong>{journey.title}</strong>
+                <span>{journey.body}</span>
+              </article>
+            ))}
           </div>
         </div>
         <ExperienceTranslationVisual />

@@ -570,6 +570,43 @@ function FirstResumeCoverageGuide() {
   );
 }
 
+type FirstResumeSectionKey =
+  | "personalInfo"
+  | "workExperience"
+  | "education"
+  | "volunteerWork"
+  | "projects"
+  | "skills"
+  | "toolsSoftware"
+  | "equipmentTools"
+  | "languages"
+  | "awards"
+  | "hobbies"
+  | "careerGoals";
+
+type FirstResumeSection = {
+  key: FirstResumeSectionKey;
+  title: string;
+  explanation: string;
+  prompt: string;
+  placeholder: string;
+};
+
+const FIRST_RESUME_SECTIONS: FirstResumeSection[] = [
+  { key: "personalInfo", title: "Personal Info", explanation: "Basic contact and location details make the resume usable.", prompt: "What name, city, email, phone, or LinkedIn should this resume use?", placeholder: "Name, city, email, phone, LinkedIn..." },
+  { key: "workExperience", title: "Work Experience", explanation: "Paid or informal work gives recruiters proof of responsibility.", prompt: "Have you worked a job, helped a family business, done babysitting, tutoring, delivery, retail, food service, or other paid work?", placeholder: "Describe the role, where it happened, and what you were trusted to do." },
+  { key: "education", title: "Education", explanation: "School, coursework, and training help explain your current foundation.", prompt: "What school, program, coursework, training, or graduation details should be included?", placeholder: "School, program, relevant courses, graduation year..." },
+  { key: "volunteerWork", title: "Volunteer Work", explanation: "Volunteer and community experience can show service, trust, and follow-through.", prompt: "Have you volunteered, helped at events, supported community groups, or taken responsibility without being paid?", placeholder: "What you helped with, who benefited, and what responsibility you had." },
+  { key: "projects", title: "Projects", explanation: "Projects prove initiative, learning, creativity, and execution.", prompt: "Have you built, organized, created, researched, fixed, designed, or launched anything?", placeholder: "School project, portfolio piece, online project, event, side project..." },
+  { key: "skills", title: "Skills", explanation: "Skills help Career Ladder translate your experience into recruiter-readable language.", prompt: "What are you good at? Include communication, organization, problem solving, customer service, writing, analysis, teamwork, or leadership.", placeholder: "Communication, customer service, organization, writing..." },
+  { key: "toolsSoftware", title: "Tools & Software", explanation: "Software and tools often make a candidate look more ready for the role.", prompt: "What apps, platforms, software, or digital tools have you used?", placeholder: "Excel, Google Docs, Canva, POS systems, CRM tools, social platforms..." },
+  { key: "equipmentTools", title: "Equipment / Physical Tools", explanation: "Physical tools and equipment can show safety, precision, trade exposure, and practical judgment.", prompt: "Have you used equipment, machinery, kitchen tools, shop tools, lab tools, devices, or safety gear?", placeholder: "Kitchen equipment, power tools, cash systems, lab equipment..." },
+  { key: "languages", title: "Languages", explanation: "Languages can support customer-facing, service, community, and global roles.", prompt: "What languages do you speak, read, or write?", placeholder: "English, French, Spanish, Arabic... include comfort level if useful." },
+  { key: "awards", title: "Awards", explanation: "Recognition can prove reliability, achievement, growth, and trust.", prompt: "Have you received awards, scholarships, honors, certificates, promotions, praise, or recognition?", placeholder: "Award name, who gave it, and what it recognized." },
+  { key: "hobbies", title: "Hobbies / Interests", explanation: "Interests can reveal career direction and hidden strengths when used carefully.", prompt: "What hobbies, interests, communities, or topics do you spend time on?", placeholder: "Sports, coding, photography, gaming communities, writing, fitness..." },
+  { key: "careerGoals", title: "Career Goals", explanation: "Goals help Career Ladder recommend the right next step instead of creating a generic resume.", prompt: "What kind of job, industry, lifestyle, or future are you aiming toward?", placeholder: "I want a first job in retail, a stable office role, remote work, trades exposure..." }
+];
+
 function FirstResumeDiscovery({
   onBack,
   onComplete
@@ -577,32 +614,29 @@ function FirstResumeDiscovery({
   onBack: () => void;
   onComplete: (resumeDraft: string, profileContext: string) => void;
 }) {
-  const [responsibility, setResponsibility] = useState("");
-  const [helping, setHelping] = useState("");
-  const [recognition, setRecognition] = useState("");
-  const [community, setCommunity] = useState("");
-  const [goals, setGoals] = useState("");
+  const [answers, setAnswers] = useState<Record<FirstResumeSectionKey, string>>(() =>
+    Object.fromEntries(FIRST_RESUME_SECTIONS.map((section) => [section.key, ""])) as Record<FirstResumeSectionKey, string>
+  );
+  const [activeKey, setActiveKey] = useState<FirstResumeSectionKey>("personalInfo");
   const [savingProfile, setSavingProfile] = useState(false);
-  const signals = inferTransferableSkillSignals(
-    [responsibility, helping, recognition, community, goals].join("\n"),
-    goals
-  );
-  const canContinue = [responsibility, helping, recognition, community, goals].some(
-    (value) => value.trim().length >= 12
-  );
+  const activeSection = FIRST_RESUME_SECTIONS.find((section) => section.key === activeKey) ?? FIRST_RESUME_SECTIONS[0];
+  const completedSections = FIRST_RESUME_SECTIONS.filter((section) => answers[section.key].trim().length >= 8);
+  const canContinue = completedSections.length >= 2 || answers.careerGoals.trim().length >= 12;
+  const combinedContext = FIRST_RESUME_SECTIONS
+    .map((section) => answers[section.key].trim() ? section.title + ": " + answers[section.key].trim() : "")
+    .filter(Boolean)
+    .join("\n");
+  const signals = inferTransferableSkillSignals(combinedContext, answers.careerGoals);
+
+  function updateAnswer(key: FirstResumeSectionKey, value: string) {
+    setAnswers((current) => ({ ...current, [key]: value }));
+  }
 
   async function complete() {
     if (!canContinue) return;
-    const profileContext = [
-      responsibility && `Responsibility or leadership: ${responsibility}`,
-      helping && `People, service, or teamwork: ${helping}`,
-      recognition && `Recognition or achievements: ${recognition}`,
-      community && `School, club, community, or activity experience: ${community}`,
-      goals && `Career direction: ${goals}`
-    ].filter(Boolean).join("\n");
-    const skills = inferFirstResumeSkills(profileContext);
+    const skills = inferFirstResumeSkills(combinedContext);
     const resumeDraft = [
-      "Candidate",
+      answers.personalInfo.trim() || "Candidate",
       "",
       "PROFESSIONAL SUMMARY",
       "Emerging professional with experience that can be framed through responsibility, service, teamwork, learning agility, and follow-through.",
@@ -611,13 +645,13 @@ function FirstResumeDiscovery({
       skills.join(", "),
       "",
       "EXPERIENCE AND ACTIVITIES",
-      responsibility && `- ${responsibility}`,
-      helping && `- ${helping}`,
-      community && `- ${community}`,
-      recognition && `- ${recognition}`,
+      ...FIRST_RESUME_SECTIONS
+        .filter((section) => !["personalInfo", "skills", "careerGoals"].includes(section.key))
+        .map((section) => answers[section.key].trim() ? "- " + section.title + ": " + answers[section.key].trim() : "")
+        .filter(Boolean),
       "",
-      goals && "CAREER GOALS",
-      goals && `- ${goals}`
+      answers.careerGoals.trim() ? "CAREER GOALS" : "",
+      answers.careerGoals.trim() ? "- " + answers.careerGoals.trim() : ""
     ].filter(Boolean).join("\n");
     setSavingProfile(true);
     try {
@@ -626,16 +660,16 @@ function FirstResumeDiscovery({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           action: "firstResumeDiscovery",
-          responsibilities: responsibility || undefined,
-          helpingExperience: helping || undefined,
-          recognition: recognition || undefined,
-          schoolCommunity: community || undefined,
-          goals: goals || undefined
+          responsibilities: [answers.workExperience, answers.projects, answers.equipmentTools].filter(Boolean).join("\n") || undefined,
+          helpingExperience: [answers.volunteerWork, answers.hobbies].filter(Boolean).join("\n") || undefined,
+          recognition: answers.awards || undefined,
+          schoolCommunity: [answers.education, answers.languages, answers.toolsSoftware].filter(Boolean).join("\n") || undefined,
+          goals: answers.careerGoals || undefined
         })
       });
       const data = (await response.json().catch(() => ({}))) as { resumeText?: string };
       if (response.ok && data.resumeText) {
-        onComplete(data.resumeText, profileContext);
+        onComplete(data.resumeText, combinedContext);
         return;
       }
     } catch {
@@ -643,91 +677,84 @@ function FirstResumeDiscovery({
     } finally {
       setSavingProfile(false);
     }
-    onComplete(resumeDraft, profileContext);
+    onComplete(resumeDraft, combinedContext);
   }
 
   return (
     <section className="app-screen-card space-y-7">
       <FlowHeader
         eyebrow="My first resume"
-        title="Let's find experience worth translating."
-        body="You do not need polished resume bullets yet. Answer in plain language and Career Ladder will turn responsibility, service, activities, and recognition into a professional starting point."
+        title="Build your first resume from real life experience."
+        body="Use the checklist to uncover work, school, community, tools, languages, interests, and goals. Career Ladder will turn the useful pieces into recruiter-readable evidence."
         onBack={onBack}
         backLabel="Change goal"
       />
-      <FirstResumeCoverageGuide />
-      <div className="grid gap-4 md:grid-cols-2">
-        <DiscoveryPrompt
-          label="Responsibility or leadership"
-          value={responsibility}
-          onChange={setResponsibility}
-          prompt="Have you ever been trusted with responsibility, leadership, opening or closing, training, organizing, or keeping something on track?"
-        />
-        <DiscoveryPrompt
-          label="People, service, or teamwork"
-          value={helping}
-          onChange={setHelping}
-          prompt="Have you helped customers, classmates, teammates, coworkers, family members, or community groups solve problems or get things done?"
-        />
-        <DiscoveryPrompt
-          label="Recognition or achievement"
-          value={recognition}
-          onChange={setRecognition}
-          prompt="Have you received recognition, awards, scholarships, honors, good feedback, promotions, or trusted responsibilities?"
-        />
-        <DiscoveryPrompt
-          label="Activities and community"
-          value={community}
-          onChange={setCommunity}
-          prompt="Have you helped organize clubs, teams, school events, sports, volunteering, community activities, or informal projects?"
-        />
-      </div>
+      <section className="first-resume-builder-grid">
+        <div className="first-resume-checklist-panel">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="app-kicker">Guided checklist</p>
+              <h3 className="mt-2 text-xl app-heading">{completedSections.length} of {FIRST_RESUME_SECTIONS.length} sections started</h3>
+            </div>
+            <span className="upload-insight-status">Profile builder</span>
+          </div>
+          <div className="first-resume-section-list">
+            {FIRST_RESUME_SECTIONS.map((section) => {
+              const complete = answers[section.key].trim().length >= 8;
+              return (
+                <button
+                  type="button"
+                  key={section.key}
+                  onClick={() => setActiveKey(section.key)}
+                  className={activeKey === section.key ? "is-active" : ""}
+                >
+                  <span>{complete ? "Started" : "Start"}</span>
+                  <strong>{section.title}</strong>
+                  <small>{section.explanation}</small>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+        <div className="first-resume-editor-panel">
+          <p className="app-kicker">{answers[activeSection.key].trim().length >= 8 ? "Editing section" : "Start section"}</p>
+          <h3 className="mt-2 text-2xl app-heading">{activeSection.title}</h3>
+          <p className="mt-2 text-sm leading-6 text-[var(--color-text-muted)]">{activeSection.prompt}</p>
+          <textarea
+            value={answers[activeSection.key]}
+            onChange={(event) => updateAnswer(activeSection.key, event.target.value)}
+            className="app-input mt-4 min-h-[11rem] resize-y"
+            placeholder={activeSection.placeholder}
+          />
+          <div className="mt-4 flex flex-wrap gap-2">
+            {FIRST_RESUME_SECTIONS.map((section) => (
+              <button
+                key={section.key}
+                type="button"
+                onClick={() => setActiveKey(section.key)}
+                className={section.key === activeKey ? "first-resume-mini-nav is-active" : "first-resume-mini-nav"}
+              >
+                {section.title}
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
       <section className="app-mini-card bg-gradient-to-br from-white to-[#eef6ff]">
         <p className="app-kicker">What this can prove</p>
         <h3 className="mt-2 text-2xl app-heading">Career Ladder looks for professional evidence, not perfect resume language.</h3>
         <div className="mt-4 grid gap-3 md:grid-cols-3">
           {signals.slice(0, 3).map((signal) => (
             <article key={signal.mapsTo} className="rounded-[18px] bg-white px-4 py-3 shadow-[var(--shadow-inset-soft)]">
-              <strong className="block text-sm font-black text-[var(--color-text-primary)]">
-                {signal.source}
-              </strong>
-              <span className="mt-2 block text-sm leading-6 text-[var(--color-text-muted)]">
-                Can support {signal.mapsTo}. In resume language: {signal.recruiterLanguage}
-              </span>
-              <span className="mt-2 block text-xs font-semibold leading-5 text-[var(--color-text-muted)]">
-                Evidence to look for: {signal.evidenceExamples.slice(0, 2).join("; ")}.
-              </span>
+              <strong className="block text-sm font-black text-[var(--color-text-primary)]">{signal.source}</strong>
+              <span className="mt-2 block text-sm leading-6 text-[var(--color-text-muted)]">Can support {signal.mapsTo}. In resume language: {signal.recruiterLanguage}</span>
+              <span className="mt-2 block text-xs font-semibold leading-5 text-[var(--color-text-muted)]">Evidence to look for: {signal.evidenceExamples.slice(0, 2).join("; ")}.</span>
             </article>
           ))}
         </div>
       </section>
-      <section className="app-mini-card">
-        <p className="app-kicker">Experience people overlook</p>
-        <h3 className="mt-2 text-2xl app-heading">Your first resume can start from real responsibility, not job titles.</h3>
-        <div className="mt-4 grid gap-3 md:grid-cols-4">
-          {FIRST_RESUME_EXAMPLES.map((item) => (
-            <article key={item.label} className="rounded-[18px] bg-white px-4 py-3 shadow-[var(--shadow-inset-soft)]">
-              <strong className="block text-sm font-black text-[var(--color-text-primary)]">{item.label}</strong>
-              <span className="mt-2 block text-xs font-semibold leading-5 text-[var(--color-text-muted)]">
-                May show {item.signal}.
-              </span>
-              <span className="mt-2 block text-xs leading-5 text-[var(--color-text-muted)]">
-                {item.why}
-              </span>
-            </article>
-          ))}
-        </div>
-      </section>
-      <DiscoveryPrompt
-        label="Career direction"
-        value={goals}
-        onChange={setGoals}
-        prompt="What kind of role, work environment, or future step are you curious about right now?"
-      />
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="max-w-2xl text-xs font-semibold leading-5 text-[var(--color-text-muted)]">
-          The first draft is a starting point. You can upload a resume later and keep enriching your Master Career Profile over time.
-        </p>
+        <p className="max-w-2xl text-xs font-semibold leading-5 text-[var(--color-text-muted)]">You do not need to complete every section today. Add enough real evidence to create a credible starting draft.</p>
         <button type="button" disabled={!canContinue || savingProfile} onClick={() => void complete()} className="app-button-primary disabled:cursor-not-allowed disabled:opacity-50">
           {savingProfile ? "Building profile..." : "Create first resume draft"}
         </button>
@@ -1007,3 +1034,4 @@ function persistContext(context: JobContext) {
 function isJobIntent(value: GoalId): value is JobIntent {
   return value === "resume" || value === "resumeCoverLetter" || value === "interviewPrep" || value === "mockInterview" || value === "careerPathway";
 }
+

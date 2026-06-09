@@ -1,21 +1,18 @@
-﻿"use client";
+"use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link";
+import { useCallback, useState } from "react";
 import LoadingIndicator from "@/components/LoadingIndicator";
 import StepIndicator from "@/components/StepIndicator";
-import { SearchCardGraphic } from "@/components/VisualDecor";
 import type { AnalyzeResponse } from "@/lib/types";
 
-// Cycling subtexts shown under "Analyzing the job postingâ€¦" while
-// /api/analyze is in flight. The phases are descriptive rather than
-// literal â€” the analyze route runs the coverage engine in a single LLM
-// call, but rotating these gives the user the sense that work is
-// happening rather than the screen having frozen.
 const ANALYZE_SUBTEXTS = [
-  "Reading the posting like a recruiter",
-  "Separating real requirements from company background copy",
-  "Identifying likely proof, gap, and transferability signals"
+  "Reading the role like a recruiter",
+  "Breaking down what the employer needs",
+  "Comparing the role against your resume evidence"
 ];
+
+type TargetMode = "description" | "title" | "saved";
 
 interface Props {
   value: string;
@@ -34,23 +31,35 @@ export default function StepJobPost({
   resumeText,
   onAnalyzed
 }: Props) {
-  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
-  const analyzeButtonRef = useRef<HTMLButtonElement | null>(null);
+  const [mode, setMode] = useState<TargetMode>("description");
+  const [jobTitle, setJobTitle] = useState("");
+  const [jobDescription, setJobDescription] = useState(value);
   const [analyzing, setAnalyzing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const analyzeAndContinue = useCallback(async () => {
     if (analyzing) return;
+    if (mode === "saved") {
+      setError("Open a saved opportunity from your dashboard, or choose another targeting option here.");
+      return;
+    }
 
-    const jobPostText = textareaRef.current?.value ?? "";
-    onChange(jobPostText);
-    if (jobPostText.trim().length < 50) {
-      setError("Paste a little more of the job posting before analyzing.");
+    const jobPostText = mode === "title"
+      ? buildJobTitleOnlyContext(jobTitle)
+      : jobDescription.trim();
+
+    if (mode === "title" && jobTitle.trim().length < 2) {
+      setError("Enter the job title you want to target.");
+      return;
+    }
+    if (mode === "description" && jobPostText.length < 50) {
+      setError("Paste a little more of the job description before analyzing.");
       return;
     }
 
     setAnalyzing(true);
     setError(null);
+    onChange(jobPostText);
     try {
       const res = await fetch("/api/analyze", {
         method: "POST",
@@ -62,112 +71,116 @@ export default function StepJobPost({
       onAnalyzed(data);
       onNext();
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Could not analyze the job post."
-      );
+      setError(err instanceof Error ? err.message : "Could not analyze this role.");
     } finally {
       setAnalyzing(false);
     }
-  }, [analyzing, onAnalyzed, onChange, onNext, resumeText]);
+  }, [analyzing, jobDescription, jobTitle, mode, onAnalyzed, onChange, onNext, resumeText]);
 
-  useEffect(() => {
-    const textarea = textareaRef.current;
-    if (!textarea) return;
-
-    const handleInput = () => onChange(textarea.value);
-    textarea.addEventListener("input", handleInput);
-    return () => textarea.removeEventListener("input", handleInput);
-  }, [onChange]);
-
-  useEffect(() => {
-    const button = analyzeButtonRef.current;
-    if (!button) return;
-
-    button.addEventListener("click", analyzeAndContinue);
-    return () => button.removeEventListener("click", analyzeAndContinue);
-  }, [analyzeAndContinue]);
+  function updateDescription(next: string) {
+    setJobDescription(next);
+    onChange(next);
+  }
 
   return (
     <section className="space-y-5">
-      <StepIndicator current={2} total={4} label="Job post" />
+      <StepIndicator current={2} total={4} label="Target role" />
 
       <div className="app-screen-card space-y-6">
-        <div className="grid gap-5 lg:grid-cols-[1fr_320px] lg:items-stretch">
-          <div className="app-consult-card p-6 sm:p-7">
-            <p className="app-kicker">Step two</p>
-            <h2 className="mt-2 text-3xl app-heading">Add the role you want</h2>
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--color-text-primary)]/72">
-              Add the full posting so Career Ladder can identify what employers want,
-              compare it against your profile or uploaded resume, and decide what needs
-              clearer role-specific framing before generation.
-            </p>
-            <div className="flow-roadmap mt-5" aria-label="Application workflow preview">
-              {["Job context", "Employer expectations", "Profile comparison", "Resume strategy"].map((label, index) => (
-                <span key={label}><strong>{index + 1}</strong>{label}</span>
-              ))}
-            </div>
-          </div>
-          <div className="app-step-hero hidden p-7 lg:flex lg:items-center lg:justify-center">
-            <SearchCardGraphic className="scale-110" />
-          </div>
+        <div className="max-w-3xl">
+          <h2 className="text-3xl app-heading sm:text-4xl">What job are you targeting?</h2>
+          <p className="mt-3 text-sm leading-6 text-[var(--color-text-muted)] sm:text-base">
+            We&apos;ll break down what the role needs, compare it to your profile, and help position your experience.
+          </p>
         </div>
 
-        <div className="app-work-panel space-y-4 p-5 sm:p-6">
-          <div>
+        <div className="job-target-options" role="tablist" aria-label="Job targeting options">
+          <button type="button" className={mode === "description" ? "is-active" : ""} onClick={() => setMode("description")}>
+            <strong>Paste job description</strong>
+            <span>Best when you have the posting.</span>
+          </button>
+          <button type="button" className={mode === "title" ? "is-active" : ""} onClick={() => setMode("title")}>
+            <strong>Enter job title</strong>
+            <span>Useful for early exploration.</span>
+          </button>
+          <button type="button" className={mode === "saved" ? "is-active" : ""} onClick={() => setMode("saved")}>
+            <strong>Choose saved opportunity</strong>
+            <span>Continue from your dashboard.</span>
+          </button>
+        </div>
+
+        {mode === "description" && (
+          <div className="app-work-panel space-y-4 p-5 sm:p-6">
             <label className="block text-sm font-black text-[var(--color-text-primary)]">
-              Job posting URL
+              Paste the job description
+              <span className="mt-2 block text-sm font-normal leading-6 text-[var(--color-text-muted)]">
+                Add the full posting for the strongest read on requirements, proof gaps, keywords, and likely recruiter concerns.
+              </span>
+              <textarea
+                value={jobDescription}
+                onChange={(event) => updateDescription(event.target.value)}
+                rows={13}
+                className="app-input mt-3 min-h-[22rem] resize-y text-base leading-7"
+                placeholder="Paste the full job description here."
+              />
             </label>
-            <input
-              type="url"
-              disabled
-              className="app-input mt-3 bg-[#f9f4ee] text-[var(--color-text-muted)]"
-              placeholder="Paste the full posting below for now"
-            />
           </div>
+        )}
 
-          <label className="block text-sm font-black text-[var(--color-text-primary)]">
-            Job description
-          </label>
-          <textarea
-            ref={textareaRef}
-            defaultValue={value}
-            onChange={(e) => onChange(e.target.value)}
-            rows={15}
-            className="app-input min-h-[28rem] resize-y text-base leading-7"
-            placeholder="Paste the full job posting here."
-          />
-          {error && <p className="text-xs text-rose-700">{error}</p>}
+        {mode === "title" && (
+          <div className="app-work-panel space-y-4 p-5 sm:p-6">
+            <label className="block text-sm font-black text-[var(--color-text-primary)]">
+              Job title
+              <input
+                value={jobTitle}
+                onChange={(event) => setJobTitle(event.target.value)}
+                className="app-input mt-3"
+                placeholder="Project Manager, Customer Success Manager, Operations Coordinator..."
+              />
+            </label>
+            <p className="rounded-[18px] bg-white px-4 py-3 text-sm leading-6 text-[var(--color-text-muted)] shadow-[var(--shadow-inset-soft)]">
+              Job-title mode uses common role expectations. Paste a full posting later when you want more precise recruiter concerns and keyword coverage.
+            </p>
+          </div>
+        )}
+
+        {mode === "saved" && (
+          <div className="app-work-panel p-5 sm:p-6">
+            <h3 className="text-xl app-heading">Continue from a saved opportunity.</h3>
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--color-text-muted)]">
+              Saved opportunities already have role context, materials, interview prep, and tracking in one workspace.
+            </p>
+            <Link href="/dashboard" className="app-button-primary mt-5 inline-flex">Open dashboard</Link>
+          </div>
+        )}
+
+        <div className="flow-roadmap" aria-label="Application workflow preview">
+          {["Break down role needs", "Compare to your profile", "Position your experience", "Generate materials"].map((label, index) => (
+            <span key={label}><strong>{index + 1}</strong>{label}</span>
+          ))}
         </div>
+
+        {error && <p className="rounded-[18px] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-900">{error}</p>}
       </div>
 
-      {analyzing && (
-        <LoadingIndicator
-          message={"Analyzing the job posting\u2026"}
-          messages={ANALYZE_SUBTEXTS}
-        />
-      )}
+      {analyzing && <LoadingIndicator message="Analyzing the role..." messages={ANALYZE_SUBTEXTS} />}
 
       <div className="flex justify-between">
-        <button
-          type="button"
-          onClick={onBack}
-          disabled={analyzing}
-          className="app-button-secondary"
-        >
-          Back
-        </button>
-        <button
-          ref={analyzeButtonRef}
-          type="button"
-          disabled={analyzing}
-          className="app-button-primary"
-        >
-          {analyzing ? "Analyzing\u2026" : "Analyze"}
+        <button type="button" onClick={onBack} disabled={analyzing} className="app-button-secondary">Back</button>
+        <button type="button" disabled={analyzing || mode === "saved"} onClick={analyzeAndContinue} className="app-button-primary">
+          {analyzing ? "Analyzing..." : mode === "title" ? "Analyze Job Title" : "Analyze Job"}
         </button>
       </div>
     </section>
   );
 }
 
-
-
+function buildJobTitleOnlyContext(title: string) {
+  const cleanTitle = title.trim();
+  return [
+    "Target job title: " + cleanTitle,
+    "",
+    "Analyze typical employer expectations, likely responsibilities, recruiter concerns, transferable skills, and resume positioning for this role.",
+    "Use this as an early role analysis because no full job posting was provided."
+  ].join("\n");
+}

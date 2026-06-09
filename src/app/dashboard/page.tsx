@@ -89,7 +89,40 @@ export default async function DashboardPage({
           <strong>Payment successful.</strong> Your credits are now attached to this account. You can reopen a saved application or start a new one when you are ready.
         </section>
       )}
-      <header className="dashboard-hero">
+      <section className="dashboard-journey-grid dashboard-journey-grid-primary" aria-label="Career Ladder journeys">
+        <JourneyCard
+          step="01"
+          title="Build My Career Profile"
+          body="Complete your profile with the experience Career Ladder should remember."
+          href="/profile"
+          cta="Continue Profile"
+          progressLabel={profileCompleteness + "% complete"}
+          progress={profileCompleteness}
+          details={["Add experience", "Education", "Skills", "Tools", "Languages", "Projects", "Volunteer work"]}
+        />
+        <JourneyCard
+          step="02"
+          title="Plan My Career"
+          body="Explore career paths, get pathway recommendations, and understand your transferable skills."
+          href="/career-coach"
+          cta="Plan My Career"
+          progressLabel={planCount + " pathway" + (planCount === 1 ? "" : "s")}
+          progress={Math.min(100, planCount * 34)}
+          details={["Career paths", "Pathway recommendations", "Transferable skills"]}
+        />
+        <JourneyCard
+          step="03"
+          title="Win Opportunities"
+          body="Tailor resumes, prepare cover letters, and practice interviews for roles you actually want."
+          href="/?step=intake"
+          cta="Start Applying"
+          progressLabel={winCount + " workspace" + (winCount === 1 ? "" : "s")}
+          progress={Math.min(100, winCount * 20)}
+          details={["Resume tailoring", "Cover letters", "Interview practice"]}
+        />
+      </section>
+
+      <header className="dashboard-hero dashboard-hero-secondary">
         <div className="relative z-10 grid gap-6 xl:grid-cols-[1fr_360px] xl:items-center">
           <div className="max-w-3xl">
             <p className="dashboard-eyebrow">Career workspace</p>
@@ -137,39 +170,6 @@ export default async function DashboardPage({
           </div>
         </div>
       </header>
-
-      <section className="dashboard-journey-grid" aria-label="Career Ladder journeys">
-        <JourneyCard
-          step="01"
-          title="Build My Career Profile"
-          body="Keep the evidence Career Ladder should remember: resume imports, projects, skills, credentials, goals, and overlooked experience."
-          href="/profile"
-          cta="Continue profile"
-          progressLabel={`${profileCompleteness}% started`}
-          progress={profileCompleteness}
-          details={profileSignals.map((item) => `${item.ready ? "Saved" : "Add"}: ${item.label}`)}
-        />
-        <JourneyCard
-          step="02"
-          title="Plan My Career"
-          body="Explore realistic paths, transferable strengths, recruiter expectations, and the next practical move."
-          href="/career-coach"
-          cta="Plan next move"
-          progressLabel={`${planCount} pathway${planCount === 1 ? "" : "s"}`}
-          progress={Math.min(100, planCount * 34)}
-          details={["Career Coach", "Career Pathways", "Transferable skills"]}
-        />
-        <JourneyCard
-          step="03"
-          title="Win Opportunities"
-          body="Turn a target role into stronger materials, interview prep, and a clean opportunity workspace."
-          href="/?step=intake"
-          cta="Start application"
-          progressLabel={`${winCount} role workspace${winCount === 1 ? "" : "s"}`}
-          progress={Math.min(100, winCount * 20)}
-          details={[`${unlockedExports} ready material${unlockedExports === 1 ? "" : "s"}`, `${interviewPrepReady} prep plan${interviewPrepReady === 1 ? "" : "s"}`, "Saved opportunity notes"]}
-        />
-      </section>
 
       {recentWork.length > 0 && (
         <section className="dashboard-recent-work">

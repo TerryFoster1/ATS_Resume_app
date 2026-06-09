@@ -133,15 +133,16 @@ export default function StepResume({ value, onChange, onNext }: Props) {
             </div>
 
             <div className="space-y-4">
-              <div className="flex flex-wrap gap-3">
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="app-button-secondary px-5 py-2.5"
-                >
-                  Choose file
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="resume-upload-drop-zone"
+              >
+                <span className="resume-upload-icon" aria-hidden>+</span>
+                <strong>Drag & drop your file here</strong>
+                <span>or choose file</span>
+                <small>PDF, DOCX, DOC, or TXT (max 10MB)</small>
+              </button>
 
               <input
                 ref={fileInputRef}
@@ -153,6 +154,13 @@ export default function StepResume({ value, onChange, onNext }: Props) {
                 onChange={(e) => handleFileSelection(e.currentTarget.files?.[0] ?? null)}
                 className="sr-only"
               />
+
+              <div className="upload-next-checklist">
+                <h4>What happens next</h4>
+                {["We review your resume", "Highlight your strengths", "Identify gaps and keywords", "Recommend next best steps"].map((item) => (
+                  <span key={item}>{item}</span>
+                ))}
+              </div>
 
               <div className="app-soft-band px-4 py-3 text-sm text-[var(--color-text-primary)]">
                 <span className="font-semibold">

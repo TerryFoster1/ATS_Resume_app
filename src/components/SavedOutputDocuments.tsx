@@ -362,7 +362,7 @@ export default function SavedOutputDocuments({
     { id: "resume" as const, label: "Resume", available: hasResume },
     { id: "coverLetter" as const, label: "Cover Letter", available: hasCoverLetter },
     { id: "interview" as const, label: "Interview Prep", available: true },
-    { id: "pathway" as const, label: "Pathway", available: true },
+    { id: "pathway" as const, label: "Career Pathway", available: true },
     { id: "opportunity" as const, label: "Opportunity", available: true }
   ];
 
