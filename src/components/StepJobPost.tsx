@@ -36,6 +36,7 @@ export default function StepJobPost({
   const [jobDescription, setJobDescription] = useState(value);
   const [analyzing, setAnalyzing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const hasResumeContext = resumeText.trim().length >= 50;
 
   const analyzeAndContinue = useCallback(async () => {
     if (analyzing) return;
@@ -93,6 +94,16 @@ export default function StepJobPost({
             We&apos;ll break down what the role needs, compare it to your profile, and help position your experience.
           </p>
         </div>
+
+        {hasResumeContext && (
+          <div className="app-soft-band px-4 py-4 text-sm text-[var(--color-text-primary)]">
+            <strong>Resume Added {"\u2713"}</strong>
+            <span className="mt-2 block leading-6 text-[var(--color-text-muted)]">
+              Career Ladder will combine your uploaded resume, Master Career Profile,
+              transferable skills, and this target role context for the analysis.
+            </span>
+          </div>
+        )}
 
         <div className="job-target-options" role="tablist" aria-label="Job targeting options">
           <button type="button" className={mode === "description" ? "is-active" : ""} onClick={() => setMode("description")}>

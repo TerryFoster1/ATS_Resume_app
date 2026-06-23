@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import LoadingIndicator from "@/components/LoadingIndicator";
 import StepIndicator from "@/components/StepIndicator";
 import { DocumentStackGraphic } from "@/components/VisualDecor";
@@ -30,11 +30,21 @@ export default function StepResume({ value, onChange, onNext }: Props) {
   );
   const [warning, setWarning] = useState<string | null>(null);
   const [tooShort, setTooShort] = useState(false);
+  const [replaceMode, setReplaceMode] = useState(false);
   const resumeText = value.trim();
+  const resumeAvailable = resumeText.length >= 50;
+  const showUploadControls = !resumeAvailable || replaceMode;
+  const resumeLabel = extractedFileName ?? selectedFile?.name ?? "Resume already added";
   const insightPreview = useMemo(
     () => buildUploadInsightPreview(resumeText),
     [resumeText]
   );
+
+  useEffect(() => {
+    if (resumeAvailable) {
+      setHasUploadedResume(true);
+    }
+  }, [resumeAvailable]);
 
   function handleFileSelection(file: File | null) {
     setSelectedFile(file);
@@ -78,6 +88,7 @@ export default function StepResume({ value, onChange, onNext }: Props) {
       if (textareaRef.current) textareaRef.current.value = text;
       setExtractedFileName(file.name);
       setHasUploadedResume(true);
+      setReplaceMode(false);
       setTooShort(false);
       if (data.profileImportWarning) setWarning(data.profileImportWarning);
       else if (data.warning) setWarning(data.warning);
@@ -109,11 +120,14 @@ export default function StepResume({ value, onChange, onNext }: Props) {
           <div className="app-step-hero p-6 sm:p-8">
             <div className="flex h-full flex-col justify-between gap-6">
               <div>
-                <p className="app-kicker">Your experience</p>
-                <h2 className="mt-2 text-3xl app-heading">Bring in your resume</h2>
+                <p className="app-kicker">{resumeAvailable && !replaceMode ? "Resume context" : "Your experience"}</p>
+                <h2 className="mt-2 text-3xl app-heading">
+                  {resumeAvailable && !replaceMode ? "Resume added" : "Bring in your resume"}
+                </h2>
                 <p className="mt-3 max-w-xl text-sm leading-6 text-[var(--color-text-primary)]/74">
-                  Upload your resume so Career Ladder can start finding strengths,
-                  gaps, and recruiter-readable evidence in your background.
+                  {resumeAvailable && !replaceMode
+                    ? "Career Ladder already has resume evidence for this workflow. Continue when you are ready, or replace it if this is not the resume you want to use."
+                    : "Upload your resume so Career Ladder can start finding strengths, gaps, and recruiter-readable evidence in your background."}
                 </p>
               </div>
               <DocumentStackGraphic className="mx-auto" />
@@ -121,84 +135,150 @@ export default function StepResume({ value, onChange, onNext }: Props) {
           </div>
 
           <div className="app-consult-card p-5 sm:p-6">
-            <div className="mb-5">
-              <p className="app-section-label">Resume import</p>
-              <h3 className="mt-2 text-xl app-heading">
-                Choose a resume file
-              </h3>
-              <p className="mt-2 text-sm leading-6 text-[var(--color-text-muted)]">
-                PDF, DOC, DOCX, and TXT files are supported. After upload, you will
-                see an early read on what your experience may already prove.
-              </p>
-            </div>
+            {!showUploadControls ? (
+              <div className="space-y-5">
+                <div>
+                  <p className="app-section-label">Resume context</p>
+                  <h3 className="mt-2 text-xl app-heading">
+                    Resume Added <span className="text-emerald-600" aria-hidden>{"\u2713"}</span>
+                  </h3>
+                  <p className="mt-3 text-sm font-semibold text-[var(--color-text-muted)]">Using:</p>
+                  <div className="mt-2 rounded-[18px] border border-[#d8e6f3] bg-white px-4 py-3 text-sm font-black text-[var(--color-text-primary)] shadow-[var(--shadow-inset-soft)]">
+                    {resumeLabel}
+                  </div>
+                </div>
 
-            <div className="space-y-4">
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="resume-upload-drop-zone"
-              >
-                <span className="resume-upload-icon" aria-hidden>+</span>
-                <strong>Drag & drop your file here</strong>
-                <span>or choose file</span>
-                <small>PDF, DOCX, DOC, or TXT (max 10MB)</small>
-              </button>
+                <div className="upload-next-checklist">
+                  <h4>Career Ladder will combine</h4>
+                  {[
+                    "your uploaded resume",
+                    "your Master Career Profile",
+                    "transferable skills",
+                    "target role context"
+                  ].map((item) => (
+                    <span key={item}>{item}</span>
+                  ))}
+                </div>
 
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".pdf,.doc,.docx,.txt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
-                onClick={() => {
-                  if (fileInputRef.current) fileInputRef.current.value = "";
-                }}
-                onChange={(e) => handleFileSelection(e.currentTarget.files?.[0] ?? null)}
-                className="sr-only"
-              />
-
-              <div className="upload-next-checklist">
-                <h4>What happens next</h4>
-                {["We review your resume", "Highlight your strengths", "Identify gaps and keywords", "Recommend next best steps"].map((item) => (
-                  <span key={item}>{item}</span>
-                ))}
-              </div>
-
-              <div className="app-soft-band px-4 py-3 text-sm text-[var(--color-text-primary)]">
-                <span className="font-semibold">
-                  {selectedFile ? selectedFile.name : "No file selected"}
-                </span>
-                <span className="mt-1 block text-xs text-[var(--color-text-muted)]">
-                  {selectedFile
-                    ? "Ready to review for strengths, gaps, and transferable signals."
-                    : "Resume upload imports your current experience and can enrich your Master Career Profile when signed in."}
-                </span>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => void uploadSelectedFile()}
-                disabled={uploading || !selectedFile}
-                className="app-button-primary w-full px-5 py-2.5"
-              >
-                {uploading ? "Uploading..." : "Upload resume"}
-              </button>
-
-              {uploading && (
-                <LoadingIndicator
-                  variant="inline"
-                  message={"Reviewing the experience in your resume\u2026"}
-                />
-              )}
-              {extractedFileName && !uploading && (
-                <p className="text-xs font-semibold text-emerald-700">
-                  Reviewed {extractedFileName}. Check the insight preview before continuing.
+                <p className="text-sm leading-6 text-[var(--color-text-muted)]">
+                  You do not need to upload again unless this is the wrong resume or the original import missed important details.
                 </p>
-              )}
-              {warning && <p className="text-xs text-orange-700">{warning}</p>}
-            </div>
+
+                {warning && <p className="text-xs text-orange-700">{warning}</p>}
+
+                <div className="flex flex-wrap gap-3">
+                  <button type="button" onClick={continueToJob} className="app-button-primary">
+                    Continue
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setReplaceMode(true);
+                      setSelectedFile(null);
+                      setWarning(null);
+                    }}
+                    className="app-button-secondary"
+                  >
+                    Replace resume
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="mb-5">
+                  <p className="app-section-label">Resume import</p>
+                  <h3 className="mt-2 text-xl app-heading">
+                    {resumeAvailable ? "Replace resume file" : "Choose a resume file"}
+                  </h3>
+                  <p className="mt-2 text-sm leading-6 text-[var(--color-text-muted)]">
+                    PDF, DOC, DOCX, and TXT files are supported. After upload, you will
+                    see an early read on what your experience may already prove.
+                  </p>
+                </div>
+
+                <div className="space-y-4">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="resume-upload-drop-zone"
+                  >
+                    <span className="resume-upload-icon" aria-hidden>+</span>
+                    <strong>Drag & drop your file here</strong>
+                    <span>or choose file</span>
+                    <small>PDF, DOCX, DOC, or TXT (max 10MB)</small>
+                  </button>
+
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".pdf,.doc,.docx,.txt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
+                    onClick={() => {
+                      if (fileInputRef.current) fileInputRef.current.value = "";
+                    }}
+                    onChange={(e) => handleFileSelection(e.currentTarget.files?.[0] ?? null)}
+                    className="sr-only"
+                  />
+
+                  <div className="upload-next-checklist">
+                    <h4>What happens next</h4>
+                    {["We review your resume", "Highlight your strengths", "Identify gaps and keywords", "Recommend next best steps"].map((item) => (
+                      <span key={item}>{item}</span>
+                    ))}
+                  </div>
+
+                  <div className="app-soft-band px-4 py-3 text-sm text-[var(--color-text-primary)]">
+                    <span className="font-semibold">
+                      {selectedFile ? selectedFile.name : "No file selected"}
+                    </span>
+                    <span className="mt-1 block text-xs text-[var(--color-text-muted)]">
+                      {selectedFile
+                        ? "Ready to review for strengths, gaps, and transferable signals."
+                        : "Resume upload imports your current experience and can enrich your Master Career Profile when signed in."}
+                    </span>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => void uploadSelectedFile()}
+                    disabled={uploading || !selectedFile}
+                    className="app-button-primary w-full px-5 py-2.5"
+                  >
+                    {uploading ? "Uploading..." : resumeAvailable ? "Replace resume" : "Upload resume"}
+                  </button>
+
+                  {resumeAvailable && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setReplaceMode(false);
+                        setSelectedFile(null);
+                        setWarning(null);
+                      }}
+                      className="app-button-secondary w-full justify-center"
+                    >
+                      Keep current resume
+                    </button>
+                  )}
+
+                  {uploading && (
+                    <LoadingIndicator
+                      variant="inline"
+                      message={"Reviewing the experience in your resume..."}
+                    />
+                  )}
+                  {extractedFileName && !uploading && (
+                    <p className="text-xs font-semibold text-emerald-700">
+                      Reviewed {extractedFileName}. Check the insight preview before continuing.
+                    </p>
+                  )}
+                  {warning && <p className="text-xs text-orange-700">{warning}</p>}
+                </div>
+              </>
+            )}
           </div>
         </div>
 
-        {hasUploadedResume && resumeText.length >= 50 && (
+        {resumeAvailable && (
           <PostUploadInsightPreview
             preview={insightPreview}
             onApply={continueToJob}
@@ -220,7 +300,7 @@ export default function StepResume({ value, onChange, onNext }: Props) {
                 }
                 }}
                 rows={16}
-                readOnly={!hasUploadedResume}
+                readOnly={!resumeAvailable && !hasUploadedResume}
                 className="app-textarea-mono mt-3 min-h-[28rem] read-only:bg-[#f9f4ee] read-only:text-[var(--color-text-muted)]"
                 placeholder="Uploaded resume text will appear here for review."
               />
@@ -239,7 +319,7 @@ export default function StepResume({ value, onChange, onNext }: Props) {
           onClick={continueToJob}
           className="app-button-primary"
         >
-          Next
+          {resumeAvailable ? "Continue" : "Next"}
         </button>
       </div>
     </section>

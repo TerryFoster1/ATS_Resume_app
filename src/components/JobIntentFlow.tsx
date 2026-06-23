@@ -109,6 +109,7 @@ export default function JobIntentFlow({
   const [resumeFileName, setResumeFileName] = useState(initial.resumeFileName ?? "");
   const [resumeWarning, setResumeWarning] = useState<string | null>(null);
   const [resumeUploading, setResumeUploading] = useState(false);
+  const [replaceResumeMode, setReplaceResumeMode] = useState(false);
   const [selectedGoal, setSelectedGoal] = useState<GoalId | null>(null);
   const [stage, setStage] = useState<Stage>("goal");
   const [busyIntent, setBusyIntent] = useState<JobIntent | null>(null);
@@ -129,9 +130,13 @@ export default function JobIntentFlow({
   const contextText = composeJobContextText(context);
   const canContinue = targetRole.trim().length >= 2 || jobPosting.trim().length >= 20;
   const hasResumeContext = resumeText.trim().length > 80;
+  const showResumeUpload = !hasResumeContext || replaceResumeMode;
+  const resumeContextLabel = resumeFileName.trim() || "Resume already added";
 
   const handleResumeUpload = useCallback(async (file: File | null) => {
     if (!file) return;
+    const previousResumeText = resumeText;
+    const previousResumeFileName = resumeFileName;
     setResumeUploading(true);
     setResumeWarning(null);
     setError(null);
@@ -149,16 +154,22 @@ export default function JobIntentFlow({
       }
       setResumeText(data.text);
       setResumeFileName(file.name);
+      setReplaceResumeMode(false);
       setResumeWarning(data.profileImportWarning ?? data.warning ?? null);
     } catch (err) {
-      setResumeText("");
-      setResumeFileName("");
+      if (previousResumeText.trim().length > 80) {
+        setResumeText(previousResumeText);
+        setResumeFileName(previousResumeFileName);
+      } else {
+        setResumeText("");
+        setResumeFileName("");
+      }
       setResumeWarning(null);
       setError(err instanceof Error ? err.message : "Could not read that resume file.");
     } finally {
       setResumeUploading(false);
     }
-  }, []);
+  }, [resumeFileName, resumeText]);
 
   const handleIntent = useCallback(
     async (intent: JobIntent) => {
@@ -457,39 +468,74 @@ export default function JobIntentFlow({
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="app-kicker">
-                {selectedConfig?.experienceMode === "required" ? "Primary input" : "Recommended input"}
+                {showResumeUpload
+                  ? selectedConfig?.experienceMode === "required" ? "Primary input" : "Recommended input"
+                  : "Resume context"}
               </p>
-              <h3 className="mt-2 text-2xl app-heading">Upload your current resume.</h3>
+              <h3 className="mt-2 text-2xl app-heading">
+                {showResumeUpload
+                  ? hasResumeContext ? "Replace the resume for this workflow." : "Upload your current resume."
+                  : "Resume Added "}
+                {!showResumeUpload && <span className="text-emerald-600" aria-label="added">{"\u2713"}</span>}
+              </h3>
             </div>
-            {selectedConfig?.experienceMode === "required" && (
+            {selectedConfig?.experienceMode === "required" && showResumeUpload && (
               <span className="rounded-full bg-[#143456] px-3 py-1 text-xs font-black text-white">
                 Required next
               </span>
             )}
           </div>
-          <p className="mt-3 text-sm leading-6 text-[var(--color-text-muted)]">
-            Career Ladder can extract your existing evidence, translate transferable
-            strengths, and compare your background against the role through a
-            recruiter-aware lens.
-          </p>
 
-          <label className="mt-5 flex cursor-pointer flex-col items-start gap-3 rounded-[22px] border border-dashed border-[#9dc4e8] bg-white/78 p-5 transition hover:-translate-y-0.5 hover:border-[#2f80ed] hover:shadow-[0_18px_38px_rgba(47,128,237,0.14)]">
-            <input
-              type="file"
-              accept=".pdf,.docx,.txt,.text,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
-              className="sr-only"
-              disabled={resumeUploading}
-              onChange={(event) => void handleResumeUpload(event.target.files?.[0] ?? null)}
-            />
-            <span className="text-sm font-black text-[var(--color-text-primary)]">
-              {resumeUploading ? "Reading your resume..." : hasResumeContext ? "Resume added" : "Upload resume"}
-            </span>
-            <span className="text-sm leading-6 text-[var(--color-text-muted)]">
-              {hasResumeContext
-                ? `${resumeFileName || "Resume"} will power skill-gap analysis, recruiter interpretation, interview prep, and pathway recommendations.`
-                : "PDF, DOCX, or TXT. This becomes the primary evidence source for career analysis."}
-            </span>
-          </label>
+          {showResumeUpload ? (
+            <>
+              <p className="mt-3 text-sm leading-6 text-[var(--color-text-muted)]">
+                Career Ladder can extract your existing evidence, translate transferable
+                strengths, and compare your background against the role through a
+                recruiter-aware lens.
+              </p>
+
+              <label className="mt-5 flex cursor-pointer flex-col items-start gap-3 rounded-[22px] border border-dashed border-[#9dc4e8] bg-white/78 p-5 transition hover:-translate-y-0.5 hover:border-[#2f80ed] hover:shadow-[0_18px_38px_rgba(47,128,237,0.14)]">
+                <input
+                  type="file"
+                  accept=".pdf,.docx,.txt,.text,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
+                  className="sr-only"
+                  disabled={resumeUploading}
+                  onChange={(event) => void handleResumeUpload(event.target.files?.[0] ?? null)}
+                />
+                <span className="text-sm font-black text-[var(--color-text-primary)]">
+                  {resumeUploading ? "Reading your resume..." : hasResumeContext ? "Replace resume" : "Upload resume"}
+                </span>
+                <span className="text-sm leading-6 text-[var(--color-text-muted)]">
+                  {hasResumeContext
+                    ? "Choose a different file only if the resume already added is not the one you want to use."
+                    : "PDF, DOCX, or TXT. This becomes the primary evidence source for career analysis."}
+                </span>
+              </label>
+            </>
+          ) : (
+            <div className="mt-4 space-y-4">
+              <div className="rounded-[20px] border border-[#d8e6f3] bg-white px-4 py-4 shadow-[var(--shadow-inset-soft)]">
+                <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--color-text-muted)]">Using</p>
+                <p className="mt-2 text-sm font-black text-[var(--color-text-primary)]">{resumeContextLabel}</p>
+              </div>
+              <div className="upload-next-checklist">
+                <h4>Career Ladder will combine</h4>
+                {["your uploaded resume", "your Master Career Profile", "transferable skills", "target role context"].map((item) => (
+                  <span key={item}>{item}</span>
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setReplaceResumeMode(true);
+                  setResumeWarning(null);
+                }}
+                className="app-button-secondary"
+              >
+                Replace resume
+              </button>
+            </div>
+          )}
 
           {resumeWarning && (
             <p className="mt-3 rounded-[16px] bg-white px-4 py-3 text-xs font-semibold leading-5 text-[var(--color-text-muted)]">
@@ -497,13 +543,19 @@ export default function JobIntentFlow({
             </p>
           )}
 
-          <div className="mt-4 grid gap-2 sm:grid-cols-3">
-            {["Skill-gap analysis", "Recruiter interpretation", "Interview prep"].map((item) => (
-              <span key={item} className="rounded-full bg-white px-3 py-2 text-center text-xs font-black text-[#245f9f] shadow-[var(--shadow-inset-soft)]">
-                {item}
-              </span>
-            ))}
-          </div>
+          {showResumeUpload ? (
+            <div className="mt-4 grid gap-2 sm:grid-cols-3">
+              {["Skill-gap analysis", "Recruiter interpretation", "Interview prep"].map((item) => (
+                <span key={item} className="rounded-full bg-white px-3 py-2 text-center text-xs font-black text-[#245f9f] shadow-[var(--shadow-inset-soft)]">
+                  {item}
+                </span>
+              ))}
+            </div>
+          ) : (
+            <p className="mt-4 text-sm leading-6 text-[var(--color-text-muted)]">
+              Continue without uploading again. Career Ladder already has enough resume context for this step.
+            </p>
+          )}
         </div>
 
         <label className="app-mini-card block text-sm font-black text-[var(--color-text-primary)]">
