@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { consumeCredits, getCreditBalance } from "@/lib/accountStorage";
+import { buildCareerGenerationContext } from "@/lib/careerGenerationContextStorage";
 import { generateInterviewPrep } from "@/lib/interviewPrep";
 import { createAdminSupabaseClient, createServerSupabaseClient } from "@/lib/supabase/server";
 
@@ -56,16 +57,35 @@ export async function POST(
     const jobContext = isRecord(snapshot.jobContext) ? snapshot.jobContext : {};
     const resumeContext =
       typeof jobContext.resumeText === "string" ? jobContext.resumeText : output.resume_text ?? "";
+    const generationContext = await buildCareerGenerationContext({
+      userId: user.id,
+      workflowType: "interviewPrep",
+      uploadedResumeFallback: resumeContext,
+      jobTarget: { title: output.job_title, companyName: output.company_name },
+      jobDescription: output.source_job_description,
+      savedOpportunityContext: {
+        outputId: id,
+        jobTitle: output.job_title,
+        companyName: output.company_name,
+        sourceJobDescription: output.source_job_description,
+        generatedResumeText: output.resume_text,
+        generatedCoverLetterText: output.cover_letter_text,
+        analysisSnapshot: output.analysis_snapshot
+      }
+    });
     const interviewPrep = await generateInterviewPrep({
       jobDescription: output.source_job_description ?? "",
-      tailoredResume: resumeContext,
+      tailoredResume: generationContext.candidateContextText || resumeContext,
       coverLetter: output.cover_letter_text ?? "",
-      clarificationAnswers: output.clarification_answers
+      clarificationAnswers: output.clarification_answers,
+      generationContext
     });
     const nextSnapshot = {
       ...snapshot,
       interviewPrep,
-      interviewPrepGeneratedAt: new Date().toISOString()
+      interviewPrepGeneratedAt: new Date().toISOString(),
+      profileWarnings: generationContext.profileWarnings,
+      usedMasterCareerProfile: generationContext.usedMasterProfile
     };
     const creditResult = await consumeCredits(user.id, 1, "generate_interview_prep");
     if (creditResult.status === "insufficient_credits") {

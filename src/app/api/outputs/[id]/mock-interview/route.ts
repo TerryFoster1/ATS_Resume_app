@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { consumeCredits, getCreditBalance } from "@/lib/accountStorage";
+import { buildCareerGenerationContext } from "@/lib/careerGenerationContextStorage";
 import {
   evaluateMockInterview,
   generateMockInterviewQuestions,
@@ -68,12 +69,14 @@ async function startInterview(access: OutputAccess) {
       typeof jobContext.resumeText === "string"
         ? jobContext.resumeText
         : access.output.resume_text ?? "";
+    const generationContext = await buildOutputGenerationContext(access, resumeContext, "mockInterview");
     const questions = await generateMockInterviewQuestions({
       jobDescription: access.output.source_job_description ?? "",
-      tailoredResume: resumeContext,
+      tailoredResume: generationContext.candidateContextText || resumeContext,
       coverLetter: access.output.cover_letter_text ?? "",
       clarificationAnswers: access.output.clarification_answers,
-      interviewPrep: typeof snapshot.interviewPrep === "string" ? snapshot.interviewPrep : null
+      interviewPrep: typeof snapshot.interviewPrep === "string" ? snapshot.interviewPrep : null,
+      generationContext
     });
 
     const latest = await access.admin
@@ -166,13 +169,15 @@ async function finishInterview(access: OutputAccess) {
       typeof jobContext.resumeText === "string"
         ? jobContext.resumeText
         : access.output.resume_text ?? "";
+    const generationContext = await buildOutputGenerationContext(access, resumeContext, "mockInterview");
     const feedback = await evaluateMockInterview({
       context: {
         jobDescription: access.output.source_job_description ?? "",
-        tailoredResume: resumeContext,
+        tailoredResume: generationContext.candidateContextText || resumeContext,
         coverLetter: access.output.cover_letter_text ?? "",
         clarificationAnswers: access.output.clarification_answers,
-        interviewPrep: typeof snapshot.interviewPrep === "string" ? snapshot.interviewPrep : null
+        interviewPrep: typeof snapshot.interviewPrep === "string" ? snapshot.interviewPrep : null,
+        generationContext
       },
       questions: current.questions,
       answers: current.answers
@@ -196,6 +201,29 @@ async function finishInterview(access: OutputAccess) {
       { status: 500 }
     );
   }
+}
+
+async function buildOutputGenerationContext(
+  access: OutputAccess,
+  resumeContext: string,
+  workflowType: "mockInterview"
+) {
+  return buildCareerGenerationContext({
+    userId: access.userId,
+    workflowType,
+    uploadedResumeFallback: resumeContext,
+    jobTarget: { title: access.output.job_title, companyName: access.output.company_name },
+    jobDescription: access.output.source_job_description,
+    savedOpportunityContext: {
+      outputId: access.output.id,
+      jobTitle: access.output.job_title,
+      companyName: access.output.company_name,
+      sourceJobDescription: access.output.source_job_description,
+      generatedResumeText: access.output.resume_text,
+      generatedCoverLetterText: access.output.cover_letter_text,
+      analysisSnapshot: access.output.analysis_snapshot
+    }
+  });
 }
 
 async function updateMockInterview(access: OutputAccess, mockInterview: MockInterviewState) {

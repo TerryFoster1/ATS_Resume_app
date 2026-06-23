@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { ensureUserProfile, saveGeneratedOutput } from "@/lib/accountStorage";
 import { buildApplicationTitle, inferJobMeta } from "@/lib/applicationMeta";
-import { resolveProfileFirstResumeText } from "@/lib/careerProfileStorage";
+import { buildCareerGenerationContext } from "@/lib/careerGenerationContextStorage";
 import { composeJobContextText } from "@/lib/intentWorkflow";
 import { buildPathwayPreview } from "@/lib/pathway";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
@@ -59,11 +59,20 @@ export async function POST(request: Request) {
   );
   const jobTitle = parsed.data.targetRole?.trim() || inferredMeta.jobTitle || "Untitled application";
   const companyName = parsed.data.companyName?.trim() || inferredMeta.companyName;
-  const profileResume = await resolveProfileFirstResumeText({
+  const generationContext = await buildCareerGenerationContext({
     userId: user.id,
-    uploadedResumeText: parsed.data.resumeText?.trim() || ""
+    workflowType:
+      parsed.data.intent === "careerPathway"
+        ? "careerPathway"
+        : parsed.data.intent === "mockInterview"
+          ? "mockInterview"
+          : "interviewPrep",
+    uploadedResumeFallback: parsed.data.resumeText?.trim() || "",
+    jobTarget: { title: jobTitle, companyName },
+    jobDescription: parsed.data.jobPosting,
+    careerGoal: parsed.data.currentBackground
   });
-  const resumeContextText = profileResume.resumeText.trim() || parsed.data.resumeText?.trim() || "";
+  const resumeContextText = generationContext.candidateContextText.trim() || parsed.data.resumeText?.trim() || "";
   const contextText = composeJobContextText({
     targetRole: jobTitle === "Untitled application" ? "" : jobTitle,
     companyName,
@@ -99,7 +108,10 @@ export async function POST(request: Request) {
         hasResumeContext: Boolean(resumeContextText),
         resumeFileName: parsed.data.resumeFileName?.trim() || null,
         resumeText: resumeContextText || null,
-        usedMasterCareerProfile: profileResume.usedProfile,
+        usedMasterCareerProfile: generationContext.usedMasterProfile,
+        profileWarnings: generationContext.profileWarnings,
+        transferableSkills: generationContext.transferableSkills.slice(0, 12),
+        professionalFunctions: generationContext.professionalFunctions.slice(0, 8),
         currentBackground: parsed.data.currentBackground?.trim() || null
       },
       pathway:

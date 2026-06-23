@@ -7,7 +7,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { analyze } from "@/lib/analysis";
-import { resolveProfileFirstResumeText } from "@/lib/careerProfileStorage";
+import { buildCareerGenerationContext } from "@/lib/careerGenerationContextStorage";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { elapsedMs, logDevTiming, nowMs } from "@/lib/utils/perf";
 import type { AnalyzeResponse } from "@/lib/types";
@@ -47,12 +47,14 @@ export async function POST(req: Request) {
   }
 
   try {
-    const { resumeText, usedProfile } = await resolveProfileFirstResumeText({
+    const context = await buildCareerGenerationContext({
       userId: await currentUserId(),
-      uploadedResumeText: parsed.resumeText
+      workflowType: "resume",
+      uploadedResumeFallback: parsed.resumeText,
+      jobDescription: parsed.jobPostText
     });
     const analysis = await analyze({
-      resumeText,
+      resumeText: context.candidateContextText || parsed.resumeText,
       jobPostText: parsed.jobPostText
     });
     const body: AnalyzeResponse = { analysis };
@@ -61,7 +63,7 @@ export async function POST(req: Request) {
       score: analysis.score,
       reqs: analysis.requirements.length,
       followUps: analysis.followUps.length,
-      usedProfile
+      usedProfile: context.usedMasterProfile
     });
     return NextResponse.json(body);
   } catch (err) {

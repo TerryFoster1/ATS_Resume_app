@@ -28,6 +28,7 @@ export function buildCoverLetterUserPrompt(args: {
   analysis: AnalysisResult;
   followUps: FollowUp[];
   writingLocale?: WritingLocale;
+  generationContext?: string;
 }): string {
   const narrativeThemes = buildNarrativeThemes(args.analysis).join("\n");
 
@@ -43,6 +44,10 @@ ${args.jobPostText.trim()}
 LANGUAGE AND REGIONAL STYLE
 ------------
 ${localePromptInstruction(args.writingLocale ?? args.analysis.writingLocale ?? "canadian_uk_english")}
+
+SHARED CAREER GENERATION CONTEXT
+------------
+${args.generationContext?.trim() || "(no shared CareerGenerationContext provided)"}
 
 CANDIDATE RESUME
 ------------
@@ -83,3 +88,4 @@ function addTheme(themes: string[], text: string, pattern: RegExp, theme: string
     themes.push(theme);
   }
 }
+

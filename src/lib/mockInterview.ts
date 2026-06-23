@@ -1,4 +1,5 @@
-﻿import { callLlmStructured } from "./llm";
+﻿import { formatCareerGenerationContextForPrompt, type CareerGenerationContext } from "./careerGenerationContext";
+import { callLlmStructured } from "./llm";
 import {
   extractTransferableSkillProfile,
   formatTransferableExtractionForPrompt
@@ -59,13 +60,14 @@ export type MockInterviewContext = {
   coverLetter: string;
   clarificationAnswers?: unknown;
   interviewPrep?: string | null;
+  generationContext?: CareerGenerationContext | null;
 };
 
 export async function generateMockInterviewQuestions(
   context: MockInterviewContext
 ): Promise<MockInterviewQuestion[]> {
   const extraction = extractTransferableSkillProfile(
-    `${context.tailoredResume}\n${context.coverLetter}\n${formatAnswers(context.clarificationAnswers)}\n${context.interviewPrep ?? ""}`,
+    `${context.generationContext?.candidateContextText ?? ""}\n${context.tailoredResume}\n${context.coverLetter}\n${formatAnswers(context.clarificationAnswers)}\n${context.interviewPrep ?? ""}`,
     context.jobDescription
   );
   const result = await callLlmStructured<{ questions: Omit<MockInterviewQuestion, "id">[] }>(
@@ -114,6 +116,9 @@ Rules:
 
 JOB DESCRIPTION
 ${clip(context.jobDescription, 6000)}
+
+SHARED CAREER GENERATION CONTEXT
+${context.generationContext ? clip(formatCareerGenerationContextForPrompt(context.generationContext), 12000) : "No shared CareerGenerationContext was provided."}
 
 TAILORED RESUME
 ${clip(context.tailoredResume || "No tailored resume has been provided yet.", 6000)}
@@ -174,7 +179,7 @@ export async function evaluateMockInterview(args: {
   answers: MockInterviewAnswer[];
 }): Promise<MockInterviewFeedback> {
   const extraction = extractTransferableSkillProfile(
-    `${args.context.tailoredResume}\n${args.context.coverLetter}`,
+    `${args.context.generationContext?.candidateContextText ?? ""}\n${args.context.tailoredResume}\n${args.context.coverLetter}`,
     args.context.jobDescription
   );
   return callLlmStructured<MockInterviewFeedback>(
@@ -220,6 +225,9 @@ Evaluation rules:
 
 JOB DESCRIPTION
 ${clip(args.context.jobDescription, 6000)}
+
+SHARED CAREER GENERATION CONTEXT
+${args.context.generationContext ? clip(formatCareerGenerationContextForPrompt(args.context.generationContext), 12000) : "No shared CareerGenerationContext was provided."}
 
 TAILORED RESUME
 ${clip(args.context.tailoredResume || "No tailored resume has been provided yet.", 6000)}

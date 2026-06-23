@@ -9,7 +9,8 @@
 
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { resolveProfileFirstResumeText } from "@/lib/careerProfileStorage";
+import { buildCareerGenerationContext } from "@/lib/careerGenerationContextStorage";
+import { formatCareerGenerationContextForPrompt } from "@/lib/careerGenerationContext";
 import { rewriteResume, rewriteCoverLetter } from "@/lib/rewrite";
 import { sanitizeGeneratedText } from "@/lib/sanitizeGeneratedText";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
@@ -71,24 +72,38 @@ export async function POST(req: Request) {
     inferWritingLocaleFromJob(parsed.jobPostText);
 
   try {
-    const { resumeText, usedProfile } = await resolveProfileFirstResumeText({
-      userId: await currentUserId(),
-      uploadedResumeText: parsed.resumeText
-    });
+    const userId = await currentUserId();
+    const [resumeContext, coverLetterContext] = await Promise.all([
+      buildCareerGenerationContext({
+        userId,
+        workflowType: "resume",
+        uploadedResumeFallback: parsed.resumeText,
+        jobDescription: parsed.jobPostText
+      }),
+      buildCareerGenerationContext({
+        userId,
+        workflowType: "coverLetter",
+        uploadedResumeFallback: parsed.resumeText,
+        jobDescription: parsed.jobPostText
+      })
+    ]);
+    const resumeText = resumeContext.candidateContextText || parsed.resumeText;
     const [resumeOut, coverLetter] = await Promise.all([
       rewriteResume({
         resumeText,
         jobPostText: parsed.jobPostText,
         analysis,
         followUps,
-        writingLocale
+        writingLocale,
+        generationContext: formatCareerGenerationContextForPrompt(resumeContext)
       }),
       rewriteCoverLetter({
-        resumeText,
+        resumeText: coverLetterContext.candidateContextText || resumeText,
         jobPostText: parsed.jobPostText,
         analysis,
         followUps,
-        writingLocale
+        writingLocale,
+        generationContext: formatCareerGenerationContextForPrompt(coverLetterContext)
       })
     ]);
 
@@ -98,7 +113,7 @@ export async function POST(req: Request) {
       strategy: resumeOut.strategy
     };
     console.info(
-      `[generate] ms=${Date.now() - tStart} resumeLen=${resumeOut.resume.length} coverLen=${coverLetter.length} usedProfile=${usedProfile}`
+      `[generate] ms=${Date.now() - tStart} resumeLen=${resumeOut.resume.length} coverLen=${coverLetter.length} usedProfile=${resumeContext.usedMasterProfile}`
     );
     return NextResponse.json(body);
   } catch (err) {

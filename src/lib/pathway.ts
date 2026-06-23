@@ -1,4 +1,5 @@
 import { callLlmStructured } from "@/lib/llm";
+import { formatCareerGenerationContextForPrompt, type CareerGenerationContext } from "@/lib/careerGenerationContext";
 import {
   buildRecruiterConcernNotes,
   inferTransferableSkillSignals,
@@ -40,6 +41,7 @@ export type PathwayInput = {
   jobPosting?: string | null;
   currentBackground?: string | null;
   resumeText?: string | null;
+  generationContext?: CareerGenerationContext | null;
 };
 
 const DEFAULT_REQUIREMENTS = [
@@ -67,7 +69,8 @@ export function buildPathwayPreview(input: PathwayInput): PathwayPreview {
 
 export async function generatePathwayAnalysis(input: PathwayInput): Promise<PathwayFullAnalysis> {
   const role = cleanRole(input.targetRole);
-  const sourceText = `${input.resumeText ?? ""}\n${input.currentBackground ?? ""}`;
+  const contextText = input.generationContext?.candidateContextText ?? "";
+  const sourceText = `${contextText}\n${input.resumeText ?? ""}\n${input.currentBackground ?? ""}`;
   const signals = inferTransferableSkillSignals(sourceText, role);
   const extraction = extractTransferableSkillProfile(sourceText, role);
   const recruiterConcerns = buildRecruiterConcernNotes(signals, role);
@@ -94,6 +97,7 @@ export async function generatePathwayAnalysis(input: PathwayInput): Promise<Path
       user: [
         `Target role: ${role}`,
         input.companyName ? `Company: ${input.companyName}` : "",
+        input.generationContext ? `Shared CareerGenerationContext:\n${formatCareerGenerationContextForPrompt(input.generationContext).slice(0, 18000)}` : "",
         input.resumeText ? `Resume evidence:\n${input.resumeText.slice(0, 12000)}` : "",
         input.currentBackground ? `Current background: ${input.currentBackground}` : "",
         input.jobPosting ? `Job posting:\n${input.jobPosting}` : "",

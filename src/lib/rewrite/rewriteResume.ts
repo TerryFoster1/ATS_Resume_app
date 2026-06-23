@@ -36,6 +36,7 @@ export interface RewriteResumeArgs {
   analysis: AnalysisResult;
   followUps: FollowUp[];
   writingLocale?: WritingLocale;
+  generationContext?: string;
   timeoutMs?: number;
 }
 
@@ -61,7 +62,8 @@ export async function rewriteResume(
       analysis: args.analysis,
       followUps: args.followUps,
       strategy,
-      writingLocale: args.writingLocale
+      writingLocale: args.writingLocale,
+      generationContext: args.generationContext
     }),
     maxTokens: 3500,
     temperature: 0.5,
@@ -131,4 +133,5 @@ function prepareResumeOutput(
     removeUnsupportedResumeDates(sanitizeGeneratedText(resumeText), context)
   );
 }
+
 

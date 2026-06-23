@@ -20,6 +20,7 @@ export interface RewriteCoverLetterArgs {
   analysis: AnalysisResult;
   followUps: FollowUp[];
   writingLocale?: WritingLocale;
+  generationContext?: string;
   timeoutMs?: number;
 }
 
@@ -39,7 +40,8 @@ export async function rewriteCoverLetter(
       jobPostText: args.jobPostText,
       analysis: args.analysis,
       followUps: args.followUps,
-      writingLocale: args.writingLocale
+      writingLocale: args.writingLocale,
+      generationContext: args.generationContext
     }),
     maxTokens: 1200,
     temperature: 0.6,
@@ -81,4 +83,6 @@ ${validation.text}`,
     return sanitizeGeneratedText(validation.text);
   }
 }
+
+
 

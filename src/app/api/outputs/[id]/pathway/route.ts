@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { consumeCredits, getCreditBalance } from "@/lib/accountStorage";
+import { buildCareerGenerationContext } from "@/lib/careerGenerationContextStorage";
 import { generatePathwayAnalysis, readPathwaySnapshot } from "@/lib/pathway";
 import { createAdminSupabaseClient, createServerSupabaseClient } from "@/lib/supabase/server";
 
@@ -54,18 +55,38 @@ export async function POST(
   const snapshot = isRecord(output.analysis_snapshot) ? output.analysis_snapshot : {};
   const jobContext = isRecord(snapshot.jobContext) ? snapshot.jobContext : {};
   try {
+    const resumeText =
+      typeof jobContext.resumeText === "string"
+        ? jobContext.resumeText
+        : output.resume_text;
+    const currentBackground =
+      typeof jobContext.currentBackground === "string"
+        ? jobContext.currentBackground
+        : readCurrentBackground(output.source_job_description);
+    const generationContext = await buildCareerGenerationContext({
+      userId: user.id,
+      workflowType: "careerPathway",
+      uploadedResumeFallback: resumeText,
+      jobTarget: { title: output.job_title, companyName: output.company_name },
+      jobDescription: output.source_job_description,
+      careerGoal: currentBackground,
+      savedOpportunityContext: {
+        outputId: id,
+        jobTitle: output.job_title,
+        companyName: output.company_name,
+        sourceJobDescription: output.source_job_description,
+        generatedResumeText: output.resume_text,
+        generatedCoverLetterText: output.cover_letter_text,
+        analysisSnapshot: output.analysis_snapshot
+      }
+    });
     const full = await generatePathwayAnalysis({
       targetRole: output.job_title ?? "Untitled application",
       companyName: output.company_name,
       jobPosting: output.source_job_description,
-      resumeText:
-        typeof jobContext.resumeText === "string"
-          ? jobContext.resumeText
-          : output.resume_text,
-      currentBackground:
-        typeof jobContext.currentBackground === "string"
-          ? jobContext.currentBackground
-          : readCurrentBackground(output.source_job_description)
+      resumeText: generationContext.candidateContextText || resumeText,
+      currentBackground,
+      generationContext
     });
     const nextPathway = {
       ...(existing ?? {
@@ -91,7 +112,9 @@ export async function POST(
       .update({
         analysis_snapshot: {
           ...snapshot,
-          pathway: nextPathway
+          pathway: nextPathway,
+          profileWarnings: generationContext.profileWarnings,
+          usedMasterCareerProfile: generationContext.usedMasterProfile
         }
       })
       .eq("id", id)

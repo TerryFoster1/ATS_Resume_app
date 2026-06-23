@@ -1,7 +1,8 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { generateCareerCoachMatches, type CareerCoachInput } from "@/lib/careerCoach";
+import { buildCareerGenerationContextFromProfile, formatCareerGenerationContextForPrompt } from "@/lib/careerGenerationContext";
 import type { MasterCareerProfile } from "@/lib/masterCareerProfile";
 
 const QUESTIONS: Array<{ key: keyof CareerCoachInput; label: string; prompt: string }> = [
@@ -219,18 +220,11 @@ function CoachBlock({ title, items }: { title: string; items: string[] }) {
 }
 
 function formatProfileContext(profile: MasterCareerProfile): string {
-  const lines = [
-    ...profile.workExperience.flatMap((item) => [
-      [item.title, item.organization, item.dateRange].filter(Boolean).join(" | "),
-      ...item.bullets
-    ]),
-    ...profile.volunteerExperience.flatMap((item) => [item.title ?? "Volunteer experience", ...item.bullets]),
-    ...profile.projects.flatMap((item) => [item.title ?? "Project", ...item.bullets]),
-    ...profile.extracurriculars.flatMap((item) => [item.title ?? "Extracurricular experience", ...item.bullets]),
-    ...profile.skills.map((item) => `Skill: ${item}`),
-    ...profile.careerGoals.map((item) => `Career goal: ${item}`),
-    ...profile.discoveryNotes.map((item) => `${item.label}: ${item.detail}`)
-  ].filter(Boolean);
-  return lines.length ? `MASTER CAREER PROFILE CONTEXT\n${lines.slice(0, 80).join("\n")}` : "";
+  const context = buildCareerGenerationContextFromProfile({
+    workflowType: "careerCoach",
+    profile,
+    careerGoal: profile.careerGoals.join("\n")
+  });
+  return formatCareerGenerationContextForPrompt(context);
 }
 

@@ -1,4 +1,5 @@
-﻿import { callLlm } from "./llm";
+﻿import { formatCareerGenerationContextForPrompt, type CareerGenerationContext } from "./careerGenerationContext";
+import { callLlm } from "./llm";
 import { sanitizeGeneratedText } from "./sanitizeGeneratedText";
 import {
   extractTransferableSkillProfile,
@@ -10,11 +11,12 @@ export type InterviewPrepInput = {
   tailoredResume: string;
   coverLetter: string;
   clarificationAnswers?: unknown;
+  generationContext?: CareerGenerationContext | null;
 };
 
 export async function generateInterviewPrep(input: InterviewPrepInput) {
   const extraction = extractTransferableSkillProfile(
-    `${input.tailoredResume}\n${input.coverLetter}\n${formatAnswers(input.clarificationAnswers)}`,
+    `${input.generationContext?.candidateContextText ?? ""}\n${input.tailoredResume}\n${input.coverLetter}\n${formatAnswers(input.clarificationAnswers)}`,
     input.jobDescription
   );
   const text = await callLlm({
@@ -37,6 +39,9 @@ export async function generateInterviewPrep(input: InterviewPrepInput) {
     ].join("\n"),
     user: `JOB DESCRIPTION
 ${clip(input.jobDescription, 6000)}
+
+SHARED CAREER GENERATION CONTEXT
+${input.generationContext ? clip(formatCareerGenerationContextForPrompt(input.generationContext), 12000) : "No shared CareerGenerationContext was provided."}
 
 TAILORED RESUME
 ${clip(input.tailoredResume || "No tailored resume has been provided yet.", 6000)}

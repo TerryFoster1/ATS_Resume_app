@@ -60,6 +60,7 @@ export function buildRewriteUserPrompt(args: {
   followUps: FollowUp[];
   strategy?: ResumeStrategy;
   writingLocale?: WritingLocale;
+  generationContext?: string;
 }): string {
   const answeredFollowUps = args.followUps.filter((f) => f.answer.trim().length > 0);
   const followUpBlock = answeredFollowUps.length
@@ -122,6 +123,10 @@ LANGUAGE AND REGIONAL STYLE
 ------------
 ${localePromptInstruction(args.writingLocale ?? args.analysis.writingLocale ?? "canadian_uk_english")}
 
+SHARED CAREER GENERATION CONTEXT
+------------
+${args.generationContext?.trim() || "(no shared CareerGenerationContext provided)"}
+
 ORIGINAL RESUME AND CONFIRMED CONTEXT
 ------------
 ${args.resumeText.trim()}
@@ -149,3 +154,4 @@ Use the strongest truthful content, transform candidate answers into polished
 resume bullets with action, context, and impact, and omit content that does not
 help this target job.`;
 }
+
